@@ -1,8 +1,6 @@
-# Test
-from flask import Flask
-import time
+from flask import Flask, render_template_string, request
 import random
-import threading
+import time
 from ddtrace import tracer, patch
 
 # Patch Flask to enable tracing
@@ -10,31 +8,53 @@ patch(flask=True)
 
 app = Flask(__name__)
 
+# HTML template with a button
+html_template = '''
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Datadog App</title>
+    <style>
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+        button {
+            font-size: 20px;
+            padding: 10px 20px;
+        }
+    </style>
+</head>
+<body>
+    <form method="POST" action="/click">
+        <button type="submit">Click me!</button>
+    </form>
+</body>
+</html>
+'''
+
 @app.route('/')
 def index():
-    processing_time = random.uniform(0.1, 0.5)
-    time.sleep(processing_time)  # Simulate some processing
-    return f"Hello! Processing time: {processing_time:.2f}s\n"
+    return render_template_string(html_template)
 
-@app.route('/data')
-def data():
-    processing_time = random.uniform(0.2, 1.0)
-    time.sleep(processing_time)  # Simulate data processing
-    return f"Data processed in {processing_time:.2f}s\n"
-
-def periodic_task():
-    while True:
-        with tracer.trace("background.periodic_task") as span:
-            span.set_tag("task", "periodic_task")
-            processing_time = random.uniform(0.5, 1.5)
-            time.sleep(processing_time)  # Simulate some background work
-            print(f"Background task completed in {processing_time:.2f}s")
-        time.sleep(30)  # Wait for 30 seconds before running again
+@app.route('/click', methods=['POST'])
+def click():
+    with tracer.trace("button_click.root") as root_span:
+        root_span.set_tag("button", "clicked")
+        
+        # Simulate some processing with a child span
+        time.sleep(random.uniform(0.1, 0.5))
+        with tracer.trace("button_click.child") as child_span:
+            child_span.set_tag("child_task", "processing")
+            time.sleep(random.uniform(0.1, 0.5))
+        
+    return "Button clicked! Processing done."
 
 if __name__ == '__main__':
-    # Start the background thread
-    threading.Thread(target=periodic_task, daemon=True).start()
-    
-    # Start the Flask app
     app.run(host='0.0.0.0', port=5000)
 
