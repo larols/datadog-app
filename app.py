@@ -2,6 +2,14 @@ from flask import Flask, render_template_string, request
 import random
 import time
 from ddtrace import tracer, patch
+from ddtrace.profiling import Profiler
+
+prof = Profiler(
+    env="production",  # if not specified, falls back to environment variable DD_ENV
+    service="datadog-app",  # if not specified, falls back to environment variable DD_SERVICE
+    version="1.0",   # if not specified, falls back to environment variable DD_VERSION
+)
+prof.start()  # Should be as early as possible, eg before other imports, to ensure everything is profiled
 
 # Patch Flask to enable tracing
 patch(flask=True)
