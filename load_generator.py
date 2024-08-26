@@ -3,7 +3,7 @@ import time
 import random
 
 def generate_load():
-    urls = ['http://localhost:5000/', 'http://localhost:5000/data']
+    urls = ['http://flask-app-service/', 'http://flask-app-service/data']
     while True:
         url = random.choice(urls)
         try:
@@ -15,3 +15,4 @@ def generate_load():
 
 if __name__ == '__main__':
     generate_load()
+
