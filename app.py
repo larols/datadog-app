@@ -8,7 +8,7 @@ patch(flask=True)
 
 app = Flask(__name__)
 
-# HTML template with a button
+# HTML template with a button and Datadog RUM script
 html_template = '''
 <!DOCTYPE html>
 <html lang="en">
@@ -29,6 +29,22 @@ html_template = '''
             padding: 10px 20px;
         }
     </style>
+    <script src="https://www.datadoghq-browser-agent.com/eu1/v5/datadog-rum.js" type="text/javascript"></script>
+    <script>
+        window.DD_RUM && window.DD_RUM.init({
+            clientToken: 'pubed1d766fe7d2e291e79fedaba88e7c5a',
+            applicationId: 'd876d594-0575-451c-adff-ee5c5aa86b1d',
+            site: 'datadoghq.eu',
+            service: 'datadog-app',
+            env: 'production',
+            sessionSampleRate: 100,
+            sessionReplaySampleRate: 100,
+            trackUserInteractions: true,
+            trackResources: true,
+            trackLongTasks: true,
+            defaultPrivacyLevel: 'allow',
+        });
+    </script>
 </head>
 <body>
     <form method="POST" action="/click">
