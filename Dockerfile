@@ -1,21 +1,23 @@
 # Use the official Python image from the Docker Hub
 FROM python:3.9-slim
 
-# Set environment variables
-ENV PYTHONUNBUFFERED=1
+# Set the working directory in the container
+WORKDIR /app
 
-# Set the working directory
-WORKDIR /usr/src/app
+# Copy the current directory contents into the container at /app
+COPY . /app
 
-# Copy the application files
-COPY app.py requirements.txt ./
-
-# Install the required Python packages
+# Install any needed packages specified in requirements.txt
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Expose the port on which the app will run
+# Make port 5000 available to the world outside this container
 EXPOSE 5000
 
-# Command to run the Flask application
+# Define environment variables for Datadog
+ENV DD_SERVICE=datadog-app
+ENV DD_AGENT_HOST=datadog-agent
+ENV DD_TRACE_ENABLED=true
+
+# Run app.py when the container launches
 CMD ["python", "app.py"]
 

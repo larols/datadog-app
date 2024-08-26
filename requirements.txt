@@ -1,3 +1,2 @@
-ddtrace==1.11.2
-flask==2.0.3
-requests==2.26.0
+flask==2.2.3
+ddtrace==1.20.0
