@@ -17,6 +17,8 @@ EXPOSE 5000
 ENV DD_SERVICE=datadog-app
 ENV DD_AGENT_HOST=datadog-agent
 ENV DD_TRACE_ENABLED=true
+ENV DD_VERSION=1.0
+ENV DD_SERVICE=datadog-app
 
 # Run app.py when the container launches
 CMD ["python", "app.py"]
