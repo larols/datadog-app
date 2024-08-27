@@ -1,42 +1,20 @@
-import logging
-from flask import Flask, render_template_string, request, g
+from flask import Flask, render_template_string, request
 import random
 import time
 from ddtrace import tracer, patch
 from ddtrace.profiling import Profiler
 
-# Initialize Datadog Profiler
 prof = Profiler(
-    env="production",
-    service="datadog-app",
-    version="1.0",
+    env="production",  # if not specified, falls back to environment variable DD_ENV
+    service="datadog-app",  # if not specified, falls back to environment variable DD_SERVICE
+    version="1.0",   # if not specified, falls back to environment variable DD_VERSION
 )
-prof.start()
+prof.start()  # Should be as early as possible, eg before other imports, to ensure everything is profiled
 
 # Patch Flask to enable tracing
 patch(flask=True)
 
 app = Flask(__name__)
-
-# Custom log formatter that includes trace and span IDs
-class TraceLogFormatter(logging.Formatter):
-    def format(self, record):
-        span = tracer.current_span()
-        if span:
-            record.trace_id = span.trace_id
-            record.span_id = span.span_id
-        else:
-            record.trace_id = None
-            record.span_id = None
-        return super().format(record)
-
-# Configure logging to include Datadog trace and span IDs
-logger = logging.getLogger(__name__)
-handler = logging.StreamHandler()
-formatter = TraceLogFormatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s [trace_id=%(trace_id)s, span_id=%(span_id)s]')
-handler.setFormatter(formatter)
-logger.addHandler(handler)
-logger.setLevel(logging.INFO)
 
 # HTML template with a button and Datadog RUM script
 html_template = '''
@@ -92,15 +70,13 @@ def index():
 def click():
     with tracer.trace("button_click.root") as root_span:
         root_span.set_tag("button", "clicked")
-        logger.info("Button was clicked")
-
+        
         # Simulate some processing with a child span
         time.sleep(random.uniform(0.1, 0.5))
         with tracer.trace("button_click.child") as child_span:
             child_span.set_tag("child_task", "processing")
-            logger.info("Processing task in child span")
             time.sleep(random.uniform(0.1, 0.5))
-
+        
     return "Button clicked! Processing done."
 
 if __name__ == '__main__':
