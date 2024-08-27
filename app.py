@@ -41,18 +41,22 @@ html_template = '''
     </style>
     <script src="https://www.datadoghq-browser-agent.com/eu1/v5/datadog-rum.js" type="text/javascript"></script>
     <script>
-        window.DD_RUM && window.DD_RUM.init({
-            clientToken: 'pubed1d766fe7d2e291e79fedaba88e7c5a',
-            applicationId: 'd876d594-0575-451c-adff-ee5c5aa86b1d',
-            site: 'datadoghq.eu',
-            service: 'datadog-app',
-            env: 'production',
-            sessionSampleRate: 100,
-            sessionReplaySampleRate: 100,
-            trackUserInteractions: true,
-            trackResources: true,
-            trackLongTasks: true,
-            defaultPrivacyLevel: 'allow',
+    window.DD_RUM && window.DD_RUM.init({
+        clientToken: 'pubed1d766fe7d2e291e79fedaba88e7c5a',
+        applicationId: 'd876d594-0575-451c-adff-ee5c5aa86b1d',
+        site: 'datadoghq.eu',
+        service: 'datadog-app',
+        env: 'production',
+        sessionSampleRate: 100,
+        sessionReplaySampleRate: 100,
+        trackUserInteractions: true,
+        trackResources: true,
+        trackLongTasks: true,
+        defaultPrivacyLevel: 'allow',
+        allowedTracingUrls: [
+            // Match the base URL and any path
+            /^http:\/\/192\.168\.50\.242\/.*$/
+        ],
         });
     </script>
 </head>
