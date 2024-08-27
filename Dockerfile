@@ -30,5 +30,5 @@ ENV DD_GIT_COMMIT_SHA=${DD_GIT_COMMIT_SHA}
 
 # Run app.py when the container launches
 # CMD ["python", "app.py"]
-CMD ["ddtrace-run", "python", "-m", "app.py"]
+CMD ["ddtrace-run", "python", "-m", "app"]
 
