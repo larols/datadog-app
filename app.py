@@ -1,21 +1,4 @@
-# ADD A COMMENT
-from flask import Flask, render_template_string, request
-import random
-import time
-from ddtrace import tracer, patch
-from ddtrace.profiling import Profiler
-from ddtrace.runtime import RuntimeMetrics
-RuntimeMetrics.enable()
-
-prof = Profiler(
-    env="production",  # if not specified, falls back to environment variable DD_ENV
-    service="datadog-app",  # if not specified, falls back to environment variable DD_SERVICE
-    version="1.0",   # if not specified, falls back to environment variable DD_VERSION
-)
-prof.start()  # Should be as early as possible, eg before other imports, to ensure everything is profiled
-
-# Patch Flask to enable tracing
-patch(flask=True)
+from flask import Flask, render_template_string
 
 app = Flask(__name__)
 
@@ -26,7 +9,7 @@ html_template = '''
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Datadog App</title>
+    <title>Simple Flask App</title>
     <style>
         body {
             display: flex;
@@ -40,6 +23,7 @@ html_template = '''
             padding: 10px 20px;
         }
     </style>
+    <!-- Include Datadog RUM JavaScript library -->
     <script src="https://www.datadoghq-browser-agent.com/eu1/v5/datadog-rum.js" type="text/javascript"></script>
     <script>
     window.DD_RUM && window.DD_RUM.init({
@@ -58,7 +42,7 @@ html_template = '''
             // Match the base URL and any path
             /^http:\/\/192\.168\.50\.242\/.*$/
         ],
-        });
+    });
     </script>
 </head>
 <body>
@@ -71,21 +55,13 @@ html_template = '''
 
 @app.route('/')
 def index():
+    # Render the HTML template for the home page
     return render_template_string(html_template)
 
 @app.route('/click', methods=['POST'])
 def click():
-    with tracer.trace("button_click.root") as root_span:
-        root_span.set_tag("button", "clicked")
-        
-        # Simulate some processing with a child span
-        time.sleep(random.uniform(0.1, 0.5))
-        with tracer.trace("button_click.child") as child_span:
-            child_span.set_tag("child_task", "processing")
-            time.sleep(random.uniform(0.1, 0.5))
-        
+    # Simulate processing
     return "Button clicked! Processing done."
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000)
-
