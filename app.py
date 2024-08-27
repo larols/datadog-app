@@ -2,19 +2,14 @@ import logging
 from flask import Flask, render_template_string, request
 import random
 import time
-from ddtrace import tracer, patch
+from ddtrace import tracer, patch_all
+from ddtrace.contrib.logging import patch as logging_patch
 from ddtrace.profiling import Profiler
-from ddtrace.context import Context
 
-# Configure logging with Datadog context
-FORMAT = ('%(asctime)s %(levelname)s [%(name)s] [%(filename)s:%(lineno)d] '
-          '[dd.service=%(dd.service)s dd.env=%(dd.env)s dd.version=%(dd.version)s dd.trace_id=%(dd.trace_id)s dd.span_id=%(dd.span_id)s] '
-          '- %(message)s')
-logging.basicConfig(format=FORMAT)
-log = logging.getLogger(__name__)
-log.setLevel(logging.DEBUG)  # Raise the logging level to DEBUG for more logs
+# 1. Patch all integrations including logging
+patch_all(logging=True)
 
-# Start Datadog Profiler
+# 2. Start Datadog Profiler early
 prof = Profiler(
     env="production",
     service="datadog-app",
@@ -22,8 +17,25 @@ prof = Profiler(
 )
 prof.start()
 
-# Patch Flask to enable tracing
-patch(flask=True)
+# 3. Configure logging format
+LOG_FORMAT = (
+    '%(asctime)s %(levelname)s [%(name)s] [%(filename)s:%(lineno)d] '
+    '[dd.service=%(dd.service)s dd.env=%(dd.env)s dd.version=%(dd.version)s '
+    'dd.trace_id=%(dd.trace_id)s dd.span_id=%(dd.span_id)s] - %(message)s'
+)
+
+logging.basicConfig(
+    level=logging.DEBUG,  # Set to DEBUG for verbose output
+    format=LOG_FORMAT,
+)
+
+log = logging.getLogger(__name__)
+
+# 4. Set Datadog service, env, and version globally
+from ddtrace import config
+config.service = "datadog-app"
+config.env = "production"
+config.version = "1.0"
 
 app = Flask(__name__)
 
@@ -81,22 +93,22 @@ def index():
 @app.route('/click', methods=['POST'])
 def click():
     log.debug("Button click received.")
-    
+
     with tracer.trace("button_click.root") as root_span:
         root_span.set_tag("button", "clicked")
-        context = root_span.context
-        log.debug(f"Created root span with ID: {root_span.span_id}, Trace ID: {context.trace_id}")
-        
+        log.debug("Started root span for button click.")
+
         # Simulate some processing with a child span
-        time.sleep(random.uniform(0.1, 0.5))
-        log.debug("Starting child span processing.")
-        
         with tracer.trace("button_click.child") as child_span:
             child_span.set_tag("child_task", "processing")
-            log.debug(f"Created child span with ID: {child_span.span_id}, Trace ID: {child_span.context.trace_id}")
+            log.debug("Started child span for processing task.")
 
-            # Simulate more processing
-            time.sleep(random.uniform(0.1, 0.5))
+            # Simulate processing time
+            processing_time = random.uniform(0.1, 0.5)
+            log.debug(f"Processing task for {processing_time:.2f} seconds.")
+            time.sleep(processing_time)
+
+        log.debug("Child span processing complete.")
 
     log.debug("Button click processing complete.")
     return "Button clicked! Processing done."
