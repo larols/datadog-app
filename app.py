@@ -1,16 +1,15 @@
 import logging
-from flask import Flask, render_template_string, request
+from flask import Flask, render_template_string, request, g
 import random
 import time
 from ddtrace import tracer, patch
 from ddtrace.profiling import Profiler
-from ddtrace.contrib.logging import DDLogFormatter
 
 # Initialize Datadog Profiler
 prof = Profiler(
-    env="production",  # if not specified, falls back to environment variable DD_ENV
-    service="datadog-app",  # if not specified, falls back to environment variable DD_SERVICE
-    version="1.0",   # if not specified, falls back to environment variable DD_VERSION
+    env="production",
+    service="datadog-app",
+    version="1.0",
 )
 prof.start()
 
@@ -19,10 +18,23 @@ patch(flask=True)
 
 app = Flask(__name__)
 
+# Custom log formatter that includes trace and span IDs
+class TraceLogFormatter(logging.Formatter):
+    def format(self, record):
+        span = tracer.current_span()
+        if span:
+            record.trace_id = span.trace_id
+            record.span_id = span.span_id
+        else:
+            record.trace_id = None
+            record.span_id = None
+        return super().format(record)
+
 # Configure logging to include Datadog trace and span IDs
 logger = logging.getLogger(__name__)
 handler = logging.StreamHandler()
-handler.setFormatter(DDLogFormatter())  # Adds trace_id and span_id to logs
+formatter = TraceLogFormatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s [trace_id=%(trace_id)s, span_id=%(span_id)s]')
+handler.setFormatter(formatter)
 logger.addHandler(handler)
 logger.setLevel(logging.INFO)
 
