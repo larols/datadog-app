@@ -1,4 +1,7 @@
 from flask import Flask, render_template_string
+from ddtrace.debugging import DynamicInstrumentation
+
+DynamicInstrumentation.enable()
 
 app = Flask(__name__)
 
