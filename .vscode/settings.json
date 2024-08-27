@@ -1,0 +1,5 @@
+{
+    "datadog.ust.service.setup.linkedNames": [
+        "datadog-app"
+    ]
+}
