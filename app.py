@@ -2,6 +2,7 @@
 from flask import Flask, render_template_string, request
 import random
 import time
+import ddtrace 
 from ddtrace import tracer, patch
 from ddtrace.profiling import Profiler
 from ddtrace.runtime import RuntimeMetrics
