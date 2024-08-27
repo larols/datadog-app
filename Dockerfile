@@ -13,6 +13,10 @@ RUN pip install --no-cache-dir -r requirements.txt
 # Make port 5000 available to the world outside this container
 EXPOSE 5000
 
+# Define build arguments
+ARG DD_GIT_REPOSITORY_URL
+ARG DD_GIT_COMMIT_SHA
+
 # Define environment variables for Datadog
 ENV DD_SERVICE=datadog-app
 ENV DD_AGENT_HOST=datadog-agent
@@ -20,6 +24,8 @@ ENV DD_TRACE_ENABLED=true
 ENV DD_VERSION=1.0
 ENV DD_SERVICE=datadog-app
 ENV DD_LOGS_INJECTION=true
+ENV DD_GIT_REPOSITORY_URL=${DD_GIT_REPOSITORY_URL}
+ENV DD_GIT_COMMIT_SHA=${DD_GIT_COMMIT_SHA}
 
 # Run app.py when the container launches
 CMD ["python", "app.py"]
