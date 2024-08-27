@@ -3,6 +3,8 @@ import random
 import time
 from ddtrace import tracer, patch
 from ddtrace.profiling import Profiler
+from ddtrace.runtime import RuntimeMetrics
+RuntimeMetrics.enable()
 
 prof = Profiler(
     env="production",  # if not specified, falls back to environment variable DD_ENV
