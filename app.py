@@ -2,42 +2,29 @@ import logging
 from flask import Flask, render_template_string, request
 import random
 import time
-from ddtrace import tracer, patch_all
-from ddtrace.contrib.logging import patch as logging_patch
+from ddtrace import tracer, patch
 from ddtrace.profiling import Profiler
+from ddtrace.contrib.logging import DDLogFormatter
 
-# 1. Patch all integrations including logging
-patch_all(logging=True)
-
-# 2. Start Datadog Profiler early
+# Initialize Datadog Profiler
 prof = Profiler(
-    env="production",
-    service="datadog-app",
-    version="1.0",
+    env="production",  # if not specified, falls back to environment variable DD_ENV
+    service="datadog-app",  # if not specified, falls back to environment variable DD_SERVICE
+    version="1.0",   # if not specified, falls back to environment variable DD_VERSION
 )
 prof.start()
 
-# 3. Configure logging format
-LOG_FORMAT = (
-    '%(asctime)s %(levelname)s [%(name)s] [%(filename)s:%(lineno)d] '
-    '[dd.service=%(dd.service)s dd.env=%(dd.env)s dd.version=%(dd.version)s '
-    'dd.trace_id=%(dd.trace_id)s dd.span_id=%(dd.span_id)s] - %(message)s'
-)
-
-logging.basicConfig(
-    level=logging.DEBUG,  # Set to DEBUG for verbose output
-    format=LOG_FORMAT,
-)
-
-log = logging.getLogger(__name__)
-
-# 4. Set Datadog service, env, and version globally
-from ddtrace import config
-config.service = "datadog-app"
-config.env = "production"
-config.version = "1.0"
+# Patch Flask to enable tracing
+patch(flask=True)
 
 app = Flask(__name__)
+
+# Configure logging to include Datadog trace and span IDs
+logger = logging.getLogger(__name__)
+handler = logging.StreamHandler()
+handler.setFormatter(DDLogFormatter())  # Adds trace_id and span_id to logs
+logger.addHandler(handler)
+logger.setLevel(logging.INFO)
 
 # HTML template with a button and Datadog RUM script
 html_template = '''
@@ -87,33 +74,23 @@ html_template = '''
 
 @app.route('/')
 def index():
-    log.debug("Rendering index page.")
     return render_template_string(html_template)
 
 @app.route('/click', methods=['POST'])
 def click():
-    log.debug("Button click received.")
-
     with tracer.trace("button_click.root") as root_span:
         root_span.set_tag("button", "clicked")
-        log.debug("Started root span for button click.")
+        logger.info("Button was clicked")
 
         # Simulate some processing with a child span
+        time.sleep(random.uniform(0.1, 0.5))
         with tracer.trace("button_click.child") as child_span:
             child_span.set_tag("child_task", "processing")
-            log.debug("Started child span for processing task.")
+            logger.info("Processing task in child span")
+            time.sleep(random.uniform(0.1, 0.5))
 
-            # Simulate processing time
-            processing_time = random.uniform(0.1, 0.5)
-            log.debug(f"Processing task for {processing_time:.2f} seconds.")
-            time.sleep(processing_time)
-
-        log.debug("Child span processing complete.")
-
-    log.debug("Button click processing complete.")
     return "Button clicked! Processing done."
 
 if __name__ == '__main__':
-    log.debug("Starting the Flask application.")
     app.run(host='0.0.0.0', port=5000)
 
