@@ -10,6 +10,8 @@ from ddtrace.debugging import DynamicInstrumentation
 
 DynamicInstrumentation.enable()
 
+ddtrace.patch(logging=True)
+
 prof = Profiler(
     env="production",  # if not specified, falls back to environment variable DD_ENV
     service="datadog-app",  # if not specified, falls back to environment variable DD_SERVICE
