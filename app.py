@@ -1,3 +1,4 @@
+import logging
 from flask import Flask, render_template_string, request
 import random
 import time
@@ -18,6 +19,10 @@ prof.start()  # Should be as early as possible, eg before other imports, to ensu
 
 # Patch Flask to enable tracing
 patch(flask=True)
+
+# Configure logging
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 app = Flask(__name__)
 
@@ -73,20 +78,30 @@ html_template = '''
 
 @app.route('/')
 def index():
+    logger.info("Rendering index page")
     return render_template_string(html_template)
 
 @app.route('/click', methods=['POST'])
 def click():
+    logger.info("Button clicked. Starting processing...")
+    
     with tracer.trace("button_click.root") as root_span:
         root_span.set_tag("button", "clicked")
         
         # Simulate some processing with a child span
-        time.sleep(random.uniform(0.1, 0.5))
+        time_to_sleep = random.uniform(0.1, 0.5)
+        logger.info(f"Root span processing. Sleeping for {time_to_sleep:.2f} seconds.")
+        time.sleep(time_to_sleep)
+        
         with tracer.trace("button_click.child") as child_span:
             child_span.set_tag("child_task", "processing")
-            time.sleep(random.uniform(0.1, 0.5))
+            time_to_sleep_child = random.uniform(0.1, 0.5)
+            logger.info(f"Child span processing. Sleeping for {time_to_sleep_child:.2f} seconds.")
+            time.sleep(time_to_sleep_child)
         
+    logger.info("Processing done. Returning response.")
     return "Button clicked! Processing done."
 
 if __name__ == '__main__':
+    logger.info("Starting Flask application...")
     app.run(host='0.0.0.0', port=5000)
