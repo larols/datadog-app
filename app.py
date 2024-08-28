@@ -1,23 +1,22 @@
-from flask import Flask, render_template_string
+from flask import Flask, render_template_string, request
 import time
 import random
 import logging
+from ddtrace import tracer, patch_all
+
+# Initialize Datadog tracing
+patch_all()
 
 app = Flask(__name__)
 
-# Configure default logging
-logger = logging.getLogger()
-logger.setLevel(logging.INFO)  # Set the desired log level
+# Configure Datadog logging
+FORMAT = ('%(asctime)s %(levelname)s [%(name)s] [%(filename)s:%(lineno)d] '
+          '[dd.service=%(dd.service)s dd.env=%(dd.env)s dd.version=%(dd.version)s dd.trace_id=%(dd.trace_id)s dd.span_id=%(dd.span_id)s] '
+          '- %(message)s')
 
-# Create a handler for output (console, file, etc.)
-handler = logging.StreamHandler()
-
-# Create a default formatter
-formatter = logging.Formatter('%(asctime)s %(name)s %(levelname)s %(message)s')
-handler.setFormatter(formatter)
-
-# Add the handler to the logger
-logger.addHandler(handler)
+logging.basicConfig(format=FORMAT)
+log = logging.getLogger(__name__)
+log.setLevel(logging.INFO)
 
 # HTML template with a button
 html_template = '''
@@ -50,17 +49,23 @@ html_template = '''
 '''
 
 @app.route('/')
+@tracer.wrap()
 def index():
-    app.logger.info("Rendering index page")
+    log.info("Rendering index page")
     return render_template_string(html_template)
 
 @app.route('/click', methods=['POST'])
+@tracer.wrap()
 def click():
-    app.logger.info("Button clicked, processing...")
-    # Simulate some processing
-    time.sleep(random.uniform(0.1, 0.5))
-    app.logger.info("Processing done")
-    return "Button clicked! Processing done."
+    log.info("Button clicked, processing...")
+    try:
+        # Simulate some processing
+        time.sleep(random.uniform(0.1, 0.5))
+        log.info("Processing done")
+        return "Button clicked! Processing done."
+    except Exception as e:
+        log.error("An error occurred during processing", exc_info=True)
+        return "An error occurred during processing", 500
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000)
