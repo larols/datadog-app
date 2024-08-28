@@ -1,29 +1,28 @@
-from flask import Flask, render_template_string, request
-import random
-import time
+from flask import Flask, render_template_string
 from ddtrace import tracer, patch
-from ddtrace.profiling import Profiler
-from ddtrace.runtime import RuntimeMetrics
 from ddtrace.debugging import DynamicInstrumentation
+from ddtrace.profiling import Profiler
+import logging
+import time
+import random
 
-
-# Enable runtime metrics and dynamic instrumentation
-RuntimeMetrics.enable()
+# Enable dynamic instrumentation
 DynamicInstrumentation.enable()
 
+# Configure and start the Profiler
 prof = Profiler(
-    env="production",  # if not specified, falls back to environment variable DD_ENV
-    service="datadog-app",  # if not specified, falls back to environment variable DD_SERVICE
-    version="1.0",   # if not specified, falls back to environment variable DD_VERSION
+    env="production",  # Environment (can be set to a different value as needed)
+    service="datadog-app",  # Service name (can be set to a different value as needed)
+    version="1.0",  # Version of the application (can be set to a different value as needed)
 )
-prof.start()  # Should be as early as possible, eg before other imports, to ensure everything is profiled
+prof.start()  # Start profiling
 
 # Patch Flask to enable tracing
 patch(flask=True)
 
 app = Flask(__name__)
 
-# HTML template with a button and Datadog RUM script
+# HTML template with a button
 html_template = '''
 <!DOCTYPE html>
 <html lang="en">
@@ -44,22 +43,6 @@ html_template = '''
             padding: 10px 20px;
         }
     </style>
-    <script src="https://www.datadoghq-browser-agent.com/eu1/v5/datadog-rum.js" type="text/javascript"></script>
-    <script>
-        window.DD_RUM && window.DD_RUM.init({
-            clientToken: 'pubed1d766fe7d2e291e79fedaba88e7c5a',
-            applicationId: 'd876d594-0575-451c-adff-ee5c5aa86b1d',
-            site: 'datadoghq.eu',
-            service: 'datadog-app',
-            env: 'production',
-            sessionSampleRate: 100,
-            sessionReplaySampleRate: 100,
-            trackUserInteractions: true,
-            trackResources: true,
-            trackLongTasks: true,
-            defaultPrivacyLevel: 'allow',
-        });
-    </script>
 </head>
 <body>
     <form method="POST" action="/click">
@@ -75,15 +58,8 @@ def index():
 
 @app.route('/click', methods=['POST'])
 def click():
-    with tracer.trace("button_click.root") as root_span:
-        root_span.set_tag("button", "clicked")
-
-        # Simulate some processing with a child span
-        time.sleep(random.uniform(0.1, 0.5))
-        with tracer.trace("button_click.child") as child_span:
-            child_span.set_tag("child_task", "processing")
-            time.sleep(random.uniform(0.1, 0.5))
-
+    # Simulate some processing
+    time.sleep(random.uniform(0.1, 0.5))
     return "Button clicked! Processing done."
 
 if __name__ == '__main__':
