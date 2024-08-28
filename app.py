@@ -2,9 +2,11 @@ from flask import Flask, render_template_string
 from ddtrace import tracer, patch
 from ddtrace.debugging import DynamicInstrumentation
 from ddtrace.profiling import Profiler
-import logging
+
 import time
 import random
+import logging
+from pythonjsonlogger import jsonlogger
 
 # Enable dynamic instrumentation
 DynamicInstrumentation.enable()
@@ -21,6 +23,20 @@ prof.start()  # Start profiling
 patch(flask=True)
 
 app = Flask(__name__)
+
+# Configure JSON logging
+logger = logging.getLogger()
+logger.setLevel(logging.DEBUG)  # Set the desired log level
+
+# Create a handler for output (console, file, etc.)
+handler = logging.StreamHandler()
+
+# Create a JSON formatter
+formatter = jsonlogger.JsonFormatter('%(asctime)s %(name)s %(levelname)s %(message)s')
+handler.setFormatter(formatter)
+
+# Add the handler to the logger
+logger.addHandler(handler)
 
 # HTML template with a button
 html_template = '''
@@ -54,12 +70,15 @@ html_template = '''
 
 @app.route('/')
 def index():
+    app.logger.info("Rendering index page")
     return render_template_string(html_template)
 
 @app.route('/click', methods=['POST'])
 def click():
+    app.logger.info("Button clicked, processing...")
     # Simulate some processing
     time.sleep(random.uniform(0.1, 0.5))
+    app.logger.info("Processing done")
     return "Button clicked! Processing done."
 
 if __name__ == '__main__':
