@@ -2,10 +2,9 @@ from flask import Flask, render_template_string, request
 import time
 import random
 import logging
-from ddtrace import tracer, patch_all
+import ddtrace
 
-# Initialize Datadog tracing
-patch_all()
+ddtrace.patch(logging=True)
 
 app = Flask(__name__)
 
@@ -49,13 +48,13 @@ html_template = '''
 '''
 
 @app.route('/')
-@tracer.wrap()
+@ddtrace.tracer.wrap()
 def index():
     log.info("Rendering index page")
     return render_template_string(html_template)
 
 @app.route('/click', methods=['POST'])
-@tracer.wrap()
+@ddtrace.tracer.wrap()
 def click():
     log.info("Button clicked, processing...")
     try:
