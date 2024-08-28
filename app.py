@@ -1,26 +1,8 @@
 from flask import Flask, render_template_string
-from ddtrace import tracer, patch
-from ddtrace.debugging import DynamicInstrumentation
-from ddtrace.profiling import Profiler
-
 import time
 import random
 import logging
 from pythonjsonlogger import jsonlogger
-
-# Enable dynamic instrumentation
-DynamicInstrumentation.enable()
-
-# Configure and start the Profiler
-prof = Profiler(
-    env="production",  # Environment (can be set to a different value as needed)
-    service="datadog-app",  # Service name (can be set to a different value as needed)
-    version="1.0",  # Version of the application (can be set to a different value as needed)
-)
-prof.start()  # Start profiling
-
-# Patch Flask to enable tracing
-patch(flask=True)
 
 app = Flask(__name__)
 
@@ -45,7 +27,7 @@ html_template = '''
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Datadog App</title>
+    <title>App</title>
     <style>
         body {
             display: flex;
