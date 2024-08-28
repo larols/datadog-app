@@ -23,12 +23,48 @@ prof.start()
 # Patch Flask to enable tracing
 patch(flask=True)
 
-# Configure logging
-logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger(__name__)
-
-# Enable automatic correlation between logs and traces
+# Configure logging with Datadog log injection
 config.logs_injection = True
+
+# Create a custom logging handler for sending logs to Datadog
+class DatadogLoggingHandler(logging.Handler):
+    def emit(self, record):
+        try:
+            # Create log message
+            log_entry = self.format(record)
+            
+            # Get current trace context
+            trace_id = None
+            span_id = None
+            if tracer.current_trace():
+                context = tracer.current_trace().context
+                trace_id = context.trace_id
+                span_id = context.span_id
+            
+            # Add trace context to log entry
+            if trace_id and span_id:
+                log_entry = f"{log_entry} trace_id={trace_id} span_id={span_id}"
+            
+            # Here, you need to send the log entry to Datadog
+            # This example assumes sending to a placeholder function
+            # Replace `send_to_datadog` with actual logging implementation
+            send_to_datadog(log_entry)
+        except Exception as e:
+            self.handleError(record)
+
+# Placeholder function for sending logs to Datadog
+def send_to_datadog(log_entry):
+    # Example: Implement actual log sending logic here
+    print(log_entry)  # Replace with actual Datadog client logic
+
+# Configure logging
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.INFO)
+
+# Add the custom handler to the logger
+handler = DatadogLoggingHandler()
+handler.setFormatter(logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s'))
+logger.addHandler(handler)
 
 app = Flask(__name__)
 
@@ -68,7 +104,6 @@ html_template = '''
         trackLongTasks: true,
         defaultPrivacyLevel: 'allow',
         allowedTracingUrls: [
-            // Match the base URL and any path
             /^http:\/\/192\.168\.50\.242\/.*$/
         ],
         });
