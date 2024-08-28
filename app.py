@@ -2,30 +2,33 @@ import logging
 from flask import Flask, render_template_string, request
 import random
 import time
-import ddtrace  
+import ddtrace
+from ddtrace import tracer, patch
+from ddtrace.profiling import Profiler
 from ddtrace.runtime import RuntimeMetrics
 from ddtrace.debugging import DynamicInstrumentation
+from ddtrace import config
 
 # Enable runtime metrics and dynamic instrumentation
 RuntimeMetrics.enable()
 DynamicInstrumentation.enable()
 
 # Start the profiler
-prof = ddtrace.profiling.Profiler(
+prof = Profiler(
     env="production",
     service="datadog-app",
 )
 prof.start()
 
 # Patch Flask to enable tracing
-ddtrace.patch(flask=True)
+patch(flask=True)
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 # Enable automatic correlation between logs and traces
-ddtrace.config.logs_injection = True
+config.logs_injection = True
 
 app = Flask(__name__)
 
@@ -88,7 +91,7 @@ def index():
 def click():
     logger.info("Button clicked. Starting processing...")
     
-    with ddtrace.tracer.trace("button_click.root") as root_span:
+    with tracer.trace("button_click.root") as root_span:
         root_span.set_tag("button", "clicked")
         
         # Simulate some processing with a child span
@@ -96,7 +99,7 @@ def click():
         logger.info(f"Root span processing. Sleeping for {time_to_sleep:.2f} seconds.")
         time.sleep(time_to_sleep)
         
-        with ddtrace.tracer.trace("button_click.child") as child_span:
+        with tracer.trace("button_click.child") as child_span:
             child_span.set_tag("child_task", "processing")
             time_to_sleep_child = random.uniform(0.1, 0.5)
             logger.info(f"Child span processing. Sleeping for {time_to_sleep_child:.2f} seconds.")
