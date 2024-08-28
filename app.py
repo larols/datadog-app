@@ -7,7 +7,7 @@ app = Flask(__name__)
 
 # Configure default logging
 logger = logging.getLogger()
-logger.setLevel(logging.DEBUG)  # Set the desired log level
+logger.setLevel(logging.INFO)  # Set the desired log level
 
 # Create a handler for output (console, file, etc.)
 handler = logging.StreamHandler()
