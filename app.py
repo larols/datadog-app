@@ -41,6 +41,9 @@ class DatadogLoggingHandler(logging.Handler):
                 trace_id = context.trace_id
                 span_id = context.span_id
             
+            # Debug print statements
+            print(f"Debug: Trace ID: {trace_id}, Span ID: {span_id}")
+            
             # Add trace context to log entry
             if trace_id and span_id:
                 log_entry = f"{log_entry} trace_id={trace_id} span_id={span_id}"
