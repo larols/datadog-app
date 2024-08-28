@@ -2,19 +2,18 @@ from flask import Flask, render_template_string
 import time
 import random
 import logging
-from pythonjsonlogger import jsonlogger
 
 app = Flask(__name__)
 
-# Configure JSON logging
+# Configure default logging
 logger = logging.getLogger()
 logger.setLevel(logging.DEBUG)  # Set the desired log level
 
 # Create a handler for output (console, file, etc.)
 handler = logging.StreamHandler()
 
-# Create a JSON formatter
-formatter = jsonlogger.JsonFormatter('%(asctime)s %(name)s %(levelname)s %(message)s')
+# Create a default formatter
+formatter = logging.Formatter('%(asctime)s %(name)s %(levelname)s %(message)s')
 handler.setFormatter(formatter)
 
 # Add the handler to the logger
