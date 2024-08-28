@@ -21,7 +21,7 @@ ARG DD_GIT_COMMIT_SHA
 ENV DD_SERVICE=datadog-app
 ENV DD_ENV=production
 ENV DD_AGENT_HOST=datadog-agent
-ENV DD_VERSION=1.2.7
+ENV DD_VERSION=1.2.8
 ENV DD_SERVICE=datadog-app
 ENV DD_GIT_REPOSITORY_URL=${DD_GIT_REPOSITORY_URL}
 ENV DD_GIT_COMMIT_SHA=${DD_GIT_COMMIT_SHA}
@@ -32,6 +32,6 @@ ENV DD_TRACE_ENABLED=true
 ENV DD_TRACE_AGENT_URL=http://datadog-agent:8126
 
 # Run app.py when the container launches
-CMD ["python", "app.py"]
-
+# CMD ["python", "app.py"]
+CMD ["ddtrace-run", "python", "-m", "app"]
 
