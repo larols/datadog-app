@@ -2,11 +2,13 @@ import logging
 from flask import Flask, render_template_string, request
 import random
 import time
-import ddtrace  # Import ddtrace, which includes everything you need
+import ddtrace  
+from ddtrace.runtime import RuntimeMetrics
+from ddtrace.debugging import DynamicInstrumentation
 
 # Enable runtime metrics and dynamic instrumentation
-ddtrace.runtime.RuntimeMetrics.enable()
-ddtrace.debugging.DynamicInstrumentation.enable()
+RuntimeMetrics.enable()
+DynamicInstrumentation.enable()
 
 # Start the profiler
 prof = ddtrace.profiling.Profiler(
