@@ -1,22 +1,27 @@
-from flask import Flask, render_template_string, request
-import time
-import random
-import logging
-import ddtrace
+# Import necessary modules
+from flask import Flask, render_template_string, request  # Flask web framework and utilities
+import time  # For simulating processing delay
+import random  # For generating random delays
+import logging  # For logging information
+import ddtrace  # For Datadog tracing and monitoring
 
 # Enable Datadog tracing for the logging module
 ddtrace.patch(logging=True)
 
+# Create a new Flask web application instance
 app = Flask(__name__)
 
+# Configure the format for logging messages, including Datadog-specific fields
 FORMAT = ('%(asctime)s %(levelname)s [%(name)s] [%(filename)s:%(lineno)d] '
           '[dd.service=%(dd.service)s dd.env=%(dd.env)s dd.version=%(dd.version)s dd.trace_id=%(dd.trace_id)s dd.span_id=%(dd.span_id)s] '
           '- %(message)s')
 
+# Set up logging with the specified format
 logging.basicConfig(format=FORMAT)
-log = logging.getLogger(__name__)
-log.setLevel(logging.INFO)
+log = logging.getLogger(__name__)  # Get a logger instance for this module
+log.setLevel(logging.INFO)  # Set logging level to INFO
 
+# HTML template that will be rendered and sent to the client
 html_template = '''
 <!DOCTYPE html>
 <html lang="en">
@@ -43,56 +48,64 @@ html_template = '''
         type="text/javascript">
     </script>
     <script>
+        // Initialize Datadog RUM with your configuration
         window.DD_RUM && window.DD_RUM.init({
-          clientToken: 'pub9440fba958cca8c9313fa3b7061a338a',
-          applicationId: '04a99ea4-d121-4f76-b731-f9514a177be0',
-          site: 'datadoghq.eu',
-          service: 'datadog-app',
+          clientToken: 'pub9440fba958cca8c9313fa3b7061a338a',  // Your Datadog RUM client token
+          applicationId: '04a99ea4-d121-4f76-b731-f9514a177be0',  // Your Datadog RUM application ID
+          site: 'datadoghq.eu',  // Datadog site, based on your organization
+          service: 'datadog-app',  // Service name reported to Datadog
           allowedTracingUrls: [
-                    (url) => url.startsWith("http://")
+                    (url) => url.startsWith("http://")  // Allow tracing for HTTP requests
                 ],
-          env: 'production',
-          version: '1.4.0',
-          sessionSampleRate: 100,
-          sessionReplaySampleRate: 100,
-          trackUserInteractions: true,
-          trackResources: true,
-          trackLongTasks: true,
-          defaultPrivacyLevel: 'allow',
+          env: 'production',  // Environment name (e.g., production)
+          version: '1.4.1',  // Version of the application
+          sessionSampleRate: 100,  // Percentage of sessions to sample for RUM
+          sessionReplaySampleRate: 100,  // Percentage of sessions to capture replay data
+          trackUserInteractions: true,  // Track user interactions like clicks
+          trackResources: true,  // Track network requests and assets
+          trackLongTasks: true,  // Track long tasks that block the main thread
+          defaultPrivacyLevel: 'allow',  // Privacy level configuration
         });
     </script>
 </head>
 <body>
-    <form method="POST" action="/click">
-        <input type="text" name="user_input" placeholder="Enter something"/>
-        <button type="submit">Click me!</button>
+    <!-- Simple form with a button to trigger a POST request -->
+    <form method="POST" action="/search">
+        <input type="text" name="query" placeholder="Enter a search query"/>
+        <button type="submit">Search</button>
     </form>
 </body>
 </html>
 '''
 
+# Route for the root URL
 @app.route('/')
-@ddtrace.tracer.wrap()
+@ddtrace.tracer.wrap()  # Wrap this function with Datadog tracing
 def index():
-    log.info("Rendering index page")
-    return render_template_string(html_template)
+    log.info("Rendering index page")  # Log that the index page is being rendered
+    return render_template_string(html_template)  # Render the HTML template
 
-@app.route('/click', methods=['POST'])
-@ddtrace.tracer.wrap()
-def click():
-    user_input = request.form.get('user_input', '')
-    log.info("Button clicked, processing...")
+# Route to handle search queries with SQL Injection vulnerability
+@app.route('/search', methods=['POST'])
+@ddtrace.tracer.wrap()  # Wrap this function with Datadog tracing
+def search():
+    user_query = request.form.get('query', '')
+    log.info("Search query received")  # Log that a search query has been received
     try:
-        # Simulate some processing time with a random delay
-        time.sleep(random.uniform(0.1, 0.5))
-        log.info("Processing done")
+        # Simulate a SQL query using the user input (vulnerable to SQL Injection)
+        simulated_db_response = f"SELECT * FROM users WHERE username = '{user_query}'"
+        # Simulate the result of the query
+        if "DROP TABLE" in user_query or "--" in user_query:
+            result = "SQL Injection detected! Malicious input was used."
+        else:
+            result = f"Simulated search result for query: {user_query}"
 
-        # Return a response that includes user input without escaping
-        # This is vulnerable to XSS if user_input contains malicious content
-        return f"Button clicked! You entered: {user_input}"
+        log.info("Search processed successfully")  # Log that the search has been processed
+        return f"Search results: {result}"  # Return simulated search results
     except Exception as e:
-        log.error("An error occurred during processing", exc_info=True)
-        return "An error occurred during processing", 500
+        log.error("An error occurred during search processing", exc_info=True)  # Log the error with exception details
+        return "An error occurred during search processing", 500  # Return an error message and status code 500
 
+# Entry point for running the Flask application
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=5000)
+    app.run(host='0.0.0.0', port=5000)  # Run the app on all available IPs on port 5000
