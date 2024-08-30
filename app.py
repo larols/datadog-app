@@ -79,14 +79,14 @@ html_template = '''
 
 # Route for the root URL
 @app.route('/')
-# @ddtrace.tracer.wrap()  # Wrap this function with Datadog tracing
+@ddtrace.tracer.wrap()  # Wrap this function with Datadog tracing
 def index():
     log.info("Rendering index page")  # Log that the index page is being rendered
     return render_template_string(html_template)  # Render the HTML template
 
 # Route to handle the button click
 @app.route('/click', methods=['POST'])
-# @ddtrace.tracer.wrap()  # Wrap this function with Datadog tracing
+@ddtrace.tracer.wrap()  # Wrap this function with Datadog tracing
 def click():
     log.info("Button clicked, processing...")  # Log that the button was clicked
     try:
