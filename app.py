@@ -70,9 +70,8 @@ html_template = '''
 </head>
 <body>
     <!-- Simple form with a button to trigger a POST request -->
-    <form method="POST" action="/search">
-        <input type="text" name="query" placeholder="Enter a search query"/>
-        <button type="submit">Search</button>
+    <form method="POST" action="/click">
+        <button type="submit">Click me!</button>
     </form>
 </body>
 </html>
@@ -85,26 +84,19 @@ def index():
     log.info("Rendering index page")  # Log that the index page is being rendered
     return render_template_string(html_template)  # Render the HTML template
 
-# Route to handle search queries with SQL Injection vulnerability
-@app.route('/search', methods=['POST'])
+# Route to handle the button click
+@app.route('/click', methods=['POST'])
 @ddtrace.tracer.wrap()  # Wrap this function with Datadog tracing
-def search():
-    user_query = request.form.get('query', '')
-    log.info("Search query received")  # Log that a search query has been received
+def click():
+    log.info("Button clicked, processing...")  # Log that the button was clicked
     try:
-        # Simulate a SQL query using the user input (vulnerable to SQL Injection)
-        simulated_db_response = f"SELECT * FROM users WHERE username = '{user_query}'"
-        # Simulate the result of the query
-        if "DROP TABLE" in user_query or "--" in user_query:
-            result = "SQL Injection detected! Malicious input was used."
-        else:
-            result = f"Simulated search result for query: {user_query}"
-
-        log.info("Search processed successfully")  # Log that the search has been processed
-        return f"Search results: {result}"  # Return simulated search results
+        # Simulate some processing time with a random delay
+        time.sleep(random.uniform(0.1, 0.5))
+        log.info("Processing done")  # Log that processing is complete
+        return "Button clicked! Processing done."  # Return a success message
     except Exception as e:
-        log.error("An error occurred during search processing", exc_info=True)  # Log the error with exception details
-        return "An error occurred during search processing", 500  # Return an error message and status code 500
+        log.error("An error occurred during processing", exc_info=True)  # Log the error with exception details
+        return "An error occurred during processing", 500  # Return an error message and status code 500
 
 # Entry point for running the Flask application
 if __name__ == '__main__':
