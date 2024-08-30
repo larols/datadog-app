@@ -52,7 +52,7 @@ html_template = '''
                     (url) => url.startsWith("http://")
                 ],
           env: 'production',
-          version: '1.4.2',
+          version: '1.4.3',
           sessionSampleRate: 100,
           sessionReplaySampleRate: 100,
           trackUserInteractions: true,
@@ -62,6 +62,7 @@ html_template = '''
         });
     </script>
 </head>
+<!-- User input for testing code vulnerable to xss  -->
 <body>
     <form method="POST" action="/click">
         <input type="text" name="user_input" placeholder="Enter something"/>
@@ -72,13 +73,13 @@ html_template = '''
 '''
 
 @app.route('/')
-@ddtrace.tracer.wrap()
+# @ddtrace.tracer.wrap()
 def index():
     log.info("Rendering index page")
     return render_template_string(html_template)
 
 @app.route('/click', methods=['POST'])
-@ddtrace.tracer.wrap()
+# @ddtrace.tracer.wrap()
 def click():
     user_input = request.form.get('user_input', '')
     log.info("Button clicked, processing...")
