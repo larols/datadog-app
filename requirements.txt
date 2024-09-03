@@ -1,3 +1,2 @@
 Flask
 ddtrace
-pytest-timeout
