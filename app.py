@@ -3,6 +3,8 @@ import time
 import random
 import logging
 import ddtrace
+import psycopg2
+from psycopg2 import sql
 
 # Enable Datadog tracing for the logging module
 ddtrace.patch(logging=True)
@@ -16,6 +18,42 @@ FORMAT = ('%(asctime)s %(levelname)s [%(name)s] [%(filename)s:%(lineno)d] '
 logging.basicConfig(format=FORMAT)
 log = logging.getLogger(__name__)
 log.setLevel(logging.INFO)
+
+# Database connection settings
+DB_HOST = "datadog-app-db"  # Hostname of the PostgreSQL container
+DB_PORT = "5432"
+DB_NAME = "mydb"
+DB_USER = "myuser"
+DB_PASSWORD = "mypassword"
+
+# Connect to PostgreSQL
+def get_db_connection():
+    connection = psycopg2.connect(
+        host=DB_HOST,
+        port=DB_PORT,
+        dbname=DB_NAME,
+        user=DB_USER,
+        password=DB_PASSWORD
+    )
+    return connection
+
+# Initialize the database (run this once, or include in an init script)
+def init_db():
+    connection = get_db_connection()
+    cursor = connection.cursor()
+    cursor.execute("""
+        CREATE TABLE IF NOT EXISTS user_inputs (
+            id SERIAL PRIMARY KEY,
+            user_input TEXT NOT NULL,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        )
+    """)
+    connection.commit()
+    cursor.close()
+    connection.close()
+
+# Call init_db() to initialize the database table
+init_db()
 
 html_template = '''
 <!DOCTYPE html>
@@ -73,24 +111,38 @@ html_template = '''
 '''
 
 @app.route('/')
-# @ddtrace.tracer.wrap()
 def index():
     log.info("Rendering index page")
     return render_template_string(html_template)
 
 @app.route('/click', methods=['POST'])
-# @ddtrace.tracer.wrap()
 def click():
     user_input = request.form.get('user_input', '')
     log.info("Button clicked, processing...")
     try:
         # Simulate some processing time with a random delay
         time.sleep(random.uniform(0.1, 0.5))
-        log.info("Processing done")
 
+        # Store the user input in the database
+        connection = get_db_connection()
+        cursor = connection.cursor()
+        cursor.execute(
+            "INSERT INTO user_inputs (user_input) VALUES (%s)",
+            (user_input,)
+        )
+        connection.commit()
+
+        # Fetch the latest user input
+        cursor.execute("SELECT user_input FROM user_inputs ORDER BY id DESC LIMIT 1")
+        result = cursor.fetchone()
+
+        cursor.close()
+        connection.close()
+
+        log.info("Processing done")
         # Return a response that includes user input without escaping
         # This is vulnerable to XSS if user_input contains malicious content
-        return f"Button clicked! You entered: {user_input}"
+        return f"Button clicked! You entered: {result[0]}"
     except Exception as e:
         log.error("An error occurred during processing", exc_info=True)
         return "An error occurred during processing", 500
