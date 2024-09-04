@@ -46,6 +46,13 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v3
 
+    - name: Generate version.json
+      run: |
+        # Get Git commit SHA
+        COMMIT_SHA=$(git rev-parse HEAD)
+        # Create version.json with the commit hash
+        echo "{\"version\": \"$COMMIT_SHA\"}" > version.json
+
     - name: Log in to Docker Hub
       uses: docker/login-action@v2
       with:
@@ -62,7 +69,8 @@ jobs:
         docker build . \
           -t ${{ secrets.DOCKER_USERNAME }}/datadog-app:latest \
           --build-arg DD_GIT_REPOSITORY_URL=${REPO_URL} \
-          --build-arg DD_GIT_COMMIT_SHA=${COMMIT_SHA}
+          --build-arg DD_GIT_COMMIT_SHA=${COMMIT_SHA} \
+          --build-arg VERSION_FILE_CONTENT="$(cat version.json)"
 
     - name: Push Docker image
       run: |
