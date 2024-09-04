@@ -11,6 +11,7 @@ ddtrace.patch(logging=True)
 
 app = Flask(__name__)
 
+# Define logging format including Datadog trace information
 FORMAT = ('%(asctime)s %(levelname)s [%(name)s] [%(filename)s:%(lineno)d] '
           '[dd.service=%(dd.service)s dd.env=%(dd.env)s dd.version=%(dd.version)s dd.trace_id=%(dd.trace_id)s dd.span_id=%(dd.span_id)s] '
           '- %(message)s')
@@ -28,29 +29,39 @@ DB_PASSWORD = "mypassword"
 
 # Connect to PostgreSQL
 def get_db_connection():
-    connection = psycopg2.connect(
-        host=DB_HOST,
-        port=DB_PORT,
-        dbname=DB_NAME,
-        user=DB_USER,
-        password=DB_PASSWORD
-    )
-    return connection
+    try:
+        connection = psycopg2.connect(
+            host=DB_HOST,
+            port=DB_PORT,
+            dbname=DB_NAME,
+            user=DB_USER,
+            password=DB_PASSWORD
+        )
+        log.info("Database connection established")
+        return connection
+    except Exception as e:
+        log.error("Failed to connect to the database", exc_info=True)
+        raise
 
 # Initialize the database (run this once, or include in an init script)
 def init_db():
-    connection = get_db_connection()
-    cursor = connection.cursor()
-    cursor.execute("""
-        CREATE TABLE IF NOT EXISTS user_inputs (
-            id SERIAL PRIMARY KEY,
-            user_input TEXT NOT NULL,
-            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-        )
-    """)
-    connection.commit()
-    cursor.close()
-    connection.close()
+    try:
+        connection = get_db_connection()
+        cursor = connection.cursor()
+        cursor.execute("""
+            CREATE TABLE IF NOT EXISTS user_inputs (
+                id SERIAL PRIMARY KEY,
+                user_input TEXT NOT NULL,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            )
+        """)
+        connection.commit()
+        cursor.close()
+        connection.close()
+        log.info("Database initialized")
+    except Exception as e:
+        log.error("Failed to initialize the database", exc_info=True)
+        raise
 
 # Call init_db() to initialize the database table
 init_db()
@@ -90,7 +101,7 @@ html_template = '''
                     (url) => url.startsWith("http://")
                 ],
           env: 'production',
-          version: '1.4.4',
+          version: '1.5.0',
           sessionSampleRate: 100,
           sessionReplaySampleRate: 100,
           trackUserInteractions: true,
@@ -118,10 +129,12 @@ def index():
 @app.route('/click', methods=['POST'])
 def click():
     user_input = request.form.get('user_input', '')
-    log.info("Button clicked, processing...")
+    log.info("Button clicked, processing input: %s", user_input)
     try:
         # Simulate some processing time with a random delay
-        time.sleep(random.uniform(0.1, 0.5))
+        processing_time = random.uniform(0.1, 0.5)
+        log.debug("Simulating processing time of %.2f seconds", processing_time)
+        time.sleep(processing_time)
 
         # Store the user input in the database
         connection = get_db_connection()
@@ -139,9 +152,8 @@ def click():
         cursor.close()
         connection.close()
 
-        log.info("Processing done")
+        log.info("Processing complete. Latest user input: %s", result[0])
         # Return a response that includes user input without escaping
-        # This is vulnerable to XSS if user_input contains malicious content
         return f"Button clicked! You entered: {result[0]}"
     except Exception as e:
         log.error("An error occurred during processing", exc_info=True)
