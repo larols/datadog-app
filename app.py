@@ -3,8 +3,6 @@ import time
 import random
 import logging
 import ddtrace
-import psycopg2
-from psycopg2 import sql
 
 # Enable Datadog tracing for the logging module
 ddtrace.patch(logging=True)
@@ -19,52 +17,6 @@ FORMAT = ('%(asctime)s %(levelname)s [%(name)s] [%(filename)s:%(lineno)d] '
 logging.basicConfig(format=FORMAT)
 log = logging.getLogger(__name__)
 log.setLevel(logging.INFO)
-
-# Database connection settings
-DB_HOST = "datadog-app-db"  # Hostname of the PostgreSQL container
-DB_PORT = "5432"
-DB_NAME = "mydb"
-DB_USER = "myuser"
-DB_PASSWORD = "mypassword"
-
-# Connect to PostgreSQL
-def get_db_connection():
-    try:
-        connection = psycopg2.connect(
-            host=DB_HOST,
-            port=DB_PORT,
-            dbname=DB_NAME,
-            user=DB_USER,
-            password=DB_PASSWORD
-        )
-        log.info("Database connection established")
-        return connection
-    except Exception as e:
-        log.error("Failed to connect to the database", exc_info=True)
-        raise
-
-# Initialize the database (run this once, or include in an init script)
-def init_db():
-    try:
-        connection = get_db_connection()
-        cursor = connection.cursor()
-        cursor.execute("""
-            CREATE TABLE IF NOT EXISTS user_inputs (
-                id SERIAL PRIMARY KEY,
-                user_input TEXT NOT NULL,
-                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-            )
-        """)
-        connection.commit()
-        cursor.close()
-        connection.close()
-        log.info("Database initialized")
-    except Exception as e:
-        log.error("Failed to initialize the database", exc_info=True)
-        raise
-
-# Call init_db() to initialize the database table
-init_db()
 
 html_template = '''
 <!DOCTYPE html>
@@ -91,29 +43,25 @@ html_template = '''
     src="https://www.datadoghq-browser-agent.com/eu1/v5/datadog-rum.js"
     type="text/javascript">
 </script>
-<script
-        src="https://www.datadoghq-browser-agent.com/eu1/v5/datadog-rum.js"
-        type="text/javascript">
-    </script>
-    <script>
-        window.DD_RUM && window.DD_RUM.init({
-          clientToken: 'pub9440fba958cca8c9313fa3b7061a338a',
-          applicationId: '04a99ea4-d121-4f76-b731-f9514a177be0',
-          site: 'datadoghq.eu',
-          service: 'datadog-app',
-          allowedTracingUrls: [
-                    (url) => url.startsWith("http://")
-                ],
-          env: 'production',
-          version: '1.5.1',
-          sessionSampleRate: 100,
-          sessionReplaySampleRate: 100,
-          trackUserInteractions: true,
-          trackResources: true,
-          trackLongTasks: true,
-          defaultPrivacyLevel: 'allow',
-        });
-    </script>
+<script>
+    window.DD_RUM && window.DD_RUM.init({
+      clientToken: 'pub9440fba958cca8c9313fa3b7061a338a',
+      applicationId: '04a99ea4-d121-4f76-b731-f9514a177be0',
+      site: 'datadoghq.eu',
+      service: 'datadog-app',
+      allowedTracingUrls: [
+                (url) => url.startsWith("http://")
+            ],
+      env: 'production',
+      version: '1.5.2',
+      sessionSampleRate: 100,
+      sessionReplaySampleRate: 100,
+      trackUserInteractions: true,
+      trackResources: true,
+      trackLongTasks: true,
+      defaultPrivacyLevel: 'allow',
+    });
+</script>
 </head>
 <!-- User input for testing code vulnerable to xss  -->
 <body>
@@ -140,25 +88,9 @@ def click():
         log.debug("Simulating processing time of %.2f seconds", processing_time)
         time.sleep(processing_time)
 
-        # Store the user input in the database
-        connection = get_db_connection()
-        cursor = connection.cursor()
-        cursor.execute(
-            "INSERT INTO user_inputs (user_input) VALUES (%s)",
-            (user_input,)
-        )
-        connection.commit()
-
-        # Fetch the latest user input
-        cursor.execute("SELECT user_input FROM user_inputs ORDER BY id DESC LIMIT 1")
-        result = cursor.fetchone()
-
-        cursor.close()
-        connection.close()
-
-        log.info("Processing complete. Latest user input: %s", result[0])
+        log.info("Processing complete. User input: %s", user_input)
         # Return a response that includes user input without escaping
-        return f"Button clicked! You entered: {result[0]}"
+        return f"Button clicked! You entered: {user_input}"
     except Exception as e:
         log.error("An error occurred during processing", exc_info=True)
         return "An error occurred during processing", 500

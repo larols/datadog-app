@@ -1,3 +1,2 @@
 Flask
 ddtrace
-psycopg2-binary
