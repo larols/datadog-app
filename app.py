@@ -91,45 +91,29 @@ html_template = '''
     src="https://www.datadoghq-browser-agent.com/eu1/v5/datadog-rum.js"
     type="text/javascript">
 </script>
-<script>
-    // Function to fetch the version from version.json
-    async function fetchVersion() {
-        try {
-            const response = await fetch('/version.json');
-            if (!response.ok) {
-                throw new Error('Network response was not ok');
-            }
-            const data = await response.json();
-            return data.version;
-        } catch (error) {
-            console.error('Error fetching version:', error);
-            return 'unknown'; // Fallback version in case of an error
-        }
-    }
-
-    // Initialize Datadog RUM with the fetched version
-    (async () => {
-        const version = await fetchVersion();
+<script
+        src="https://www.datadoghq-browser-agent.com/eu1/v5/datadog-rum.js"
+        type="text/javascript">
+    </script>
+    <script>
         window.DD_RUM && window.DD_RUM.init({
-            clientToken: 'pub9440fba958cca8c9313fa3b7061a338a',
-            applicationId: '04a99ea4-d121-4f76-b731-f9514a177be0',
-            site: 'datadoghq.eu',
-            service: 'datadog-app',
-            allowedTracingUrls: [
-                (url) => url.startsWith("http://")
-            ],
-            env: 'production',
-            version: version,
-            sessionSampleRate: 100,
-            sessionReplaySampleRate: 100,
-            trackUserInteractions: true,
-            trackResources: true,
-            trackLongTasks: true,
-            defaultPrivacyLevel: 'allow',
+          clientToken: 'pub9440fba958cca8c9313fa3b7061a338a',
+          applicationId: '04a99ea4-d121-4f76-b731-f9514a177be0',
+          site: 'datadoghq.eu',
+          service: 'datadog-app',
+          allowedTracingUrls: [
+                    (url) => url.startsWith("http://")
+                ],
+          env: 'production',
+          version: '1.5.1',
+          sessionSampleRate: 100,
+          sessionReplaySampleRate: 100,
+          trackUserInteractions: true,
+          trackResources: true,
+          trackLongTasks: true,
+          defaultPrivacyLevel: 'allow',
         });
-    })();
-</script>
-
+    </script>
 </head>
 <!-- User input for testing code vulnerable to xss  -->
 <body>

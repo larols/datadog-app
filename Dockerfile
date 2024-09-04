@@ -13,14 +13,10 @@ RUN pip install --no-cache-dir -r requirements.txt
 # Define build arguments
 ARG DD_GIT_REPOSITORY_URL
 ARG DD_GIT_COMMIT_SHA
-ARG VERSION_FILE_CONTENT
 
 # Define environment variables for Datadog
 ENV DD_GIT_REPOSITORY_URL=${DD_GIT_REPOSITORY_URL}
 ENV DD_GIT_COMMIT_SHA=${DD_GIT_COMMIT_SHA}
-
-# Create version.json from the VERSION_FILE_CONTENT build argument
-RUN echo $VERSION_FILE_CONTENT > /app/version.json
 
 # Make port 5000 available to the world outside this container
 EXPOSE 5000
