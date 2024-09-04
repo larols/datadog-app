@@ -84,7 +84,7 @@ def click():
     log.info("Button clicked, processing input: %s", user_input)
     try:
         # Simulate some processing time with a random delay
-        processing_time = random.uniform(0.1, 0.5)
+        processing_time = random.uniform(0.1, 0.9)
         log.debug("Simulating processing time of %.2f seconds", processing_time)
         time.sleep(processing_time)
 
