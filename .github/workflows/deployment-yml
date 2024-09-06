@@ -1,0 +1,39 @@
+name: Deploy to k8s
+
+on:
+  workflow_run:
+    workflows: ["Build, Test, and Push Docker Image"]
+    types:
+      - completed
+
+jobs:
+  deploy:
+    name: Deploy to k8s
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    env:
+      DD_BETA_COMMANDS_ENABLED: 1 
+      DD_GITHUB_JOB_NAME: Deploy to k8s
+      DD_SITE: datadoghq.eu
+      DD_API_KEY: ${{ secrets.DD_API_KEY }}
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    - name: Configure kubectl
+      run: |
+        mkdir -p $HOME/.kube
+        echo "${{ secrets.KUBECONFIG }}" > $HOME/.kube/config
+
+    - name: Deploy to Kubernetes
+      run: |
+        kubectl apply -f k8s/deployment.yaml
+
+    - name: Mark deployment in Datadog
+      run: |
+        npx @datadog/datadog-ci deployment mark \
+          --env production \
+          --service datadog-app \
+          --version $(git rev-parse --short HEAD)
