@@ -1,0 +1,44 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: datadog-app
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: datadog-app
+  template:
+    metadata:
+      labels:
+        app: datadog-app
+      annotations:
+        ad.datadoghq.com/datadog-app.logs: '[{"source":"python","service":"datadog-app"}]'
+    spec:
+      containers:
+      - name: datadog-app
+        image: laols/datadog-app:latest
+        ports:
+        - containerPort: 5000
+        env:
+        - name: DD_TRACE_AGENT_URL
+          value: 'http://datadog-agent:8126'
+        - name: DD_AGENT_HOST
+          valueFrom:
+            fieldRef:
+              fieldPath: status.hostIP
+        - name: DD_TRACE_ENABLED
+          value: "true"
+        - name: DD_IAST_ENABLED
+          value: "true"
+        - name: DD_DYNAMIC_INSTRUMENTATION_ENABLED
+          value: "true"
+        - name: DD_RUNTIME_METRICS_ENABLED
+          value: "true"
+        - name: DD_PROFILING_ENABLED
+          value: "true"
+        - name: DD_ENV
+          value: production
+        - name: DD_SERVICE
+          value: datadog-app
+        - name: DD_VERSION
+          value: "1.6.0"

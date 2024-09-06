@@ -1,0 +1,29 @@
+name: Deploy to Kubernetes
+
+on:
+    workflow_run:
+      workflows: ["Build, Test, and Push Docker Image"]
+      types:
+        - completed
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    - name: Set up Kubernetes
+      uses: azure/setup-kubectl@v2
+      with:
+        version: '1.31.0' # Specify the kubectl version you need
+
+    - name: Configure kubectl
+      run: |
+        mkdir -p $HOME/.kube
+        echo "${{ secrets.KUBECONFIG }}" > $HOME/.kube/config
+
+    - name: Deploy to Kubernetes
+      run: |
+        kubectl apply -f k8s/deployment.yaml

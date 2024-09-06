@@ -1,4 +1,4 @@
-# TESTING
+# TESTING DEPLOYMENT
 
 from flask import Flask, render_template_string, request
 import time
@@ -55,7 +55,7 @@ html_template = '''
                 (url) => url.startsWith("http://")
             ],
       env: 'production',
-      version: '1.5.2',
+      version: '1.6.0',
       sessionSampleRate: 100,
       sessionReplaySampleRate: 100,
       trackUserInteractions: true,
