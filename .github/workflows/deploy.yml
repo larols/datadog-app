@@ -15,10 +15,12 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v3
 
-    - name: Set up Kubernetes CLI (kubectl)
-      uses: actions/setup-kubectl@v2
-      with:
-        version: '1.31.0' # Specify the kubectl version you need
+    - name: Install kubectl
+      run: |
+        curl -LO "https://dl.k8s.io/release/v1.31.0/bin/linux/amd64/kubectl"
+        chmod +x ./kubectl
+        sudo mv ./kubectl /usr/local/bin/kubectl
+        kubectl version --client
 
     - name: Configure kubectl
       run: |
@@ -28,3 +30,4 @@ jobs:
     - name: Deploy to Kubernetes
       run: |
         kubectl apply -f k8s/deployment.yaml
+        kubectl apply -f k8s/service.yaml  # Add this if you have a service.yaml
