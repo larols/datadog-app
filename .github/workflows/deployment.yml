@@ -36,4 +36,4 @@ jobs:
         npx @datadog/datadog-ci deployment mark \
           --env production \
           --service datadog-app \
-          --version $(git rev-parse --short HEAD)
+          --version 1.6.0
