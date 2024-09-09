@@ -22,6 +22,10 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v3
 
+    - name: Set deployment start time
+      id: set_deploy_start
+      run: echo "deploy_start=$(date +%s)" >> $GITHUB_ENV
+
     - name: Configure kubectl
       run: |
         mkdir -p $HOME/.kube
@@ -36,4 +40,16 @@ jobs:
         npx @datadog/datadog-ci deployment mark \
           --env production \
           --service datadog-app \
-          --revision "1.6.1"
+          --revision "1.6.2"
+
+    - name: Track deployment in Datadog
+      env:
+        DD_BETA_COMMANDS_ENABLED: 1
+        DD_SITE: 'datadoghq.eu'
+        DD_API_KEY: ${{ secrets.DD_API_KEY }}
+      run: |
+        datadog-ci dora deployment --service datadog-app --env production \
+          --started-at ${{ env.deploy_start }} --finished-at $(date +%s) \
+          --git-repository-url "${{ github.event.repository.html_url }}" \
+          --git-commit-sha ${{ github.sha }}
+        
