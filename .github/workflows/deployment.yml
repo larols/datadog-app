@@ -48,7 +48,7 @@ jobs:
         DD_SITE: 'datadoghq.eu'
         DD_API_KEY: ${{ secrets.DD_API_KEY }}
       run: |
-        datadog-ci dora deployment --service datadog-app --env production \
+        npx @datadog/datadog-ci dora deployment --service datadog-app --env production \
           --started-at ${{ env.deploy_start }} --finished-at $(date +%s) \
           --git-repository-url "${{ github.event.repository.html_url }}" \
           --git-commit-sha ${{ github.sha }}
