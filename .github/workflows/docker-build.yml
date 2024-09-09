@@ -63,7 +63,7 @@ jobs:
           -t ${{ secrets.DOCKER_USERNAME }}/datadog-app:latest \
           --build-arg DD_GIT_REPOSITORY_URL=${REPO_URL} \
           --build-arg DD_GIT_COMMIT_SHA=${COMMIT_SHA} \
-          --build-arg VERSION_FILE_CONTENT="$(cat version.json)"
+        #  --build-arg VERSION_FILE_CONTENT="$(cat version.json)"
 
     - name: Push Docker image
       run: |

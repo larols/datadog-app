@@ -53,7 +53,7 @@ html_template = '''
                 (url) => url.startsWith("http://")
             ],
       env: 'production',
-      version: 'ABC123',
+      version: '1.6.4',
       sessionSampleRate: 100,
       sessionReplaySampleRate: 100,
       trackUserInteractions: true,
