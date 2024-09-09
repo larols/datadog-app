@@ -1,5 +1,3 @@
-# TESTING DEPLOYMENT
-
 from flask import Flask, render_template_string, request
 import time
 import random
@@ -55,7 +53,7 @@ html_template = '''
                 (url) => url.startsWith("http://")
             ],
       env: 'production',
-      version: '1.6.2',
+      version: '1.6.3',
       sessionSampleRate: 100,
       sessionReplaySampleRate: 100,
       trackUserInteractions: true,

@@ -40,7 +40,7 @@ jobs:
         npx @datadog/datadog-ci deployment mark \
           --env production \
           --service datadog-app \
-          --revision "1.6.2"
+          --revision "1.6.3"
 
     - name: Track deployment in Datadog
       env:
