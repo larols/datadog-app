@@ -49,7 +49,7 @@ jobs:
     - name: Set commit sha for RUM version
       run: |
         # Extract the commit SHA
-        VERSION=${{ github.sha::7 }}
+        VERSION=$(echo ${{ github.sha }} | cut -c1-7)
         # Replace the placeholder VERSION in app.py with the commit SHA
         sed -i "s/version: 'VERSION'/version: '$VERSION'/g" app.py
 
