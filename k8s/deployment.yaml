@@ -41,4 +41,4 @@ spec:
         - name: DD_SERVICE
           value: datadog-app
         - name: DD_VERSION
-          value: "1.6.3"
+          value: "ABC123"

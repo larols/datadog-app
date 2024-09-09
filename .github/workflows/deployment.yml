@@ -1,55 +1,50 @@
-name: Deploy to k8s
+name: Build, Test, and Push Docker Image
 
 on:
-  workflow_run:
-    workflows: ["Build, Test, and Push Docker Image"]
-    types:
-      - completed
+  push:
+    branches:
+      - main
 
 jobs:
-  deploy:
-    name: Deploy to k8s
+  build:
     runs-on: ubuntu-latest
-    timeout-minutes: 5
-
-    env:
-      DD_BETA_COMMANDS_ENABLED: 1 
-      DD_GITHUB_JOB_NAME: Deploy to k8s
-      DD_SITE: datadoghq.eu
-      DD_API_KEY: ${{ secrets.DD_API_KEY }}
 
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v3
+      - name: Checkout code
+        uses: actions/checkout@v3
 
-    - name: Set deployment start time
-      id: set_deploy_start
-      run: echo "deploy_start=$(date +%s)" >> $GITHUB_ENV
+      - name: Set commit ID as version
+        id: set-version
+        run: echo "VERSION=${GITHUB_SHA}" >> $GITHUB_ENV
 
-    - name: Configure kubectl
-      run: |
-        mkdir -p $HOME/.kube
-        echo "${{ secrets.KUBECONFIG }}" > $HOME/.kube/config
+      - name: Update version in app.py
+        run: |
+          sed -i "s/version: 'ABC123'/version: '${{ env.VERSION }}'/g" app.py
 
-    - name: Deploy to Kubernetes
-      run: |
-        kubectl apply -f k8s/deployment.yaml --insecure-skip-tls-verify
+      - name: Update DD_VERSION in deployment.yaml
+        run: |
+          sed -i "s/DD_VERSION: 'ABC123'/DD_VERSION: '${{ env.VERSION }}'/g" /k8s/deployment.yaml
 
-    - name: Mark deployment in Datadog
-      run: |
-        npx @datadog/datadog-ci deployment mark \
-          --env production \
-          --service datadog-app \
-          --revision "1.6.3"
+      - name: Build Docker image
+        run: docker build -t my-image:${{ env.VERSION }} .
 
-    - name: Track deployment in Datadog
-      env:
-        DD_BETA_COMMANDS_ENABLED: 1
-        DD_SITE: 'datadoghq.eu'
-        DD_API_KEY: ${{ secrets.DD_API_KEY }}
-      run: |
-        npx @datadog/datadog-ci dora deployment --service datadog-app --env production \
-          --started-at ${{ env.deploy_start }} --finished-at $(date +%s) \
-          --git-repository-url "${{ github.event.repository.html_url }}" \
-          --git-commit-sha ${{ github.sha }}
-        
+      - name: Test Docker image
+        run: docker run --rm my-image:${{ env.VERSION }} python -m unittest discover
+
+      - name: Push Docker image to Docker Hub
+        run: |
+          echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
+          docker push my-image:${{ env.VERSION }}
+
+      - name: Deploy to Kubernetes
+        uses: azure/setup-kubectl@v1
+        with:
+          version: 'latest'
+        run: kubectl apply -f /k8s/deployment.yaml
+
+      - name: Notify Datadog
+        uses: datadog/datadog-ci@v1
+        with:
+          api-key: ${{ secrets.DD_API_KEY }}
+          app-key: ${{ secrets.DD_APP_KEY }}
+          command: datadog deployment create --version ${{ env.VERSION }} --description "Deployment of commit ${{ env.VERSION }}"
