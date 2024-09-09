@@ -27,6 +27,13 @@ jobs:
         pip install -r requirements.txt
         pip install pytest ddtrace
 
+    - name: Set commit SHA for RUM version
+      run: |
+        # Extract the commit SHA
+        VERSION=${{ github.sha }}
+        # Replace the placeholder VERSION in app.py with the commit SHA
+        sed -i "s/version: 'VERSION'/version: '$VERSION'/g" app.py
+
     - name: Run tests with Datadog monitoring
       env:
         DD_CIVISIBILITY_AGENTLESS_ENABLED: true
@@ -63,7 +70,6 @@ jobs:
           -t ${{ secrets.DOCKER_USERNAME }}/datadog-app:latest \
           --build-arg DD_GIT_REPOSITORY_URL=${REPO_URL} \
           --build-arg DD_GIT_COMMIT_SHA=${COMMIT_SHA} \
-        #  --build-arg VERSION_FILE_CONTENT="$(cat version.json)"
 
     - name: Push Docker image
       run: |
