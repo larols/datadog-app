@@ -1,4 +1,4 @@
-name: Test and Deploy Datadog-App
+name: Test and Deploy datadog-app
 
 on:
   push:
