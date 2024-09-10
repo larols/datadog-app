@@ -56,6 +56,7 @@ html_template = '''
             ],
       env: 'production',
       version: 'VERSION',
+      
       sessionSampleRate: 100,
       sessionReplaySampleRate: 100,
       trackUserInteractions: true,
@@ -63,6 +64,8 @@ html_template = '''
       trackLongTasks: true,
       defaultPrivacyLevel: 'allow',
     });
+    // Add feature flag evaluation
+    datadogRum.addFeatureFlagEvaluation('new_feature', 'true');
 </script>
 </head>
 <!-- User input for testing code vulnerable to xss  -->
