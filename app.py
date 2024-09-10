@@ -1,5 +1,3 @@
-# NEW VERSION
-
 from flask import Flask, render_template_string, request
 import time
 import random
