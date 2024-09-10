@@ -64,8 +64,6 @@ html_template = '''
       trackLongTasks: true,
       defaultPrivacyLevel: 'allow',
     });
-    // Add feature flag evaluation
-    datadogRum.addFeatureFlagEvaluation('new_feature', 'true');
 </script>
 </head>
 <!-- User input for testing code vulnerable to xss  -->
