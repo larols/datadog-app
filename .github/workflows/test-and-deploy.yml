@@ -93,7 +93,7 @@ jobs:
       uses: actions/checkout@v3
 
     - name: Tag pipeline in Datadog
-      run: datadog-ci tag --level pipeline --tags team:lars
+      run: npx @datadog/datadog-ci tag --level pipeline --tags team:lars
 
     - name: Set deployment start time
       id: set_deploy_start
