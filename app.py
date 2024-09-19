@@ -64,14 +64,40 @@ html_template = '''
       trackLongTasks: true,
       defaultPrivacyLevel: 'allow',
     });
-    // Set static user details
-    window.DD_RUM && window.DD_RUM.setUser({
-      id: 123,
-      name: "Lars Olsson",
-      email: "hej@larsolsson.se"
-    });
 
-</script>
+    // Random user data generation
+    (function() {
+      // Arrays for random name generation
+      const firstNames = ["John", "Jane", "Sam", "Chris", "Pat", "Alex", "Jamie", "Taylor", "Jordan", "Casey"];
+      const lastNames = ["Smith", "Doe", "Johnson", "Brown", "Davis", "Miller", "Wilson", "Moore", "Clark", "Lee"];
+
+      // Generate a random integer between min and max (inclusive)
+      function getRandomInt(min, max) {
+        return Math.floor(Math.random() * (max - min + 1)) + min;
+      }
+
+      // Generate a random user
+      function generateUser() {
+        const id = getRandomInt(1100, 1200); // ID range 1100-1200
+        const firstName = firstNames[getRandomInt(0, firstNames.length - 1)];
+        const lastName = lastNames[getRandomInt(0, lastNames.length - 1)];
+        const name = `${firstName} ${lastName}`;
+        const email = `${firstName.toLowerCase()}.${lastName.toLowerCase()}@example.com`;
+
+        return { id, name, email };
+      }
+
+      // Generate and send a single randomized user to DD_RUM
+      const user = generateUser();
+      window.DD_RUM && window.DD_RUM.setUser({
+        id: user.id,
+        name: user.name,
+        email: user.email
+      });
+      console.log(`User sent: ${user.id}, ${user.name}, ${user.email}`);
+    })();
+</script>    
+
 </head>
 <!-- User input for testing code vulnerable to xss  -->
 <body>
