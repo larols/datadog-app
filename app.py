@@ -64,6 +64,13 @@ html_template = '''
       trackLongTasks: true,
       defaultPrivacyLevel: 'allow',
     });
+    // Set static user details
+    window.DD_RUM && window.DD_RUM.setUser({
+      id: 123,
+      name: "Lars Olsson",
+      email: "hej@larsolsson.se"
+    });
+
 </script>
 </head>
 <!-- User input for testing code vulnerable to xss  -->
