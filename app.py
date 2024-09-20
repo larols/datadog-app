@@ -240,36 +240,19 @@ def metrics():
 
 @app.route('/error')
 def error():
-    log.info("Simulating an error")
+    log.info("Simulating a template rendering error")
 
-    # Simulate a backend error and propagate it to the client
+    # Simulate an invalid template rendering by returning an incomplete template
     try:
-        raise Exception("This is a simulated server-side error for testing purposes")
+        # This will cause a template syntax error
+        return render_template_string('''
+        <h2>Error Page</h2>
+        <p>This page has an intentional template error: {{ error }}</p>
+        <h2>Unclosed tag
+        ''')
     except Exception as e:
-        log.error("Error occurred: %s", str(e), exc_info=True)
-
-        # Return an HTML page that will cause a client-side JavaScript error
-        error_page = '''
-        <!DOCTYPE html>
-        <html lang="en">
-        <head>
-            <meta charset="UTF-8">
-            <meta name="viewport" content="width=device-width, initial-scale=1.0">
-            <title>Simulated Client-Side Error</title>
-            <script>
-                // This will trigger a client-side JavaScript error visible in Datadog RUM
-                throw new Error("Simulated JavaScript error triggered for testing purposes");
-            </script>
-        </head>
-        <body>
-            <h1>Simulated Client-Side Error</h1>
-            <p>This is a page that intentionally triggers a JavaScript error.</p>
-        </body>
-        </html>
-        '''
-        
-        # Return the HTML page with a 500 status code
-        return error_page, 500
+        log.error("Error occurred while rendering the template: %s", str(e), exc_info=True)
+        return "An error occurred while rendering the template", 500
 
 @app.route('/profile', methods=['GET', 'POST'])
 def profile():
