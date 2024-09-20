@@ -14,11 +14,11 @@ spec:
         app: datadog-app
         component: frontend
       annotations:
-        ad.datadoghq.com/datadog-app.logs: '[{"source":"nginx","service":"datadog-app-frontend"}]'
+        ad.datadoghq.com/datadog-app.logs: '[{"source":"nginx","service":"datadog-app-frontend"}]'  # Added annotations here
     spec:
       containers:
-      - name: nginx
-        image: laols/datadog-app-frontend:latest
+      - name: datadog-app-frontend  # Ensure this matches your container name
+        image: laols/datadog-app-frontend:latest  # Specify the Docker image here
         ports:
         - containerPort: 80
         env:
@@ -27,7 +27,7 @@ spec:
         - name: DD_SERVICE
           value: datadog-app-frontend
         - name: DD_VERSION
-          value: ""  # This can be dynamically set in GitHub Actions
+          value: ""  # This will be updated later with the commit SHA
 ---
 apiVersion: v1
 kind: Service
