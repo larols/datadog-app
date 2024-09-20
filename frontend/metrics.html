@@ -32,8 +32,10 @@
                     return response.json();
                 })
                 .then(data => {
+                    // Convert memory from KiB to GiB
+                    const memoryInGiB = (data.memory / 1024 / 1024).toFixed(2); // Convert to GiB
                     // Display the metrics data
-                    document.getElementById('metrics-data').innerText = `CPU: ${data.cpu}%, Memory: ${data.memory} GB`;
+                    document.getElementById('metrics-data').innerText = `CPU: ${data.cpu}%, Memory: ${memoryInGiB} GiB`;
                 })
                 .catch(error => {
                     console.error('Error fetching metrics:', error);
