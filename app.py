@@ -4,13 +4,13 @@ import random
 import logging
 import ddtrace
 
-# Enable Datadog tracing for the logging module
-ddtrace.patch(logging=True)
+# ddtrace.patch(logging=True) # Enable Datadog tracing for the logging module
+ddtrace.patch_all() # Enable tracing for all available libraries
 
 app = Flask(__name__)
 
 # Enable Flask debug mode
-app.config['DEBUG'] = True
+app.config['DEBUG'] = False
 
 # Define logging format including Datadog trace information
 FORMAT = ('%(asctime)s %(levelname)s [%(name)s] [%(filename)s:%(lineno)d] '
@@ -230,8 +230,8 @@ def about():
 @app.route('/metrics')
 def metrics():
     log.info("Rendering metrics page")
-    cpu = random.uniform(0, 100)
-    memory = random.uniform(0, 16)
+    cpu = random.uniform(0, 100), 1)
+    memory = random.uniform(0, 16), 1)
     return render_template_string(html_template.replace('{% block content %}{% endblock %}', '''
     <h2>Metrics</h2>
     <p>CPU Utilization: {{ cpu }}%</p>
@@ -241,7 +241,13 @@ def metrics():
 @app.route('/error')
 def error():
     log.info("Simulating an error")
-    raise Exception("This is a simulated error for testing purposes")
+    
+    # Simulate an error and ensure it is propagated to the client
+    try:
+        raise Exception("This is a simulated error for testing purposes")
+    except Exception as e:
+        log.error("Error occurred: %s", str(e), exc_info=True)
+        return str(e), 500  # Return the error message with a 500 status code
 
 @app.route('/profile', methods=['GET', 'POST'])
 def profile():
