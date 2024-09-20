@@ -14,7 +14,7 @@ spec:
         app: datadog-app
         component: frontend
       annotations:
-        ad.datadoghq.com/datadog-app.logs: '[{"source":"nginx","service":"datadog-app-frontend"}]'
+        ad.datadoghq.com/datadog-app-frontend.logs: '[{"source":"nginx","service":"datadog-app-frontend"}]'
     spec:
       containers:
       - name: datadog-app-frontend  # Ensure this matches your container name
