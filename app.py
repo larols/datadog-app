@@ -9,6 +9,9 @@ ddtrace.patch(logging=True)
 
 app = Flask(__name__)
 
+# Enable Flask debug mode
+app.config['DEBUG'] = True
+
 # Define logging format including Datadog trace information
 FORMAT = ('%(asctime)s %(levelname)s [%(name)s] [%(filename)s:%(lineno)d] '
           '[dd.service=%(dd.service)s dd.env=%(dd.env)s dd.version=%(dd.version)s dd.trace_id=%(dd.trace_id)s dd.span_id=%(dd.span_id)s] '
