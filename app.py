@@ -241,13 +241,35 @@ def metrics():
 @app.route('/error')
 def error():
     log.info("Simulating an error")
-    
-    # Simulate an error and ensure it is propagated to the client
+
+    # Simulate a backend error and propagate it to the client
     try:
-        raise Exception("This is a simulated error for testing purposes")
+        raise Exception("This is a simulated server-side error for testing purposes")
     except Exception as e:
         log.error("Error occurred: %s", str(e), exc_info=True)
-        return str(e), 500  # Return the error message with a 500 status code
+
+        # Return an HTML page that will cause a client-side JavaScript error
+        error_page = '''
+        <!DOCTYPE html>
+        <html lang="en">
+        <head>
+            <meta charset="UTF-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <title>Simulated Client-Side Error</title>
+            <script>
+                // This will trigger a client-side JavaScript error visible in Datadog RUM
+                throw new Error("Simulated JavaScript error triggered for testing purposes");
+            </script>
+        </head>
+        <body>
+            <h1>Simulated Client-Side Error</h1>
+            <p>This is a page that intentionally triggers a JavaScript error.</p>
+        </body>
+        </html>
+        '''
+        
+        # Return the HTML page with a 500 status code
+        return error_page, 500
 
 @app.route('/profile', methods=['GET', 'POST'])
 def profile():
