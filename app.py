@@ -65,36 +65,40 @@ html_template = '''
       defaultPrivacyLevel: 'allow',
     });
 
-    // Random user data generation
+    // Random user data generation for 3 customer segments
     (function() {
-      // Arrays for random name generation
       const firstNames = ["John", "Jane", "Sam", "Chris", "Pat", "Alex", "Jamie", "Taylor", "Jordan", "Casey"];
       const lastNames = ["Smith", "Doe", "Johnson", "Brown", "Davis", "Miller", "Wilson", "Moore", "Clark", "Lee"];
+      const customerSegments = [
+        { idPrefix: 'cust-a-', domain: 'example.com' },
+        { idPrefix: 'cust-b-', domain: 'larsolsson.se' },
+        { idPrefix: 'cust-c-', domain: 'datadog.com' }
+      ];
 
       // Generate a random integer between min and max (inclusive)
       function getRandomInt(min, max) {
         return Math.floor(Math.random() * (max - min + 1)) + min;
       }
 
-      // Generate a random user
+      // Generate a random user with segment logic
       function generateUser() {
-        const id = getRandomInt(1100, 1200); // ID range 1100-1200
         const firstName = firstNames[getRandomInt(0, firstNames.length - 1)];
         const lastName = lastNames[getRandomInt(0, lastNames.length - 1)];
-        const name = `${firstName} ${lastName}`;
-        const email = `${firstName.toLowerCase()}.${lastName.toLowerCase()}@example.com`;
+        const segment = customerSegments[getRandomInt(0, customerSegments.length - 1)]; // Randomly pick one segment
 
-        return { id, name, email };
+        const id = `${segment.idPrefix}${getRandomInt(1000, 9999)}`; // Generate id like cust-a-xxxx, cust-b-xxxx, etc.
+        const email = `${firstName.toLowerCase()}.${lastName.toLowerCase()}@${segment.domain}`;
+
+        return { id, name: `${firstName} ${lastName}`, email };
       }
 
-      // Generate and send a single randomized user to DD_RUM
-      const user = generateUser();
-      window.DD_RUM && window.DD_RUM.setUser({
-        id: user.id,
-        name: user.name,
-        email: user.email
+      // Generate and send a single user to DD_RUM
+      const randomUser = generateUser();
+      window.DD_RUM?.setUser({
+        id: randomUser.id,
+        name: randomUser.name,
+        email: randomUser.email
       });
-      console.log(`User sent: ${user.id}, ${user.name}, ${user.email}`);
     })();
 </script>    
 
