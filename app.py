@@ -130,6 +130,7 @@ html_template = '''
         <a href="/profile">User Profile</a>
     </nav>
     <hr>
+    <h2>{{ title }}</h2>
     {% block content %}{% endblock %}
 </body>
 </html>
@@ -138,42 +139,33 @@ html_template = '''
 @app.route('/')
 def index():
     log.info("Rendering index page")
-    return render_template_string('''
-    {% extends "layout.html" %}
-    {% block content %}
+    return render_template_string(html_template.replace('{% block content %}{% endblock %}', '''
     <h2>Main Page</h2>
     <p>This is the main page. Use the navigation to explore other views.</p>
     <form method="POST" action="/click">
         <input type="text" name="user_input" placeholder="Enter something"/>
         <button type="submit">Click me!</button>
     </form>
-    {% endblock %}
-    ''', layout=html_template)
+    '''), title="Main Page")
 
 @app.route('/about')
 def about():
     log.info("Rendering about page")
-    return render_template_string('''
-    {% extends "layout.html" %}
-    {% block content %}
+    return render_template_string(html_template.replace('{% block content %}{% endblock %}', '''
     <h2>About Page</h2>
     <p>This is a simple app demonstrating Flask with Datadog integration.</p>
-    {% endblock %}
-    ''', layout=html_template)
+    '''), title="About Page")
 
 @app.route('/metrics')
 def metrics():
     log.info("Rendering metrics page")
     cpu = random.uniform(0, 100)
     memory = random.uniform(0, 16)
-    return render_template_string('''
-    {% extends "layout.html" %}
-    {% block content %}
+    return render_template_string(html_template.replace('{% block content %}{% endblock %}', '''
     <h2>Metrics</h2>
     <p>CPU Utilization: {{ cpu }}%</p>
     <p>Memory Utilization: {{ memory }} GB</p>
-    {% endblock %}
-    ''', cpu=cpu, memory=memory, layout=html_template)
+    '''), cpu=cpu, memory=memory, title="Metrics")
 
 @app.route('/error')
 def error():
@@ -185,22 +177,16 @@ def profile():
     if request.method == 'POST':
         log.info("Rendering user profile page")
         user_data = request.json
-        return render_template_string('''
-        {% extends "layout.html" %}
-        {% block content %}
+        return render_template_string(html_template.replace('{% block content %}{% endblock %}', '''
         <h2>User Profile</h2>
         <p><strong>ID:</strong> {{ user.id }}</p>
         <p><strong>Name:</strong> {{ user.name }}</p>
         <p><strong>Email:</strong> {{ user.email }}</p>
-        {% endblock %}
-        ''', user=user_data, layout=html_template)
-    return render_template_string('''
-    {% extends "layout.html" %}
-    {% block content %}
+        '''), user=user_data, title="User Profile")
+    return render_template_string(html_template.replace('{% block content %}{% endblock %}', '''
     <h2>User Profile</h2>
     <p>Loading user profile...</p>
-    {% endblock %}
-    ''', layout=html_template)
+    '''), title="User Profile")
 
 @app.route('/click', methods=['POST'])
 def click():
