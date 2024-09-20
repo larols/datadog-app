@@ -22,11 +22,28 @@
     </div>
 
     <script>
+        // Initialize Datadog RUM
+        window.DD_RUM && window.DD_RUM.init({
+            clientToken: 'pub9440fba958cca8c9313fa3b7061a338a',
+            applicationId: '04a99ea4-d121-4f76-b731-f9514a177be0',
+            site: 'datadoghq.eu',
+            service: 'datadog-app-frontend',
+            env: 'production',
+            version: '1.0.0',
+            sessionSampleRate: 100,
+            sessionReplaySampleRate: 100,
+            trackUserInteractions: true,
+        });
+
         // Fetch metrics data from the backend
         document.addEventListener('DOMContentLoaded', function() {
             const metricsUrl = 'http://datadog-app-backend-service:5000/metrics'; // Use the service name to fetch metrics
-            console.log(`Fetching metrics from: ${metricsUrl}`); // Log the URL being fetched
-            
+
+            // Log the start of the metrics fetch
+            window.DD_RUM.addAction('Fetching metrics', {
+                url: metricsUrl,
+            });
+
             fetch(metricsUrl)
                 .then(response => {
                     if (!response.ok) {
@@ -35,14 +52,20 @@
                     return response.json();
                 })
                 .then(data => {
-                    console.log('Fetched metrics data:', data); // Log the fetched data
                     // Convert memory from KiB to GiB
                     const memoryInGiB = (data.memory / 1024 / 1024).toFixed(2); // Convert to GiB
                     // Display the metrics data
                     document.getElementById('metrics-data').innerText = `CPU: ${data.cpu}%, Memory: ${memoryInGiB} GiB`;
+
+                    // Log the successful fetch of metrics
+                    window.DD_RUM.addAction('Metrics fetched successfully', {
+                        cpu: data.cpu,
+                        memory: memoryInGiB,
+                    });
                 })
                 .catch(error => {
-                    console.error('Error fetching metrics:', error);
+                    // Log the error
+                    window.DD_RUM.addError(error.message);
                     document.getElementById('metrics-data').innerText = 'Failed to load metrics data.';
                 });
         });
