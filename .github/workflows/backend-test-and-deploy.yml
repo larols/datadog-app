@@ -86,12 +86,12 @@ jobs:
       run: |
         # Deploy the backend application
         kubectl apply -f ./k8s/backend-deployment.yaml --insecure-skip-tls-verify
-      
+
         # Extract the commit SHA
-        VERSION=$(echo ${{ github.sha }} | cut -c1-7)
-      
+        VERSION=$(echo 748bc83169aa58768deecf2910c361c880989735 | cut -c1-7)
+
         # Patch the deployment to update the DD_VERSION environment variable
-        kubectl patch deployment backend -p "{\"spec\":{\"template\":{\"spec\":{\"containers\":[{\"name\":\"datadog-app-backend\",\"env\":[{\"name\":\"DD_VERSION\",\"value\":\"$VERSION\"}]}]}}}}" --insecure-skip-tls-verify
+        kubectl patch deployment datadog-app-backend -p "{\"spec\":{\"template\":{\"spec\":{\"containers\":[{\"name\":\"datadog-app-backend\",\"env\":[{\"name\":\"DD_VERSION\",\"value\":\"$VERSION\"}]}]}}}}" --insecure-skip-tls-verify
 
     - name: Mark deployment in Datadog
       run: npx @datadog/datadog-ci deployment mark --env production --service datadog-app-backend --revision "${{ github.sha }}"

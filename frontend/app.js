@@ -3,7 +3,7 @@ window.DD_RUM && window.DD_RUM.init({
   clientToken: 'pub9440fba958cca8c9313fa3b7061a338a',
   applicationId: '04a99ea4-d121-4f76-b731-f9514a177be0',
   site: 'datadoghq.eu',
-  service: 'datadog-app-frontend',  // Update service name if needed
+  service: 'datadog-app',  // Update service name if needed
   allowedTracingUrls: [
       "http://backend-service:5000"  // Use the backend service name and port
   ],
