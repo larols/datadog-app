@@ -94,11 +94,7 @@ jobs:
         kubectl patch deployment backend -p "{\"spec\":{\"template\":{\"spec\":{\"containers\":[{\"name\":\"datadog-app-backend\",\"env\":[{\"name\":\"DD_VERSION\",\"value\":\"$VERSION\"}]}]}}}}" --insecure-skip-tls-verify
 
     - name: Mark deployment in Datadog
-      run: |
-        npx @datadog/datadog-ci deployment mark \
-          --env production \
-          --service datadog-app-backend \
-          --revision "${{ github.sha }}"
+      run: npx @datadog/datadog-ci deployment mark --env production --service datadog-app-backend --revision "${{ github.sha }}"
 
     - name: Track deployment in Datadog
       env:
@@ -106,7 +102,4 @@ jobs:
         DD_SITE: 'datadoghq.eu'
         DD_API_KEY: ${{ secrets.DD_API_KEY }}
       run: |
-        npx @datadog/datadog-ci dora deployment --service datadog-app-backend --env production \
-          --started-at ${{ env.deploy_start }} --finished-at $(date +%s) \
-          --git-repository-url "${{ github.event.repository.html_url }}" \
-          --git-commit-sha ${{ github.sha }}
+        run: npx @datadog/datadog-ci dora deployment --service datadog-app-backend --env production --started-at ${{ env.deploy_start }} --finished-at $(date +%s) --git-repository-url "${{ github.event.repository.html_url }}" --git-commit-sha ${{ github.sha }}
