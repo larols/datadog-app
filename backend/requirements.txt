@@ -1,3 +1,5 @@
 Flask
-ddtrace
 kubernetes
+google-auth
+cryptography
+ddtrace
