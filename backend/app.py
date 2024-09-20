@@ -1,6 +1,8 @@
 import os
 import logging
-from flask import Flask, jsonify
+import random
+import time
+from flask import Flask, jsonify, request, render_template_string
 from kubernetes import client, config
 import ddtrace
 
@@ -18,34 +20,60 @@ logging.basicConfig(format=FORMAT)
 log = logging.getLogger(__name__)
 log.setLevel(logging.INFO)
 
+@app.route('/')
+def index():
+    log.info("Rendering index page")
+    return render_template_string('''
+    <h2>Main Page</h2>
+    <p>This is the main page. Use the navigation to explore other views.</p>
+    <form method="POST" action="/click">
+        <input type="text" name="user_input" placeholder="Enter something" required />
+        <button type="submit">Click me!</button>
+    </form>
+    ''')
+
+@app.route('/click', methods=['POST'])
+def click():
+    user_input = request.form.get('user_input', '')
+    log.info("Button clicked, processing input: %s", user_input)
+    try:
+        processing_time = random.uniform(0.1, 0.9)
+        log.debug("Simulating processing time of %.2f seconds", processing_time)
+        time.sleep(processing_time)
+        log.info("Processing complete. User input: %s", user_input)
+        return f"Button clicked! You entered: {user_input}"
+    except Exception as e:
+        log.error("An error occurred during processing", exc_info=True)
+        return "An error occurred during processing", 500
+
+@app.route('/internal-metrics', methods=['GET'])
+def internal_metrics():
+    backend_url = 'http://datadog-app-backend-service:5000/metrics'  # Internal service URL
+    try:
+        response = requests.get(backend_url)
+        response.raise_for_status()  # Raise an error for bad responses
+        return jsonify(response.json())
+    except Exception as e:
+        log.error("Failed to fetch metrics from backend: %s", e)
+        return jsonify(error="Failed to fetch metrics"), 500
+
 @app.route('/metrics', methods=['GET'])
 def metrics():
     log.info("Serving metrics")
-
-    # Load Kubernetes config
     config.load_incluster_config()
-
-    # Create an API client
     v1 = client.CoreV1Api()
-
-    # Get the node name from the environment
     node_name = os.getenv('NODE_NAME')
 
-    # Get node metrics
     try:
         node_metrics = v1.read_node(name=node_name)
         cpu_usage = node_metrics.status.allocatable['cpu']
         memory_usage = node_metrics.status.allocatable['memory']
-
-        # Log metrics
         log.info("CPU Usage: %s", cpu_usage)
         log.info("Memory Usage: %s", memory_usage)
-
     except Exception as e:
         log.error("Failed to fetch metrics: %s", e)
         return jsonify(error="Failed to fetch metrics"), 500
 
-    # Return metrics
     return jsonify(cpu=cpu_usage, memory=memory_usage)
 
 if __name__ == '__main__':
