@@ -1,4 +1,4 @@
-from flask import Flask, jsonify, request
+from flask import Flask, jsonify, request, CORS
 from kubernetes import client, config
 import os
 import logging
@@ -9,6 +9,7 @@ from ddtrace import patch_all
 patch_all()
 
 app = Flask(__name__)
+CORS(app)
 
 # Set up logging
 logging.basicConfig(level=logging.INFO)
