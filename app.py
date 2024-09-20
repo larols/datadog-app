@@ -255,4 +255,23 @@ def profile():
         <p><strong>Email:</strong> {{ user.email }}</p>
         '''), user=user_data, title="User Profile")
     return render_template_string(html_template.replace('{% block content %}{% endblock %}', '''
-    <h2>User Profile</
+    <h2>User Profile</h2>
+    <p>Loading user profile...</p>
+    '''), title="User Profile")
+
+@app.route('/click', methods=['POST'])
+def click():
+    user_input = request.form.get('user_input', '')
+    log.info("Button clicked, processing input: %s", user_input)
+    try:
+        processing_time = random.uniform(0.1, 0.9)
+        log.debug("Simulating processing time of %.2f seconds", processing_time)
+        time.sleep(processing_time)
+        log.info("Processing complete. User input: %s", user_input)
+        return f"Button clicked! You entered: {user_input}"
+    except Exception as e:
+        log.error("An error occurred during processing", exc_info=True)
+        return "An error occurred during processing", 500
+
+if __name__ == '__main__':
+    app.run(host='0.0.0.0', port=5000)
