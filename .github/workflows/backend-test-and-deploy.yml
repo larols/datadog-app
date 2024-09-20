@@ -82,16 +82,16 @@ jobs:
         mkdir -p $HOME/.kube
         echo "${{ secrets.KUBECONFIG }}" > $HOME/.kube/config
 
-    - name: Deploy backend to Kubernetes
+    - name: Deploy backend and set DD_VERSION in Kubernetes
       run: |
-        kubectl apply -f ./k8s/backend-deployment.yaml
-
-    - name: Set commit SHA for DD_VERSION
-      run: |
+        # Deploy the backend application
+        kubectl apply -f ./k8s/backend-deployment.yaml --insecure-skip-tls-verify
+      
         # Extract the commit SHA
         VERSION=$(echo ${{ github.sha }} | cut -c1-7)
-        # Apply the manifest with a patch to update the DD_VERSION field
-        kubectl patch deployment backend -p "{\"spec\":{\"template\":{\"spec\":{\"containers\":[{\"name\":\"flask-app\",\"env\":[{\"name\":\"DD_VERSION\",\"value\":\"$VERSION\"}]}]}}}}"
+      
+        # Patch the deployment to update the DD_VERSION environment variable
+        kubectl patch deployment backend -p "{\"spec\":{\"template\":{\"spec\":{\"containers\":[{\"name\":\"datadog-app-backend\",\"env\":[{\"name\":\"DD_VERSION\",\"value\":\"$VERSION\"}]}]}}}}" --insecure-skip-tls-verify
 
     - name: Mark deployment in Datadog
       run: |

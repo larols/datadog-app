@@ -86,9 +86,16 @@ jobs:
         mkdir -p $HOME/.kube
         echo "${{ secrets.KUBECONFIG }}" > $HOME/.kube/config
 
-    - name: Deploy frontend to Kubernetes
+    - name: Deploy frontend and set DD_VERSION in Kubernetes
       run: |
-        kubectl apply -f ./k8s/frontend-deployment.yaml
+        # Deploy the frontend application
+        kubectl apply -f ./k8s/frontend-deployment.yaml --insecure-skip-tls-verify
+      
+        # Extract the commit SHA
+        VERSION=$(echo ${{ github.sha }} | cut -c1-7)
+      
+        # Patch the deployment to update the DD_VERSION environment variable
+        kubectl patch deployment frontend -p "{\"spec\":{\"template\":{\"spec\":{\"containers\":[{\"name\":\"datadog-app-frontend\",\"env\":[{\"name\":\"DD_VERSION\",\"value\":\"$VERSION\"}]}]}}}}" --insecure-skip-tls-verify
 
     - name: Mark deployment in Datadog
       run: |
