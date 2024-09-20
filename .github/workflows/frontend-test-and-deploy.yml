@@ -48,7 +48,7 @@ jobs:
         # Extract the commit SHA
         VERSION=$(echo ${{ github.sha }} | cut -c1-7)
         # Replace the placeholder VERSION in app.py with the commit SHA
-        sed -i "s/version: 'VERSION'/version: '$VERSION'/g" ./frontend/app.py
+        sed -i "s/version: 'VERSION'/version: '$VERSION'/g" ./frontend/app.js
 
     - name: Log in to Docker Hub
       uses: docker/login-action@v2
@@ -88,7 +88,7 @@ jobs:
 
     - name: Deploy frontend to Kubernetes
       run: |
-        kubectl apply -f k8s/frontend-deployment.yaml
+        kubectl apply -f ./k8s/frontend-deployment.yaml
 
     - name: Mark deployment in Datadog
       run: |

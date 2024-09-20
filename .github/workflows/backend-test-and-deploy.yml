@@ -84,7 +84,7 @@ jobs:
 
     - name: Deploy backend to Kubernetes
       run: |
-        kubectl apply -f k8s/backend-deployment.yaml
+        kubectl apply -f ./k8s/backend-deployment.yaml
 
     - name: Set commit SHA for DD_VERSION
       run: |
