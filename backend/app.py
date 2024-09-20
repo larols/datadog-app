@@ -1,5 +1,6 @@
 import os
 import logging
+import requests
 from flask import Flask, jsonify
 from kubernetes import client, config
 import ddtrace
@@ -17,6 +18,18 @@ FORMAT = ('%(asctime)s %(levelname)s [%(name)s] [%(filename)s:%(lineno)d] '
 logging.basicConfig(format=FORMAT)
 log = logging.getLogger(__name__)
 log.setLevel(logging.INFO)
+
+@app.route('/internal-metrics', methods=['GET'])
+def internal_metrics():
+    # Fetch metrics from the backend service
+    backend_url = 'http://datadog-app-backend-service:5000/metrics'  # Internal service URL
+    try:
+        response = requests.get(backend_url)
+        response.raise_for_status()  # Raise an error for bad responses
+        return jsonify(response.json())
+    except Exception as e:
+        log.error("Failed to fetch metrics from backend: %s", e)
+        return jsonify(error="Failed to fetch metrics"), 500
 
 @app.route('/metrics', methods=['GET'])
 def metrics():

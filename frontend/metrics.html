@@ -22,22 +22,9 @@
     </div>
 
     <script>
-        // Initialize Datadog RUM
-        window.DD_RUM && window.DD_RUM.init({
-            clientToken: 'pub9440fba958cca8c9313fa3b7061a338a',
-            applicationId: '04a99ea4-d121-4f76-b731-f9514a177be0',
-            site: 'datadoghq.eu',
-            service: 'datadog-app-frontend',
-            env: 'production',
-            version: '1.0.0',
-            sessionSampleRate: 100,
-            sessionReplaySampleRate: 100,
-            trackUserInteractions: true,
-        });
-
-        // Fetch metrics data from the backend
+        // Fetch metrics data from the internal endpoint
         document.addEventListener('DOMContentLoaded', function() {
-            const metricsUrl = 'http://datadog-app-backend-service:5000/metrics'; // Use the service name to fetch metrics
+            const metricsUrl = '/internal-metrics'; // Use the internal endpoint
 
             // Log the start of the metrics fetch
             window.DD_RUM.addAction('Fetching metrics', {
