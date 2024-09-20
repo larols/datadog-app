@@ -24,7 +24,7 @@
     <script>
         // Fetch metrics data from the backend
         document.addEventListener('DOMContentLoaded', function() {
-            fetch('http://backend-service:5000/metrics') // Use the service name to fetch metrics
+            fetch('http://datadog-app-backend-service:5000/metrics') // Use the service name to fetch metrics
                 .then(response => {
                     if (!response.ok) {
                         throw new Error('Network response was not ok');
