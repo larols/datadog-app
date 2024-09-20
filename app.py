@@ -71,8 +71,8 @@ html_template = '''
       const lastNames = ["Smith", "Doe", "Johnson", "Brown", "Davis", "Miller", "Wilson", "Moore", "Clark", "Lee"];
       const customerSegments = [
         { idPrefix: 'cust-a-', domain: 'example.com' },
-        { idPrefix: 'cust-b-', domain: 'larsolsson.se' },
-        { idPrefix: 'cust-c-', domain: 'datadog.com' }
+        { idPrefix: 'cust-b-', domain: 'example.io' },
+        { idPrefix: 'cust-c-', domain: 'example.net' }
       ];
 
       // Generate a random integer between min and max (inclusive)
