@@ -35,12 +35,16 @@ def index():
 @app.route('/click', methods=['POST'])
 def click():
     user_input = request.form.get('user_input', '')
-    log.info("Button clicked, processing input: %s", user_input)
+    log.info("Button clicked, processing input: %s", user_input)  # Log user input
     try:
         processing_time = random.uniform(0.1, 0.9)
         log.debug("Simulating processing time of %.2f seconds", processing_time)
         time.sleep(processing_time)
         log.info("Processing complete. User input: %s", user_input)
+
+        # Log the user input for further tracking
+        log.info("User input logged: %s", user_input)  # Additional log entry for user input
+
         return f"Button clicked! You entered: {user_input}"
     except Exception as e:
         log.error("An error occurred during processing", exc_info=True)
