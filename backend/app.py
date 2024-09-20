@@ -1,8 +1,12 @@
-from flask import jsonify
+from flask import Flask, jsonify, request
 from kubernetes import client, config
 import os
-from flask import Flask, jsonify, request
-import random, logging
+import logging
+import random
+from ddtrace import patch_all
+
+# Patch all supported libraries
+patch_all()
 
 app = Flask(__name__)
 

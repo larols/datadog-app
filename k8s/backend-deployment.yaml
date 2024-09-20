@@ -28,6 +28,10 @@ spec:
           valueFrom:
             fieldRef:
               fieldPath: status.hostIP
+        - name: NODE_NAME
+          valueFrom:
+            fieldRef:
+              fieldPath: spec.nodeName
         - name: DD_TRACE_ENABLED
           value: "true"
         - name: DD_IAST_ENABLED
