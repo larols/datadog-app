@@ -32,7 +32,7 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: frontend-service
+  name: datadog-app-frontend-service
 spec:
   selector:
     app: datadog-app
