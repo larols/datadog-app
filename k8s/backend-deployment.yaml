@@ -14,7 +14,7 @@ spec:
         app: datadog-app
         component: backend
       annotations:
-        ad.datadoghq.com/datadog-app.logs: '[{"source":"python","service":"datadog-app-backend"}]'  # Added annotations here
+        ad.datadoghq.com/datadog-app.logs: '[{"source":"python","service":"datadog-app-backend"}]'
     spec:
       containers:
       - name: datadog-app-backend  # Ensure this matches your container name
