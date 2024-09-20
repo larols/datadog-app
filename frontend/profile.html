@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Profile</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="app.js"></script>
+</head>
+<body>
+    <nav>
+        <a href="/">Home</a> | 
+        <a href="/about.html">About</a> | 
+        <a href="/metrics.html">Metrics</a> | 
+        <a href="/error.html">Simulate Server Error</a> | 
+        <a href="/profile.html">User Profile</a> 
+    </nav>
+    <div class="container">
+        <h2>User Profile</h2>
+        <p id="user-data">Loading user data...</p>
+    </div>
+
+    <script>
+        // Fetch user data from the backend when the page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            fetch('/profile', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    // Replace with actual user data or fetch from elsewhere
+                    id: "user-id",
+                    name: "User Name",
+                    email: "user@example.com"
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                // Display the user data
+                document.getElementById('user-data').innerText = `ID: ${data.id}, Name: ${data.name}, Email: ${data.email}`;
+            })
+            .catch(error => {
+                console.error('Error fetching user data:', error);
+                document.getElementById('user-data').innerText = 'Failed to load user data.';
+            });
+        });
+    </script>
+</body>
+</html>

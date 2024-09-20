@@ -17,7 +17,28 @@
     </nav>
     <div class="container">
         <h2>Metrics</h2>
-        <p>Loading metrics data...</p>
+        <p id="metrics-data">Loading metrics data...</p>
     </div>
+
+    <script>
+        // Fetch metrics data from the backend
+        document.addEventListener('DOMContentLoaded', function() {
+            fetch('http://backend-service:5000/metrics') // Use the service name to fetch metrics
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok');
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    // Display the metrics data
+                    document.getElementById('metrics-data').innerText = `CPU: ${data.cpu}%, Memory: ${data.memory} GB`;
+                })
+                .catch(error => {
+                    console.error('Error fetching metrics:', error);
+                    document.getElementById('metrics-data').innerText = 'Failed to load metrics data.';
+                });
+        });
+    </script>
 </body>
 </html>

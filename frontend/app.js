@@ -5,7 +5,7 @@
     site: 'datadoghq.eu',
     service: 'datadog-app-frontend',  // Update service name if needed
     allowedTracingUrls: [
-      "http://localhost:5000"  // Adjust as necessary
+        "http://backend-service:5000"  // Use the backend service name and port
     ],
     env: 'production',
     version: 'VERSION',  // This will be replaced dynamically
