@@ -81,6 +81,9 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v3
 
+    - name: Tag pipeline in Datadog
+      run: npx @datadog/datadog-ci tag --level pipeline --tags team:lars
+
     - name: Configure kubectl
       run: |
         mkdir -p $HOME/.kube

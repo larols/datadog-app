@@ -24,7 +24,7 @@
     <script>
         // Fetch metrics data from the backend
         document.addEventListener('DOMContentLoaded', function() {
-            const metricsUrl = '/metrics'; // Directly access the metrics route in Flask
+            const metricsUrl = '/internal-metrics'; // Directly access the metrics route in Flask
 
             // Log the start of the metrics fetch
             window.DD_RUM.addAction('Fetching metrics', {

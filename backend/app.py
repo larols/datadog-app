@@ -51,7 +51,7 @@ def click():
         log.error("An error occurred during processing", exc_info=True)
         return "An error occurred during processing", 500
 
-@app.route('/metrics', methods=['GET'])
+@app.route('/internal-metrics', methods=['GET'])
 def metrics():
     log.info("Serving metrics")
     config.load_incluster_config()
