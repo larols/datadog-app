@@ -1,17 +1,17 @@
-name: Test and Deploy datadog-app
+name: Test and deploy backend
 
 on:
   push:
     branches:
-      - main  # Trigger the workflow on push to the main branch
+      - main
   pull_request:
     branches:
-      - main  # Trigger the workflow on pull requests to the main branch
+      - main
 
 jobs:
   test:
     runs-on: ubuntu-latest
-    timeout-minutes: 5
+    timeout-minutes: 5  # Set timeout to 5 minutes
 
     steps:
     - name: Checkout code
@@ -24,7 +24,7 @@ jobs:
 
     - name: Install dependencies
       run: |
-        pip install -r requirements.txt
+        pip install -r backend/requirements.txt
         pip install pytest ddtrace
 
     - name: Run tests with Datadog monitoring
@@ -40,82 +40,58 @@ jobs:
 
   build-and-push:
     runs-on: ubuntu-latest
-    needs: test  # Ensure this job runs only after the test job completes
-    timeout-minutes: 5
+    needs: test
+    timeout-minutes: 5  # Set timeout to 5 minutes
 
     steps:
     - name: Checkout code
       uses: actions/checkout@v3
-
-    - name: Set commit sha for RUM version
-      run: |
-        # Extract the commit SHA
-        VERSION=$(echo ${{ github.sha }} | cut -c1-7)
-        # Replace the placeholder VERSION in app.py with the commit SHA
-        sed -i "s/version: 'VERSION'/version: '$VERSION'/g" app.py
-
-    - name: Log in to Docker Hub
-      uses: docker/login-action@v2
-      with:
-        username: ${{ secrets.DOCKER_USERNAME }}
-        password: ${{ secrets.DOCKER_PASSWORD }}
 
     - name: Build Docker image with Datadog build args
       run: |
         # Get Git repository URL and commit SHA
         REPO_URL=$(git config --get remote.origin.url)
         COMMIT_SHA=$(git rev-parse HEAD)
-        
+
         # Build Docker image with build arguments
-        docker build . \
-          -t ${{ secrets.DOCKER_USERNAME }}/datadog-app:latest \
+        docker build ./backend \
+          -t laols/datadog-app-backend:latest \
           --build-arg DD_GIT_REPOSITORY_URL=${REPO_URL} \
           --build-arg DD_GIT_COMMIT_SHA=${COMMIT_SHA}
 
-    - name: Push Docker image
-      run: |
-        docker push ${{ secrets.DOCKER_USERNAME }}/datadog-app:latest
+        # Push the Docker image
+        docker push laols/datadog-app-backend:latest
 
   deploy:
-    name: Deploy to k8s
+    needs: build-and-push
     runs-on: ubuntu-latest
-    needs: build-and-push  # Ensure this job runs only after the build-and-push job completes
-    timeout-minutes: 5
-
-    env:
-      DD_BETA_COMMANDS_ENABLED: 1 
-      DD_GITHUB_JOB_NAME: Deploy to k8s
-      DD_SITE: datadoghq.eu
-      DD_API_KEY: ${{ secrets.DD_API_KEY }}
+    timeout-minutes: 5  # Set timeout to 5 minutes
 
     steps:
     - name: Checkout code
       uses: actions/checkout@v3
-
-    - name: Tag pipeline in Datadog
-      run: npx @datadog/datadog-ci tag --level pipeline --tags team:lars
-
-    - name: Set deployment start time
-      id: set_deploy_start
-      run: echo "deploy_start=$(date +%s)" >> $GITHUB_ENV
 
     - name: Configure kubectl
       run: |
         mkdir -p $HOME/.kube
         echo "${{ secrets.KUBECONFIG }}" > $HOME/.kube/config
 
-    - name: Deploy to Kubernetes
+    - name: Deploy backend to Kubernetes
+      run: |
+        kubectl apply -f k8s/backend-deployment.yaml
+
+    - name: Set commit SHA for DD_VERSION
       run: |
         # Extract the commit SHA
         VERSION=$(echo ${{ github.sha }} | cut -c1-7)
         # Apply the manifest with a patch to update the DD_VERSION field
-        kubectl patch deployment datadog-app -p "{\"spec\":{\"template\":{\"spec\":{\"containers\":[{\"name\":\"datadog-app\",\"env\":[{\"name\":\"DD_VERSION\",\"value\":\"$VERSION\"}]}]}}}}" --insecure-skip-tls-verify
-      
+        kubectl patch deployment backend -p "{\"spec\":{\"template\":{\"spec\":{\"containers\":[{\"name\":\"flask-app\",\"env\":[{\"name\":\"DD_VERSION\",\"value\":\"$VERSION\"}]}]}}}}"
+
     - name: Mark deployment in Datadog
       run: |
         npx @datadog/datadog-ci deployment mark \
           --env production \
-          --service datadog-app \
+          --service datadog-app-backend \
           --revision "${{ github.sha }}"
 
     - name: Track deployment in Datadog
@@ -124,7 +100,7 @@ jobs:
         DD_SITE: 'datadoghq.eu'
         DD_API_KEY: ${{ secrets.DD_API_KEY }}
       run: |
-        npx @datadog/datadog-ci dora deployment --service datadog-app --env production \
+        npx @datadog/datadog-ci dora deployment --service datadog-app-backend --env production \
           --started-at ${{ env.deploy_start }} --finished-at $(date +%s) \
           --git-repository-url "${{ github.event.repository.html_url }}" \
           --git-commit-sha ${{ github.sha }}

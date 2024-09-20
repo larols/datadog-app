@@ -1,22 +1,24 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: datadog-app
+  name: backend
 spec:
   replicas: 1
   selector:
     matchLabels:
       app: datadog-app
+      component: backend
   template:
     metadata:
       labels:
         app: datadog-app
+        component: backend
       annotations:
-        ad.datadoghq.com/datadog-app.logs: '[{"source":"python","service":"datadog-app"}]'
+        ad.datadoghq.com/datadog-app.logs: '[{"source":"python","service":"datadog-app-backend"}]'
     spec:
       containers:
-      - name: datadog-app
-        image: laols/datadog-app:latest
+      - name: flask-app
+        image: laols/datadog-app-backend:latest
         ports:
         - containerPort: 5000
         env:
@@ -39,6 +41,20 @@ spec:
         - name: DD_ENV
           value: production
         - name: DD_SERVICE
-          value: datadog-app
+          value: datadog-app-backend
         - name: DD_VERSION
-          value: ""
+          value: ""  # Dynamically set in GitHub Actions
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: backend-service
+spec:
+  selector:
+    app: datadog-app
+    component: backend
+  ports:
+    - protocol: TCP
+      port: 5000
+      targetPort: 5000
+  type: ClusterIP

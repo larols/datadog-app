@@ -1,0 +1,44 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: frontend
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: datadog-app
+      component: frontend
+  template:
+    metadata:
+      labels:
+        app: datadog-app
+        component: frontend
+      annotations:
+        ad.datadoghq.com/datadog-app.logs: '[{"source":"python","service":"datadog-app-frontend"}]'
+    spec:
+      containers:
+      - name: nginx
+        image: laols/datadog-app-frontend:latest
+        ports:
+        - containerPort: 80
+        env:
+        - name: DD_ENV
+          value: production
+        - name: DD_SERVICE
+          value: datadog-app-frontend
+        - name: DD_VERSION
+          value: ""  # Dynamically set in GitHub Actions
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: frontend-service
+spec:
+  selector:
+    app: datadog-app
+    component: frontend
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 80
+  type: LoadBalancer
