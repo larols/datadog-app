@@ -24,7 +24,10 @@
     <script>
         // Fetch metrics data from the backend
         document.addEventListener('DOMContentLoaded', function() {
-            fetch('http://datadog-app-backend-service:5000/metrics') // Use the service name to fetch metrics
+            const metricsUrl = 'http://datadog-app-backend-service:5000/metrics'; // Use the service name to fetch metrics
+            console.log(`Fetching metrics from: ${metricsUrl}`); // Log the URL being fetched
+            
+            fetch(metricsUrl)
                 .then(response => {
                     if (!response.ok) {
                         throw new Error('Network response was not ok');
@@ -32,6 +35,7 @@
                     return response.json();
                 })
                 .then(data => {
+                    console.log('Fetched metrics data:', data); // Log the fetched data
                     // Convert memory from KiB to GiB
                     const memoryInGiB = (data.memory / 1024 / 1024).toFixed(2); // Convert to GiB
                     // Display the metrics data
