@@ -11,9 +11,14 @@ patch_all()
 app = Flask(__name__)
 CORS(app)
 
-# Set up logging
-logging.basicConfig(level=logging.INFO)
+# Define logging format including Datadog trace information
+FORMAT = ('%(asctime)s %(levelname)s [%(name)s] [%(filename)s:%(lineno)d] '
+          '[dd.service=%(dd.service)s dd.env=%(dd.env)s dd.version=%(dd.version)s dd.trace_id=%(dd.trace_id)s dd.span_id=%(dd.span_id)s] '
+          '- %(message)s')
+
+logging.basicConfig(format=FORMAT)
 log = logging.getLogger(__name__)
+log.setLevel(logging.INFO)
 
 @app.route('/metrics', methods=['GET'])
 def metrics():
@@ -33,6 +38,10 @@ def metrics():
         node_metrics = v1.read_node(name=node_name)
         cpu_usage = node_metrics.status.allocatable['cpu']  # Total allocatable CPU
         memory_usage = node_metrics.status.allocatable['memory']  # Total allocatable memory
+
+        # Log CPU and memory metrics
+        log.info("CPU Usage: %s", cpu_usage)
+        log.info("Memory Usage: %s", memory_usage)
     except Exception as e:
         log.error("Failed to fetch metrics: %s", e)
         return jsonify(error="Failed to fetch metrics"), 500
