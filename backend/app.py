@@ -1,3 +1,6 @@
+from flask import jsonify
+from kubernetes import client, config
+import os
 from flask import Flask, jsonify, request
 import random, logging
 
@@ -10,9 +13,27 @@ log = logging.getLogger(__name__)
 @app.route('/metrics', methods=['GET'])
 def metrics():
     log.info("Serving metrics")
-    cpu = round(random.uniform(0, 100), 1)
-    memory = round(random.uniform(0, 16), 1)
-    return jsonify(cpu=cpu, memory=memory)
+
+    # Load Kubernetes config
+    config.load_incluster_config()  # Use this if running inside a cluster
+
+    # Create an API client
+    v1 = client.CoreV1Api()
+
+    # Get the node name from the environment
+    node_name = os.getenv('NODE_NAME')  # Make sure this is set in your deployment manifest
+
+    # Get node metrics
+    try:
+        node_metrics = v1.read_node(name=node_name)
+        cpu_usage = node_metrics.status.allocatable['cpu']  # Total allocatable CPU
+        memory_usage = node_metrics.status.allocatable['memory']  # Total allocatable memory
+    except Exception as e:
+        log.error("Failed to fetch metrics: %s", e)
+        return jsonify(error="Failed to fetch metrics"), 500
+
+    # Return metrics
+    return jsonify(cpu=cpu_usage, memory=memory_usage)
 
 @app.route('/error', methods=['GET'])
 def error():
