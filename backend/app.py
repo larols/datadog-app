@@ -4,6 +4,7 @@ import random
 import time
 from flask import Flask, jsonify, request, render_template_string
 from kubernetes import client, config
+import requests
 import ddtrace
 
 app = Flask(__name__)
@@ -49,17 +50,6 @@ def click():
     except Exception as e:
         log.error("An error occurred during processing", exc_info=True)
         return "An error occurred during processing", 500
-
-@app.route('/internal-metrics', methods=['GET'])
-def internal_metrics():
-    backend_url = 'http://datadog-app-backend-service:5000/metrics'  # Internal service URL
-    try:
-        response = requests.get(backend_url)
-        response.raise_for_status()  # Raise an error for bad responses
-        return jsonify(response.json())
-    except Exception as e:
-        log.error("Failed to fetch metrics from backend: %s", e)
-        return jsonify(error="Failed to fetch metrics"), 500
 
 @app.route('/metrics', methods=['GET'])
 def metrics():

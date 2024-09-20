@@ -22,9 +22,14 @@
     </div>
 
     <script>
-        // Fetch metrics data from the internal endpoint
+        // Fetch metrics data from the backend
         document.addEventListener('DOMContentLoaded', function() {
-            const metricsUrl = '/internal-metrics'; // Internal endpoint in your Flask app
+            const metricsUrl = '/metrics'; // Directly access the metrics route in Flask
+
+            // Log the start of the metrics fetch
+            window.DD_RUM.addAction('Fetching metrics', {
+                url: metricsUrl,
+            });
 
             fetch(metricsUrl)
                 .then(response => {
@@ -36,9 +41,16 @@
                 .then(data => {
                     const memoryInGiB = (data.memory / 1024 / 1024).toFixed(2); // Convert memory to GiB
                     document.getElementById('metrics-data').innerText = `CPU: ${data.cpu}%, Memory: ${memoryInGiB} GiB`;
+
+                    // Log successful metrics fetch
+                    window.DD_RUM.addAction('Metrics fetched successfully', {
+                        cpu: data.cpu,
+                        memory: memoryInGiB,
+                    });
                 })
                 .catch(error => {
-                    console.error('Error fetching metrics:', error);
+                    // Log the error
+                    window.DD_RUM.addError(error.message);
                     document.getElementById('metrics-data').innerText = 'Failed to load metrics data.';
                 });
         });
