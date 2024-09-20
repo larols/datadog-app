@@ -3,3 +3,4 @@ kubernetes
 google-auth
 cryptography
 ddtrace
+flask-cors
