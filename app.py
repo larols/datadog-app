@@ -138,6 +138,7 @@ html_template = '''
           trackUserInteractions: true,
           trackResources: true,
           trackLongTasks: true,
+          trackErrors: true,
           defaultPrivacyLevel: 'allow',
         });
 
