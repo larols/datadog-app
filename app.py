@@ -230,8 +230,8 @@ def about():
 @app.route('/metrics')
 def metrics():
     log.info("Rendering metrics page")
-    cpu = random.uniform(0, 100), 1)
-    memory = random.uniform(0, 16), 1)
+    cpu = round(random.uniform(0, 100), 1)
+    memory = round(random.uniform(0, 16), 1)
     return render_template_string(html_template.replace('{% block content %}{% endblock %}', '''
     <h2>Metrics</h2>
     <p>CPU Utilization: {{ cpu }}%</p>
