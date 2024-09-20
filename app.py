@@ -21,29 +21,99 @@ logging.basicConfig(format=FORMAT)
 log = logging.getLogger(__name__)
 log.setLevel(logging.INFO)
 
+# HTML template with modern styles
 html_template = '''
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>App</title>
+    <title>{{ title }}</title>
     <style>
+        /* Add a modern font */
+        @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;700&display=swap');
+
+        /* Global styles */
         body {
+            font-family: 'Roboto', sans-serif;
+            background-color: #f4f4f9;
+            color: #333;
+            margin: 0;
             display: flex;
             justify-content: center;
             align-items: center;
             height: 100vh;
-            margin: 0;
+            text-align: center;
             flex-direction: column;
         }
-        button {
-            font-size: 20px;
-            padding: 10px 20px;
+
+        /* Navigation bar */
+        nav {
+            margin-bottom: 20px;
         }
+
         nav a {
-            margin: 5px;
+            text-decoration: none;
+            color: #3498db;
+            font-size: 18px;
+            margin: 0 10px;
+            font-weight: 500;
+            transition: color 0.3s ease;
         }
+
+        nav a:hover {
+            color: #2c3e50;
+        }
+
+        /* Page container */
+        .container {
+            background-color: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            max-width: 600px;
+            width: 100%;
+        }
+
+        /* Buttons */
+        button {
+            font-size: 18px;
+            padding: 10px 20px;
+            background-color: #3498db;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        button:hover {
+            background-color: #2980b9;
+        }
+
+        /* Input fields */
+        input[type="text"] {
+            padding: 10px;
+            border: 2px solid #ddd;
+            border-radius: 5px;
+            font-size: 16px;
+            margin-right: 10px;
+            width: 60%;
+        }
+
+        input[type="text"]:focus {
+            border-color: #3498db;
+            outline: none;
+        }
+
+        hr {
+            width: 80%;
+            margin: 20px auto;
+            border: none;
+            height: 1px;
+            background-color: #ddd;
+        }
+
     </style>
 
     <!-- Include Datadog RUM (Real User Monitoring) -->
@@ -129,13 +199,14 @@ html_template = '''
         <a href="/error">Simulate Error</a> | 
         <a href="/profile">User Profile</a>
     </nav>
-    <hr>
-    <h2>{{ title }}</h2>
-    {% block content %}{% endblock %}
+    <div class="container">
+        {% block content %}{% endblock %}
+    </div>
 </body>
 </html>
 '''
 
+# Define Flask routes
 @app.route('/')
 def index():
     log.info("Rendering index page")
@@ -184,23 +255,4 @@ def profile():
         <p><strong>Email:</strong> {{ user.email }}</p>
         '''), user=user_data, title="User Profile")
     return render_template_string(html_template.replace('{% block content %}{% endblock %}', '''
-    <h2>User Profile</h2>
-    <p>Loading user profile...</p>
-    '''), title="User Profile")
-
-@app.route('/click', methods=['POST'])
-def click():
-    user_input = request.form.get('user_input', '')
-    log.info("Button clicked, processing input: %s", user_input)
-    try:
-        processing_time = random.uniform(0.1, 0.9)
-        log.debug("Simulating processing time of %.2f seconds", processing_time)
-        time.sleep(processing_time)
-        log.info("Processing complete. User input: %s", user_input)
-        return f"Button clicked! You entered: {user_input}"
-    except Exception as e:
-        log.error("An error occurred during processing", exc_info=True)
-        return "An error occurred during processing", 500
-
-if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=5000)
+    <h2>User Profile</
