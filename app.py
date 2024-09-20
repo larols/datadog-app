@@ -196,7 +196,8 @@ html_template = '''
         <a href="/">Home</a> | 
         <a href="/about">About</a> | 
         <a href="/metrics">Metrics</a> | 
-        <a href="/error">Simulate Error</a> | 
+        <a href="/error">Simulate Server Error</a> | 
+        <a href="/frontend-error">Simulate Front-End Error</a> |
         <a href="/profile">User Profile</a>
     </nav>
     <div class="container">
@@ -240,19 +241,35 @@ def metrics():
 
 @app.route('/error')
 def error():
-    log.info("Simulating a template rendering error")
+    log.info("Simulating an error")
+    raise Exception("This is a simulated error for testing purposes")
 
-    # Simulate an invalid template rendering by returning an incomplete template
-    try:
-        # This will cause a template syntax error
-        return render_template_string('''
-        <h2>Error Page</h2>
-        <p>This page has an intentional template error: {{ error }}</p>
-        <h2>Unclosed tag
-        ''')
-    except Exception as e:
-        log.error("Error occurred while rendering the template: %s", str(e), exc_info=True)
-        return "An error occurred while rendering the template", 500
+@app.route('/frontend-error')
+def frontend_error():
+    log.info("Simulating a front-end JavaScript error")
+
+    # Return a simple HTML page that triggers a client-side error
+    error_page = '''
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Simulated JavaScript Error</title>
+    </head>
+    <body>
+        <h2>Simulated Front-End Error</h2>
+        <p>This page will trigger a client-side JavaScript error for testing purposes.</p>
+
+        <script>
+            // This will trigger a client-side JavaScript error that Datadog RUM should capture
+            throw new Error("Simulated front-end JavaScript error");
+        </script>
+    </body>
+    </html>
+    '''
+
+    return error_page, 200
 
 @app.route('/profile', methods=['GET', 'POST'])
 def profile():
