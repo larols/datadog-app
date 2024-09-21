@@ -19,6 +19,9 @@
             env: 'prod',
             version: 'VERSION',
             sessionSampleRate: 100,
+            allowedTracingUrls: [
+                (url) => url.startsWith("http://192.168.50.21")
+            ],
             sessionReplaySampleRate: 100,
             trackUserInteractions: true,
             trackResources: true,

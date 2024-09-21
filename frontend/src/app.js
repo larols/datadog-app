@@ -15,7 +15,13 @@ function App() {
             .then(data => {
                 setViewsData(data);
                 if (window.DD_LOGS) {
-                    window.DD_LOGS.logger.info('Fetched data for views', { id: data.id, text: data.text });
+                    try {
+                        window.DD_LOGS.logger.info('Fetched data for views', { id: data.id, text: data.text });
+                    } catch (logError) {
+                        console.error('Logging error:', logError);
+                    }
+                } else {
+                    console.warn('Datadog Logs SDK not initialized');
                 }
             })
             .catch(error => console.error('Error fetching data:', error));
