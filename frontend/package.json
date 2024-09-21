@@ -5,8 +5,7 @@
     "dependencies": {
     "react": "*",
     "react-dom": "*",
-    "react-scripts": "*",
-    "axios": "*"
+    "react-scripts": "*"
     },
     "scripts": {
       "start": "react-scripts start",

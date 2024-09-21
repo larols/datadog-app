@@ -17,11 +17,11 @@ RUN ls -la /app
 # Install dependencies
 RUN npm install
 
-# Print npm logs regardless of the previous command's success
-RUN cat /root/.npm/_logs/2024*.log || true
-
 # Build the React app
 RUN npm run build
+
+# Print npm logs regardless of the previous command's success
+RUN cat /root/.npm/_logs/2024*.log || true
 
 # Stage 2: Serve the app with Nginx
 FROM nginx:alpine
