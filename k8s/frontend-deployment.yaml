@@ -41,6 +41,6 @@ spec:
             - name: DD_ENV
               value: production
             - name: DD_SERVICE
-              value: datadog-app
+              value: datadog-app-frontend
             - name: DD_VERSION
               value: ""  # Placeholder to be patched later
