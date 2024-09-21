@@ -16,5 +16,5 @@ COPY views/app.py ./views/
 # Expose the port the app runs on
 EXPOSE 5000
 
-# Run the application
-CMD ["python", "views/app.py"]
+# Start the application with ddtrace
+CMD ["ddtrace-run", "python", "views/app.py"]

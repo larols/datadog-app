@@ -4,6 +4,8 @@ on:
   push:
     branches:
       - main  # Adjust to your default branch
+    paths:
+      - 'backend/views/**'  # Only trigger this workflow for changes in the backend/views directory
 
 jobs:
   build-and-push:
@@ -32,7 +34,7 @@ jobs:
         REPO_URL=$(git config --get remote.origin.url)
 
         # Build Docker image with build arguments
-        docker build -f backend/Dockerfile ./backend \
+        docker build -f backend/views/Dockerfile ./backend/views \
           -t ${{ secrets.DOCKER_USERNAME }}/datadog-app-views:latest \
           --build-arg DD_GIT_REPOSITORY_URL=${REPO_URL} \
           --build-arg DD_GIT_COMMIT_SHA=${{ github.sha }} \

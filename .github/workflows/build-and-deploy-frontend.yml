@@ -4,6 +4,8 @@ on:
   push:
     branches:
       - main  # Adjust to your default branch
+    paths:
+      - 'frontend/**'  # Only trigger this workflow for changes in the frontend directory  
 
 jobs:
   build-and-push:
@@ -19,6 +21,11 @@ jobs:
         # Extract the commit SHA
         VERSION=$(echo ${{ github.sha }} | cut -c1-7)
         echo "VERSION=${VERSION}" >> $GITHUB_ENV
+
+    - name: Update version in index.html
+      run: |
+        # Replace the placeholder VERSION in index.html with the commit SHA
+        sed -i "s/version: 'VERSION'/version: '${{ env.VERSION }}'/g" frontend/public/index.html
 
     - name: Log in to Docker Hub
       uses: docker/login-action@v2
