@@ -12,11 +12,14 @@ COPY package-lock.json ./
 COPY public ./public
 COPY src ./src
 
-# Clear npm cache and install dependencies
-RUN ls -la /app  # List files to check if the correct files are present
-# Clear npm cache and install dependencies
-RUN npm cache clean --force || true && \
-    npm install || (cat /root/.npm/_logs/2024*.log && exit 1)
+# List files to check if the correct files are present
+RUN ls -la /app
+
+# Install dependencies
+RUN npm install
+
+# Print npm logs regardless of the previous command's success
+RUN cat /root/.npm/_logs/2024*.log || true
 
 # Build the React app
 RUN npm run build
