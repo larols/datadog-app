@@ -45,7 +45,7 @@ jobs:
   deploy:
     name: Deploy to k8s
     runs-on: ubuntu-latest
-    needs: build-and-push  # Ensure this job runs only after the build-and-push job completes
+    needs: build-and-push
     timeout-minutes: 5
 
     env:
@@ -72,8 +72,8 @@ jobs:
 
     - name: Deploy Frontend to Kubernetes
       run: |
-        kubectl apply -f k8s/frontend-deployment.yaml
-        kubectl apply -f k8s/frontend-service.yaml
+        kubectl apply -f k8s/frontend-deployment.yaml --insecure-skip-tls-verify
+        kubectl apply -f k8s/frontend-service.yaml --insecure-skip-tls-verify
 
     - name: Deploy with Version Patch
       run: |
