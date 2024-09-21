@@ -1,17 +1,16 @@
 from flask import Flask, jsonify
-from ddtrace import patch_all
+from ddtrace import patch_all, patch
 import logging
 
 # Patch all supported libraries for Datadog tracing
 patch_all()
+patch(logging=True)  # Enable tracing for logging
 
 # Initialize the Flask app
 app = Flask(__name__)
 
-# Define logging format including Datadog trace information
-FORMAT = ('%(asctime)s %(levelname)s [%(name)s] [%(filename)s:%(lineno)d] '
-          '[dd.service=%(dd.service)s dd.env=%(dd.env)s dd.version=%(dd.version)s '
-          'dd.trace_id=%(dd.trace_id)s dd.span_id=%(dd.span_id)s] - %(message)s')
+# Define logging format
+FORMAT = ('%(asctime)s %(levelname)s [%(name)s] [%(filename)s:%(lineno)d] - %(message)s')
 
 # Configure logging
 logging.basicConfig(format=FORMAT)
@@ -26,7 +25,6 @@ def get_views_data():
     global visit_count
     visit_count += 1  # Increment the visit counter
 
-    # Log the visit count
     log.info(f"Visitor count: {visit_count}")
 
     data = {

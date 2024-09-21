@@ -1,0 +1,26 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: datadog-app-nginx
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: datadog-app-nginx
+  template:
+    metadata:
+      labels:
+        app: datadog-app-nginx
+    spec:
+      containers:
+      - name: nginx
+        image: nginx:latest  # Use the official Nginx image
+        ports:
+        - containerPort: 80
+        volumeMounts:
+        - name: nginx-config
+          mountPath: /etc/nginx/conf.d  # Mount the configuration directory
+      volumes:
+      - name: nginx-config
+        configMap:
+          name: nginx-config  # Reference to the ConfigMap

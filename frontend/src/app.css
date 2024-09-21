@@ -1,9 +1,14 @@
 .App {
     display: flex;
+    flex-direction: column; /* Stack children vertically */
     justify-content: center;
-    align-items: center;
+    align-items: center; /* Center horizontally */
     height: 100vh; /* Full viewport height */
     background-color: #f0f0f0; /* Light gray background */
+}
+
+h1 {
+    margin-bottom: 20px; /* Space between title and tiles */
 }
 
 .tiles-container {

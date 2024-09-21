@@ -5,7 +5,7 @@ function App() {
     const [viewsData, setViewsData] = useState(null);
 
     useEffect(() => {
-        fetch('http://datadog-app-views:5000/api/views')
+        fetch('/api/views')
             .then(response => response.json())
             .then(data => setViewsData(data))
             .catch(error => console.error('Error fetching data:', error));
