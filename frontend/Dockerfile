@@ -4,17 +4,17 @@ FROM node:14 as build
 # Set the working directory
 WORKDIR /app
 
-# Copy files
+# Copy package.json and package-lock.json
 COPY package.json ./
 COPY package-lock.json ./
-COPY public ./public
-COPY src ./src
 
-# Install dependencies
-RUN npm install
+# Clear npm cache and install dependencies
+RUN npm cache clean --force && \
+    npm install
 
 # Copy the rest of the application code
-COPY . .
+COPY public ./public
+COPY src ./src
 
 # Build the React app
 RUN npm run build
