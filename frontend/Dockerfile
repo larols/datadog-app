@@ -9,8 +9,9 @@ COPY package.json ./
 COPY package-lock.json ./
 
 # Clear npm cache and install dependencies
-RUN npm cache clean --force && \
-    npm install
+RUN npm cache clean --force
+RUN ls -la /app  # List files to check if the correct files are present
+RUN npm install
 
 # Copy the rest of the application code
 COPY public ./public
