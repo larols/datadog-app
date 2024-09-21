@@ -33,7 +33,7 @@ jobs:
         COMMIT_SHA=$(git rev-parse HEAD)
 
         # Build Docker image with build arguments
-        docker build -f frontend/Dockerfile . \
+        docker build -f frontend/Dockerfile frontend/ \
           -t ${{ secrets.DOCKER_USERNAME }}/datadog-app-frontend:latest \
           --build-arg DD_GIT_REPOSITORY_URL=${REPO_URL} \
           --build-arg DD_GIT_COMMIT_SHA=${COMMIT_SHA}
