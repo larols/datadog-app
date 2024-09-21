@@ -3,9 +3,10 @@
     "version": "1.0.0",
     "private": true,
     "dependencies": {
-      "react": "^18.0.0",
-      "react-dom": "^18.0.0",
-      "react-scripts": "5.0.0"
+    "react": "*",
+    "react-dom": "*",
+    "react-scripts": "*",
+    "axios": "*"
     },
     "scripts": {
       "start": "react-scripts start",
