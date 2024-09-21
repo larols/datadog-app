@@ -26,6 +26,18 @@
             defaultPrivacyLevel: 'allow',
         });
     </script>
+
+    <!-- Datadog Logs Script -->
+    <script type="text/javascript" src="https://www.datadoghq-browser-agent.com/eu1/v5/datadog-logs.js"></script>
+    <script>
+        window.DD_LOGS &&
+            window.DD_LOGS.init({
+                clientToken: 'pub9440fba958cca8c9313fa3b7061a338a',  // Replace with your client token
+                site: 'datadoghq.eu',
+                forwardErrorsToLogs: true,
+                sessionSampleRate: 100,
+            });
+    </script>
 </head>
 <body>
     <div id="root"></div> <!-- This is where your React app will be rendered -->

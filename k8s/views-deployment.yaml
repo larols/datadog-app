@@ -5,7 +5,7 @@ metadata:
   labels:
     app: datadog-app-views
   annotations:
-    ad.datadoghq.com/datadog-app.logs: '[{"source":"python","service":"datadog-app-views"}]'  # Update source to "python"
+    ad.datadoghq.com/datadog-app-views.logs: '[{"source":"python","service":"datadog-app-views"}]'  # Update source to "python"
 spec:
   replicas: 1
   selector:

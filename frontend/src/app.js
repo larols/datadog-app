@@ -12,7 +12,12 @@ function App() {
                 }
                 return response.json();
             })
-            .then(data => setViewsData(data))
+            .then(data => {
+                setViewsData(data);
+                if (window.DD_LOGS) {
+                    window.DD_LOGS.logger.info('Fetched data for views', { id: data.id, text: data.text });
+                }
+            })
             .catch(error => console.error('Error fetching data:', error));
     }, []);
 
