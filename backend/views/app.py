@@ -29,7 +29,7 @@ def get_views_data():
 
     data = {
         "id": 1,
-        "text": f"Views: You are visitor number {visit_count}!"
+        "text": f" You are visitor number {visit_count}!"
     }
     return jsonify(data)
 
