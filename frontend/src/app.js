@@ -1,5 +1,5 @@
 import React from 'react';
-import './App.css'; // Importing the CSS for styling
+import './app.css'; // Importing the CSS for styling
 
 function App() {
     const tilesData = [
