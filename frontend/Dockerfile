@@ -18,7 +18,7 @@ RUN ls -la /app
 RUN npm install
 
 # Build the React app
-RUN npm run build
+RUN npm run build || (cat /root/.npm/_logs/2024-*.log && exit 1)
 
 # Print npm logs regardless of the previous command's success
 RUN cat /root/.npm/_logs/2024*.log || true
