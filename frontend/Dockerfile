@@ -4,9 +4,11 @@ FROM node:14 as build
 # Set the working directory
 WORKDIR /app
 
-# Copy package.json and package-lock.json
+# Copy files
 COPY package.json ./
 COPY package-lock.json ./
+COPY public ./public
+COPY src ./src
 
 # Install dependencies
 RUN npm install
