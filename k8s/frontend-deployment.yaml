@@ -1,0 +1,22 @@
+# /k8s/frontend-deployment.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: datadog-app-frontend
+  labels:
+    app: datadog-app-frontend
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: datadog-app-frontend
+  template:
+    metadata:
+      labels:
+        app: datadog-app-frontend
+    spec:
+      containers:
+        - name: frontend
+          image: laols/datadog-app-frontend:latest
+          ports:
+            - containerPort: 80
