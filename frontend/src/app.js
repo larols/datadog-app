@@ -1,9 +1,18 @@
-import React from 'react';
-import './app.css'; // Importing the CSS for styling
+import React, { useEffect, useState } from 'react';
+import './app.css';
 
 function App() {
+    const [viewsData, setViewsData] = useState(null);
+
+    useEffect(() => {
+        fetch('http://datadog-app-views:5000/api/views')
+            .then(response => response.json())
+            .then(data => setViewsData(data))
+            .catch(error => console.error('Error fetching data:', error));
+    }, []);
+
     const tilesData = [
-        { id: 1, text: 'Tile 1: Dummy Data' },
+        { id: 1, text: viewsData ? viewsData.text : 'Loading...' },
         { id: 2, text: 'Tile 2: Dummy Data' },
         { id: 3, text: 'Tile 3: Dummy Data' },
         { id: 4, text: 'Tile 4: Dummy Data' },
@@ -11,6 +20,7 @@ function App() {
 
     return (
         <div className="App">
+            <h1>datadog-app</h1>
             <div className="tiles-container">
                 {tilesData.map(tile => (
                     <div key={tile.id} className="tile">
