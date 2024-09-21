@@ -8,14 +8,15 @@ WORKDIR /app
 COPY package.json ./
 COPY package-lock.json ./
 
-# Clear npm cache and install dependencies
-RUN npm cache clean --force
-RUN ls -la /app  # List files to check if the correct files are present
-RUN npm install
-
 # Copy the rest of the application code
 COPY public ./public
 COPY src ./src
+
+# Clear npm cache and install dependencies
+RUN ls -la /app  # List files to check if the correct files are present
+# Clear npm cache and install dependencies
+RUN npm cache clean --force || true && \
+    npm install || (cat /root/.npm/_logs/2024*.log && exit 1)
 
 # Build the React app
 RUN npm run build
