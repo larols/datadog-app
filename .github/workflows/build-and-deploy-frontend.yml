@@ -81,8 +81,4 @@ jobs:
       run: |
         kubectl apply -f k8s/frontend-deployment.yaml --insecure-skip-tls-verify
         kubectl apply -f k8s/frontend-service.yaml --insecure-skip-tls-verify
-
-    - name: Deploy with Version Patch
-      run: |
-        # Apply the manifest with a patch to update the DD_VERSION field
-        kubectl patch deployment datadog-app-frontend -p "{\"spec\":{\"template\":{\"spec\":{\"containers\":[{\"name\":\"datadog-app-frontend\",\"env\":[{\"name\":\"DD_VERSION\",\"value\":\"${{ env.VERSION }}\"}]}]}}}}" --insecure-skip-tls-verify
+        kubectl set env deployment/datadog-app-frontend DD_VERSION=${{ env.VERSION }} --insecure-skip-tls-verify

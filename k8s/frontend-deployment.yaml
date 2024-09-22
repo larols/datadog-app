@@ -4,8 +4,6 @@ metadata:
   name: datadog-app-frontend
   labels:
     app: datadog-app-frontend
-  annotations:
-    ad.datadoghq.com/datadog-app-frontend.logs: '[{"source":"nginx","service":"datadog-app-frontend"}]'
 spec:
   replicas: 1
   selector:
@@ -15,6 +13,8 @@ spec:
     metadata:
       labels:
         app: datadog-app-frontend
+      annotations:
+        ad.datadoghq.com/datadog-app-views.logs: '[{"source":"python","service":"datadog-app-views"}]'
     spec:
       containers:
         - name: datadog-app-frontend
@@ -43,4 +43,4 @@ spec:
             - name: DD_SERVICE
               value: datadog-app-frontend
             - name: DD_VERSION
-              value: ""  # Placeholder to be patched later
+              value: "default-value"  # Placeholder to be patched later

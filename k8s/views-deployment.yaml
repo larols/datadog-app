@@ -4,8 +4,6 @@ metadata:
   name: datadog-app-views
   labels:
     app: datadog-app-views
-  annotations:
-    ad.datadoghq.com/datadog-app-views.logs: '[{"source":"python","service":"datadog-app-views"}]'  # Update source to "python"
 spec:
   replicas: 1
   selector:
@@ -15,6 +13,8 @@ spec:
     metadata:
       labels:
         app: datadog-app-views
+      annotations:
+        ad.datadoghq.com/datadog-app-views.logs: '[{"source":"python","service":"datadog-app-views"}]'
     spec:
       containers:
         - name: datadog-app-views
@@ -43,4 +43,4 @@ spec:
             - name: DD_SERVICE
               value: datadog-app-views
             - name: DD_VERSION
-              value: ""  # Placeholder to be patched later
+              value: "default-value"  # Placeholder to be patched later

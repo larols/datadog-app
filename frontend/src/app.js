@@ -6,23 +6,10 @@ function App() {
 
     useEffect(() => {
         fetch('/api/views')
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error('Network response was not ok');
-                }
-                return response.json();
-            })
+            .then(response => response.json())
             .then(data => {
                 setViewsData(data);
-                if (window.DD_LOGS) {
-                    try {
-                        window.DD_LOGS.logger.info('Fetched data for views', { id: data.id, text: data.text });
-                    } catch (logError) {
-                        console.error('Logging error:', logError);
-                    }
-                } else {
-                    console.warn('Datadog Logs SDK not initialized');
-                }
+                window.DD_LOGS?.logger.info('Fetched data for views', { id: data.id, text: data.text });
             })
             .catch(error => console.error('Error fetching data:', error));
     }, []);
