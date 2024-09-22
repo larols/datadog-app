@@ -5,9 +5,9 @@ metadata:
   labels:
     app: datadog-app-views
 spec:
-  type: ClusterIP  # Default type, accessible only within the cluster
+  type: ClusterIP
   ports:
-    - port: 80  # Port for the service
-      targetPort: 5000  # Port on the container
+    - port: 80 
+      targetPort: 5000
   selector:
     app: datadog-app-views
