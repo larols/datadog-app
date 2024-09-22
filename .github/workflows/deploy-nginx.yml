@@ -23,6 +23,13 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v3
 
+    - name: Set commit sha for version
+      id: set_commit_sha
+      run: |
+        # Extract the commit SHA
+        VERSION=$(echo ${{ github.sha }} | cut -c1-7)
+        echo "VERSION=${VERSION}" >> $GITHUB_ENV
+
     - name: Tag pipeline in Datadog
       run: npx @datadog/datadog-ci tag --level pipeline --tags team:lars
 
@@ -37,6 +44,19 @@ jobs:
 
     - name: Deploy Nginx to Kubernetes
       run: |
-        kubectl apply -f k8s/nginx-config.yaml --insecure-skip-tls-verify  # Apply the ConfigMap
-        kubectl apply -f k8s/nginx-deployment.yaml --insecure-skip-tls-verify  # Apply the Deployment
-        kubectl apply -f k8s/nginx-service.yaml --insecure-skip-tls-verify  # Apply the Service
+        kubectl apply -f k8s/nginx-config.yaml --insecure-skip-tls-verify
+        kubectl apply -f k8s/nginx-deployment.yaml --insecure-skip-tls-verify
+        kubectl apply -f k8s/nginx-service.yaml --insecure-skip-tls-verify
+        kubectl set env deployment/datadog-app-nginx DD_VERSION=${{ env.VERSION }} --insecure-skip-tls-verify
+
+    - name: Mark deployment in Datadog
+      run: |
+        npx @datadog/datadog-ci deployment mark --env production --service datadog-app-nginx --revision "${{ github.sha }}"
+          
+    - name: Track deployment in Datadog
+      env:
+        DD_BETA_COMMANDS_ENABLED: 1
+        DD_SITE: 'datadoghq.eu'
+        DD_API_KEY: ${{ secrets.DD_API_KEY }}
+      run: |
+        npx @datadog/datadog-ci dora deployment --service datadog-app-nginx --env production --started-at ${{ env.deploy_start }} --finished-at $(date +%s) --git-repository-url "${{ github.event.repository.html_url }}" --git-commit-sha ${{ github.sha }}

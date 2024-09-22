@@ -77,3 +77,15 @@ jobs:
         kubectl apply -f k8s/views-deployment.yaml --insecure-skip-tls-verify
         kubectl apply -f k8s/views-service.yaml --insecure-skip-tls-verify
         kubectl set env deployment/datadog-app-views DD_VERSION=${{ env.VERSION }} --insecure-skip-tls-verify
+
+    - name: Mark deployment in Datadog
+      run: |
+        npx @datadog/datadog-ci deployment mark --env production --service datadog-app-views --revision "${{ github.sha }}"
+        
+    - name: Track deployment in Datadog
+      env:
+        DD_BETA_COMMANDS_ENABLED: 1
+        DD_SITE: 'datadoghq.eu'
+        DD_API_KEY: ${{ secrets.DD_API_KEY }}
+      run: |
+        npx @datadog/datadog-ci dora deployment --service datadog-app-views --env production --started-at ${{ env.deploy_start }} --finished-at $(date +%s) --git-repository-url "${{ github.event.repository.html_url }}" --git-commit-sha ${{ github.sha }}
