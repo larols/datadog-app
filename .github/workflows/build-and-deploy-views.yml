@@ -36,14 +36,15 @@ jobs:
       run: |
         # Get Git repository URL
         REPO_URL=$(git config --get remote.origin.url)
-
+        COMMIT_SHA=$(git rev-parse HEAD)
+      
         # Build Docker image with build arguments
         docker build -f backend/views/Dockerfile ./backend/views \
-          -t ${{ secrets.DOCKER_USERNAME }}/datadog-app-views:latest \
-          --build-arg DD_GIT_REPOSITORY_URL=$(git config --get remote.origin.url) \
-          ---build-arg DD_GIT_COMMIT_SHA=$(git rev-parse HEAD) \
-          --build-arg DD_VERSION=${{ env.VERSION }}
-
+          -t "${{ secrets.DOCKER_USERNAME }}/datadog-app-views:latest" \
+          --build-arg DD_GIT_REPOSITORY_URL="$REPO_URL" \
+          --build-arg DD_GIT_COMMIT_SHA="$COMMIT_SHA" \
+          --build-arg DD_VERSION="${{ env.VERSION }}"
+      
     - name: Push Docker image
       run: |
         docker push ${{ secrets.DOCKER_USERNAME }}/datadog-app-views:latest
