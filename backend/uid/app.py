@@ -17,7 +17,7 @@ def record_visit():
         conn = get_db_connection()
         cursor = conn.cursor()
         cursor.execute("INSERT INTO visitors (uid, visit_time) VALUES (%s, %s);",
-                       (uid, visit_time))  # Now visit_time is a datetime object
+                       (uid, visit_time))  # Use the datetime object
         conn.commit()
 
         # Check the number of entries and delete the oldest if necessary
