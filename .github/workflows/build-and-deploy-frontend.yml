@@ -3,13 +3,15 @@ name: Build and Deploy Frontend
 on:
   push:
     branches:
-      - main  # Adjust to your default branch
+      - main
     paths:
-      - 'frontend/**'  # Only trigger this workflow for changes in the frontend directory  
+      - 'frontend/**'
+      - '.github/workflows/build-and-deploy-frontend.yml'
 
 jobs:
   build-and-push:
     runs-on: ubuntu-latest
+    timeout-minutes: 5
 
     steps:
     - name: Checkout code

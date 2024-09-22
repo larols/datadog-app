@@ -3,13 +3,15 @@ name: Build and Deploy Views
 on:
   push:
     branches:
-      - main  # Adjust to your default branch
+      - main
     paths:
-      - 'backend/views/**'  # Only trigger this workflow for changes in the backend/views directory
+      - 'backend/views/**'
+      - '.github/workflows/build-and-deploy-views.yml'
 
 jobs:
   build-and-push:
     runs-on: ubuntu-latest
+    timeout-minutes: 5
 
     steps:
     - name: Checkout code

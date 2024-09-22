@@ -3,9 +3,12 @@ name: Deploy Nginx
 on:
   push:
     branches:
-      - main  # Adjust to your default branch
+      - main
     paths:
-      - 'nginx/**'  # Include nginx directory if you have changes there
+      - 'k8s/nginx-deployment.yaml'
+      - 'k8s/nginx-config.yaml'
+      - 'k8s/nginx-service.yaml'
+      - '.github/workflows/deploy-nginx.yaml'
 
 jobs:
   deploy:
