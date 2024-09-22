@@ -5,6 +5,35 @@ import time
 import psycopg2
 import os
 import uuid
+from datetime import datetime
+
+@app.route('/api/uid', methods=['POST'])
+def record_visit():
+    uid = str(uuid.uuid4())  # Generate a unique identifier (UID)
+    visit_time = datetime.now()  # Get the current timestamp as a datetime object
+
+    try:
+        # Store the UID in the database
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        cursor.execute("INSERT INTO visitors (uid, visit_time) VALUES (%s, %s);",
+                       (uid, visit_time))  # Now visit_time is a datetime object
+        conn.commit()
+
+        # Check the number of entries and delete the oldest if necessary
+        cursor.execute("SELECT COUNT(*) FROM visitors;")
+        count = cursor.fetchone()[0]
+        if count > MAX_ENTRIES:
+            cursor.execute("DELETE FROM visitors ORDER BY visit_time ASC LIMIT 1;")  # Remove the oldest entry
+
+        cursor.close()
+        conn.close()
+
+        log.info(f"Visit recorded: {uid}")  # Log the recorded visit
+        return jsonify({"message": "Visit recorded successfully!", "uid": uid}), 201
+    except Exception as e:
+        log.error(f"Database error: {e}")
+        return jsonify({"error": "Database error"}), 500
 
 # Patch all supported libraries for Datadog tracing
 patch_all()
