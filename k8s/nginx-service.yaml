@@ -9,4 +9,4 @@ spec:
       targetPort: 80
       protocol: TCP
   selector:
-    app: nginx
+    app: datadog-app-nginx

@@ -20,7 +20,7 @@
             version: 'VERSION',
             sessionSampleRate: 100,
             allowedTracingUrls: [
-                (url) => url.startsWith("http://192.168.50.21")
+                (url) => url.startsWith("http://")  // Updated to allow all HTTP URLs
             ],
             sessionReplaySampleRate: 100,
             trackUserInteractions: true,
