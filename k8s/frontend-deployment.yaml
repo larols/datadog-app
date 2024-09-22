@@ -39,7 +39,7 @@ spec:
             - name: DD_PROFILING_ENABLED
               value: "true"
             - name: DD_ENV
-              value: production
+              value: prod
             - name: DD_SERVICE
               value: datadog-app-frontend
             - name: DD_VERSION
