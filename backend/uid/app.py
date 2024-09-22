@@ -24,8 +24,9 @@ log.setLevel(logging.INFO)
 
 # Database connection function
 def get_db_connection():
+    host = os.environ['POSTGRES_HOST'] 
     conn = psycopg2.connect(
-        host='datadog-app-postgres',  # Use the service name of your PostgreSQL
+        host=host,
         database=os.environ['POSTGRES_DB'],
         user=os.environ['POSTGRES_USER'],
         password=os.environ['POSTGRES_PASSWORD']
