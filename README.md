@@ -5,30 +5,38 @@ This project consists of a frontend and backend application monitored by Datadog
 ```
 ├── README.md
 ├── backend
-│   ├── service-b
-│   └── views
-│       ├── Dockerfile             # Dockerfile for the views backend service
-│       ├── app.py                 # Main application code for the views service
-│       └── requirements.txt       # Python dependencies for the views service
+│   ├── uid
+│   │   ├── Dockerfile
+│   │   ├── app.py
+│   │   └── requirements.txt
+│   └── views
+│       ├── Dockerfile
+│       ├── app.py
+│       └── requirements.txt
 ├── frontend
-│   ├── Dockerfile                 # Dockerfile for building the frontend React application
-│   ├── package.json               # npm package configuration for frontend dependencies
-│   ├── public
-│   │   ├── favicon.ico            # Favicon for the web application
-│   │   └── index.html             # Main HTML file for the React application
-│   └── src
-│       ├── app.css                # CSS styles for the React application
-│       ├── app.js                 # Main JavaScript file for the React application
-│       ├── index.css              # Additional CSS styles for the React application
-│       └── index.js               # Entry point for the React application
-└── k8s
-    ├── frontend-deployment.yaml   # Kubernetes deployment configuration for the frontend
-    ├── frontend-service.yaml      # Kubernetes service configuration for the frontend
-    ├── nginx-config.yaml          # Nginx configuration for serving the frontend
-    ├── nginx-deployment.yaml      # Kubernetes deployment configuration for Nginx
-    ├── nginx-service.yaml         # Kubernetes service configuration for Nginx
-    ├── views-deployment.yaml      # Kubernetes deployment configuration for the views backend
-    └── views-service.yaml         # Kubernetes service configuration for the views backend
+│   ├── Dockerfile
+│   ├── package.json
+│   ├── public
+│   │   ├── favicon.ico
+│   │   └── index.html
+│   └── src
+│       ├── app.css
+│       ├── app.js
+│       ├── index.css
+│       └── index.js
+├── k8s
+│   ├── frontend-deployment.yaml
+│   ├── frontend-service.yaml
+│   ├── nginx-config.yaml
+│   ├── nginx-deployment.yaml
+│   ├── nginx-service.yaml
+│   ├── postgres-deployment.yaml
+│   ├── postgres-service.yaml
+│   ├── uid-deployment.yaml
+│   ├── uid-service.yaml
+│   ├── views-deployment.yaml
+│   └── views-service.yaml
+└── static-analysis.datadog.yml
 ```
 
 ## Description of Files
