@@ -45,7 +45,11 @@ This project consists of a frontend and backend application monitored by Datadog
 - This file provides an overview of the project, including its structure and purpose.
 
 ### Backend
-- **service-b/**: Placeholder for another backend service if needed in the future.
+- **uid/**: Placeholder for another backend service if needed in the future.
+  - **Dockerfile**: Contains the instructions to build a Docker image for the uid backend service.
+  - **app.py**: The main application code that handles API requests and serves data.
+  - **requirements.txt**: Lists the Python dependencies required for the uid service.
+  
 - **views/**:
   - **Dockerfile**: Contains the instructions to build a Docker image for the views backend service.
   - **app.py**: The main application code that handles API requests and serves data.
