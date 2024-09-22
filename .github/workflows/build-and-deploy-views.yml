@@ -82,7 +82,7 @@ jobs:
 
     - name: Mark deployment in Datadog
       run: |
-        npx @datadog/datadog-ci deployment mark --env prod --service datadog-app-views --revision "${{ github.sha }}"
+        npx @datadog/datadog-ci deployment mark --env production --service datadog-app-views --revision "${{ github.sha }}"
         
     - name: Track deployment in Datadog
       env:
@@ -90,4 +90,4 @@ jobs:
         DD_SITE: 'datadoghq.eu'
         DD_API_KEY: ${{ secrets.DD_API_KEY }}
       run: |
-        npx @datadog/datadog-ci dora deployment --service datadog-app-views --env prod --started-at ${{ env.deploy_start }} --finished-at $(date +%s) --git-repository-url "${{ github.event.repository.html_url }}" --git-commit-sha ${{ github.sha }}
+        npx @datadog/datadog-ci dora deployment --service datadog-app-views --env production --started-at ${{ env.deploy_start }} --finished-at $(date +%s) --git-repository-url "${{ github.event.repository.html_url }}" --git-commit-sha ${{ github.sha }}
