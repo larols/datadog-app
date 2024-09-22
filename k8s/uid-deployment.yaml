@@ -1,0 +1,36 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: datadog-app-uid
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: datadog-app-uid
+  template:
+    metadata:
+      labels:
+        app: datadog-app-uid
+      annotations:
+        ad.datadoghq.com/datadog-app-uid.logs: '[{"source":"python","service":"datadog-app-uid"}]'
+    spec:
+      containers:
+      - name: datadog-app-uid
+        image: laols/datadog-app-uid:latest
+        ports:
+        - containerPort: 5000
+        env:
+          - name: POSTGRES_USER
+            value: "datadog"
+          - name: POSTGRES_PASSWORD
+            value: "Datadog1!"
+          - name: POSTGRES_DB
+            value: "datadog-app-db"
+          - name: DD_VERSION
+            value: "default-value"
+          - name: DD_ENV
+            value: production
+          - name: DD_SERVICE
+            value: datadog-app-uid
+          - name: DD_RUNTIME_METRICS_ENABLED
+            value: "true"
