@@ -14,7 +14,7 @@ spec:
       labels:
         app: datadog-app-frontend
       annotations:
-        ad.datadoghq.com/datadog-app-frontend.logs: '[{"source":"python","service":"datadog-app-frontend"}]'
+        ad.datadoghq.com/datadog-app-frontend.logs: '[{"source":"react-native","service":"datadog-app-frontend"}]'
     spec:
       containers:
         - name: datadog-app-frontend
