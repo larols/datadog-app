@@ -24,7 +24,7 @@ log.setLevel(logging.INFO)
 
 # Database connection function
 def get_db_connection():
-    host = os.environ['POSTGRES_HOST'] 
+    host = os.environ['POSTGRES_HOST']
     conn = psycopg2.connect(
         host=host,
         database=os.environ['POSTGRES_DB'],
@@ -39,6 +39,25 @@ for var in required_env_vars:
     if os.environ.get(var) is None:
         log.error(f"Missing environment variable: {var}")
         raise RuntimeError(f"Missing environment variable: {var}")
+
+# Function to create the visitors table if it does not exist
+def initialize_database():
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute("""
+        CREATE TABLE IF NOT EXISTS visitors (
+            id SERIAL PRIMARY KEY,
+            visit_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            uid UUID DEFAULT gen_random_uuid()
+        );
+    """)
+    conn.commit()
+    cursor.close()
+    conn.close()
+    log.info("Database initialized and tables created if they did not exist.")
+
+# Initialize the database at startup
+initialize_database()
 
 # Set the maximum number of stored UIDs
 MAX_ENTRIES = 100
