@@ -79,7 +79,15 @@ def record_visit():
         cursor.execute("SELECT COUNT(*) FROM visitors;")
         count = cursor.fetchone()[0]
         if count > MAX_ENTRIES:
-            cursor.execute("DELETE FROM visitors ORDER BY visit_time ASC LIMIT 1;")  # Remove the oldest entry
+            cursor.execute("""
+                DELETE FROM visitors
+                WHERE ctid IN (
+                    SELECT ctid
+                    FROM visitors
+                    ORDER BY visit_time ASC
+                    LIMIT 1
+                );
+            """)  # Remove the oldest entry
 
         cursor.close()
         conn.close()
