@@ -1,4 +1,4 @@
-name: Build and Deploy Frontend and Nginx
+name: Build and Deploy nginx
 
 on:
   push:
