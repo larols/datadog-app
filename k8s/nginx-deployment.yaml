@@ -20,6 +20,15 @@ spec:
         volumeMounts:
         - name: nginx-config
           mountPath: /etc/nginx/conf.d
+        env:
+          - name: DD_VERSION
+            value: "default-value"
+          - name: DD_ENV
+            value: production
+          - name: DD_SERVICE
+            value: datadog-app-nginx
+          - name: DD_RUNTIME_METRICS_ENABLED
+            value: "true"
       volumes:
       - name: nginx-config
         configMap:

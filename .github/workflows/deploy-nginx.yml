@@ -1,0 +1,42 @@
+name: Deploy Nginx
+
+on:
+  push:
+    branches:
+      - main  # Adjust to your default branch
+    paths:
+      - 'nginx/**'  # Include nginx directory if you have changes there
+
+jobs:
+  deploy:
+    name: Deploy to k8s
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    env:
+      DD_BETA_COMMANDS_ENABLED: 1
+      DD_GITHUB_JOB_NAME: Deploy to k8s
+      DD_SITE: datadoghq.eu
+      DD_API_KEY: ${{ secrets.DD_API_KEY }}
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    - name: Tag pipeline in Datadog
+      run: npx @datadog/datadog-ci tag --level pipeline --tags team:lars
+
+    - name: Set deployment start time
+      id: set_deploy_start
+      run: echo "deploy_start=$(date +%s)" >> $GITHUB_ENV
+
+    - name: Configure kubectl
+      run: |
+        mkdir -p $HOME/.kube
+        echo "${{ secrets.KUBECONFIG }}" > $HOME/.kube/config
+
+    - name: Deploy Nginx to Kubernetes
+      run: |
+        kubectl apply -f k8s/nginx-config.yaml --insecure-skip-tls-verify  # Apply the ConfigMap
+        kubectl apply -f k8s/nginx-deployment.yaml --insecure-skip-tls-verify  # Apply the Deployment
+        kubectl apply -f k8s/nginx-service.yaml --insecure-skip-tls-verify  # Apply the Service
