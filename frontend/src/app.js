@@ -28,21 +28,25 @@ function App() {
 
     // Fetch UID data
     useEffect(() => {
-        fetch('/api/uid/fetch') // Correct endpoint to fetch UIDs
+        fetch('/api/uid/latest') // Update to the new endpoint
             .then(response => response.json())
             .then(data => {
-                setUidData(data); // Assuming the response is an array of UIDs
-                window.DD_LOGS?.logger.info('Fetched data for UIDs', { uids: data.uids });
+                if (data.uid) {
+                    setUidData(data); // Set the latest UID and timestamp
+                    window.DD_LOGS?.logger.info('Fetched latest UID', { uid: data.uid, visit_time: data.visit_time });
+                } else {
+                    console.error('No UID found');
+                }
             })
-            .catch(error => console.error('Error fetching UID data:', error));
+            .catch(error => console.error('Error fetching latest UID data:', error));
     }, []);
 
-    const tilesData = [
-        { id: 1, text: viewsData ? viewsData.text : 'Loading...' },
-        { id: 2, text: uidData ? `UIDs: ${uidData.uids.join(', ')}` : 'Fetching UIDs...' },
-        { id: 3, text: 'Tile 3: Dummy Data' },
-        { id: 4, text: 'Tile 4: Dummy Data' },
-    ];
+const uidLoading = !uidData;
+
+const tilesData = [
+    { id: 1, text: viewsData ? viewsData.text : 'Loading...' },
+    { id: 2, text: uidData ? `Latest UID: ${uidData.uid}, Timestamp: ${uidData.visit_time}` : 'Fetching UID...' },
+];
 
     return (
         <div className="App">

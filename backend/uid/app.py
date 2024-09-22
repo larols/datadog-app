@@ -90,18 +90,22 @@ def record_visit():
         log.error(f"Database error: {e}")
         return jsonify({"error": "Database error"}), 500
 
-@app.route('/api/uid/fetch', methods=['GET'])
-def fetch_uids():
+@app.route('/api/uid/latest', methods=['GET'])
+def fetch_latest_uid():
     try:
         conn = get_db_connection()
         cursor = conn.cursor()
-        cursor.execute("SELECT uid FROM visitors ORDER BY visit_time DESC;")
-        rows = cursor.fetchall()
+        cursor.execute("SELECT uid, visit_time FROM visitors ORDER BY visit_time DESC LIMIT 1;")
+        row = cursor.fetchone()
         cursor.close()
         conn.close()
 
-        log.info("Fetched UIDs from the database")  # Log the fetching action
-        return jsonify({"uids": [str(row[0]) for row in rows]}), 200
+        if row:
+            latest_uid, visit_time = row
+            log.info("Fetched latest UID from the database")  # Log the fetching action
+            return jsonify({"uid": str(latest_uid), "visit_time": str(visit_time)}), 200
+        else:
+            return jsonify({"error": "No UID found"}), 404
     except Exception as e:
         log.error(f"Database error: {e}")
         return jsonify({"error": "Database error"}), 500
