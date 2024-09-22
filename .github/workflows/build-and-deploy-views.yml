@@ -6,6 +6,8 @@ on:
       - main
     paths:
       - 'backend/views/**'
+      - 'k8s/views-deployment.yaml'
+      - 'k8s/views-service.yaml'
       - '.github/workflows/build-and-deploy-views.yml'
 
 jobs:

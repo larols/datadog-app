@@ -11,6 +11,8 @@ spec:
     metadata:
       labels:
         app: datadog-app-nginx
+      annotations:
+        ad.datadoghq.com/datadog-app-nginx.logs: '[{"source":"nginx","service":"datadog-app-nginx"}]'
     spec:
       containers:
       - name: datadog-app-nginx

@@ -6,6 +6,8 @@ on:
       - main
     paths:
       - 'frontend/**'
+      - 'k8s/frontend-deployment.yaml'
+      - 'k8s/frontend-service.yaml'
       - '.github/workflows/build-and-deploy-frontend.yml'
 
 jobs:

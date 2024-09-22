@@ -1,20 +1,19 @@
-# Use the official Python image
 FROM python:3.9-slim
 
-# Set the working directory
 WORKDIR /app
 
-# Copy the requirements file
 COPY requirements.txt ./
 
-# Install dependencies
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Copy the application code
 COPY app.py ./views/
 
-# Expose the port the app runs on
+ARG DD_GIT_REPOSITORY_URL
+ARG DD_GIT_COMMIT_SHA
+
+ENV DD_GIT_REPOSITORY_URL=${DD_GIT_REPOSITORY_URL}
+ENV DD_GIT_COMMIT_SHA=${DD_GIT_COMMIT_SHA}
+
 EXPOSE 5000
 
-# Start the application with ddtrace
 CMD ["ddtrace-run", "python", "views/app.py"]
