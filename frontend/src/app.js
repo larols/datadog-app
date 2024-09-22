@@ -3,7 +3,7 @@ import './app.css';
 
 function App() {
     const [viewsData, setViewsData] = useState(null);
-    const [calcData, setCalcData] = useState(null); // State for Tile 2
+    const [uidData, setUidData] = useState(null); // State for UID data
 
     // Fetch data for Tile 1
     useEffect(() => {
@@ -16,12 +16,22 @@ function App() {
             .catch(error => console.error('Error fetching data:', error));
     }, []);
 
-    // Fetch data for Tile 2
+    // Record a visit and generate a new UID
     useEffect(() => {
-        fetch('/api/uid') // Use the correct endpoint for calculations
+        fetch('/api/uid', { method: 'POST' }) // Correct endpoint to record a visit
             .then(response => response.json())
             .then(data => {
-                setCalcData(data); // Assuming the response is an array of UIDs
+                console.log('Visit recorded:', data.uid);
+            })
+            .catch(error => console.error('Error recording visit:', error));
+    }, []);
+
+    // Fetch UID data
+    useEffect(() => {
+        fetch('/api/uid/fetch') // Correct endpoint to fetch UIDs
+            .then(response => response.json())
+            .then(data => {
+                setUidData(data); // Assuming the response is an array of UIDs
                 window.DD_LOGS?.logger.info('Fetched data for UIDs', { uids: data.uids });
             })
             .catch(error => console.error('Error fetching UID data:', error));
@@ -29,7 +39,7 @@ function App() {
 
     const tilesData = [
         { id: 1, text: viewsData ? viewsData.text : 'Loading...' },
-        { id: 2, text: calcData ? `UIDs: ${calcData.uids.join(', ')}` : 'Fetching UIDs...' }, // Update Tile 2
+        { id: 2, text: uidData ? `UIDs: ${uidData.uids.join(', ')}` : 'Fetching UIDs...' },
         { id: 3, text: 'Tile 3: Dummy Data' },
         { id: 4, text: 'Tile 4: Dummy Data' },
     ];

@@ -43,7 +43,7 @@ for var in required_env_vars:
 # Set the maximum number of stored UIDs
 MAX_ENTRIES = 100
 
-@app.route('/visit', methods=['POST'])
+@app.route('/api/uid', methods=['POST'])
 def record_visit():
     uid = str(uuid.uuid4())  # Generate a unique identifier (UID)
     visit_time = time.time()  # Record the current timestamp
@@ -71,7 +71,7 @@ def record_visit():
         log.error(f"Database error: {e}")
         return jsonify({"error": "Database error"}), 500
 
-@app.route('/fetch_uids', methods=['GET'])
+@app.route('/api/uid/fetch', methods=['GET'])
 def fetch_uids():
     try:
         conn = get_db_connection()
