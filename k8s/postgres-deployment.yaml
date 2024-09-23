@@ -13,6 +13,7 @@ spec:
         app: datadog-app-postgres
       annotations:
         ad.datadoghq.com/datadog-app-postgres.logs: '[{"source":"postgres","service":"datadog-app-postgres"}]'
+        ad.datadoghq.com/postgres.checks='{"postgres":{"init_config":{},"instances":[{"host":"%%host%%","port":"5432","username":"datadog","password":"Datadog1!"}]}}'
     spec:
       containers:
       - name: datadog-app-postgres
