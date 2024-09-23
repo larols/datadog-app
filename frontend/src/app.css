@@ -19,7 +19,7 @@ h1 {
     display: flex;
     position: absolute; /* Position it in the corner */
     top: 20px; /* Adjust as needed */
-    right: 20px; /* Adjust as needed */
+    left: 20px; /* Move to the left corner */
 }
 
 .navbar button {

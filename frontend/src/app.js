@@ -50,9 +50,8 @@ function App() {
             .catch(error => console.error('Error recording visit:', error));
     }, []);
 
-    // Function to reload data
-    const reloadData = () => {
-        fetchViewsData();
+    // Function to reload UID data only
+    const reloadUidData = () => {
         fetchUidData();
     };
 
@@ -96,7 +95,7 @@ function App() {
             <nav className="navbar">
                 <button onClick={() => setActiveTab('home')}>Home</button>
                 <button onClick={() => setActiveTab('about')}>About</button>
-                <button onClick={reloadData}>Reload Data</button>
+                <button onClick={reloadUidData}>Reload UID Data</button> {/* Reloads only UID data */}
             </nav>
             {renderContent()}
             {modalContent && (
