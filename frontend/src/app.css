@@ -1,43 +1,60 @@
 .App {
     display: flex;
-    flex-direction: column; /* Stack children vertically */
+    flex-direction: column;
     justify-content: center;
-    align-items: center; /* Center horizontally */
-    height: 100vh; /* Full viewport height */
-    background-color: #f0f0f0; /* Light gray background */
-    font-family: 'Arial', sans-serif; /* Set a modern font */
+    align-items: center;
+    height: 100vh;
+    background-color: #f0f0f0;
+    font-family: 'Arial', sans-serif;
 }
 
 h1 {
-    margin-bottom: 20px; /* Space between title and tiles */
-    color: #333; /* Darker text color for better contrast */
-    font-size: 2.5em; /* Larger title */
-    text-align: center; /* Center the title */
+    margin-bottom: 20px;
+    color: #333;
+    font-size: 2.5em;
+    text-align: center;
+}
+
+.navbar {
+    margin-bottom: 20px;
+}
+
+.navbar button {
+    margin: 0 10px;
+    padding: 10px 20px;
+    font-size: 16px;
+    cursor: pointer;
 }
 
 .tiles-container {
-    display: flex; /* Use flexbox for a single row layout */
-    justify-content: center; /* Center items horizontally */
-    overflow-x: auto; /* Enable horizontal scrolling if necessary */
-    gap: 20px; /* Space between tiles */
-    max-width: 800px; /* Increased maximum width for better layout */
-    width: 100%; /* Full width */
-    padding: 20px; /* Padding around the container */
+    display: flex;
+    justify-content: center;
+    overflow-x: auto;
+    gap: 20px;
+    max-width: 800px;
+    width: 100%;
+    padding: 20px;
 }
 
 .tile {
-    background-color: #ffffff; /* White background for tiles */
-    padding: 20px; /* Padding inside tiles */
-    border-radius: 8px; /* Rounded corners */
-    border: 2px solid #9b59b6; /* Purple frame */
-    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2); /* Stronger shadow for pop-out effect */
-    text-align: center; /* Center text */
-    font-size: 18px; /* Font size */
-    transition: transform 0.3s, box-shadow 0.3s; /* Animation for hover effect */
+    background-color: #ffffff;
+    padding: 20px;
+    border-radius: 8px;
+    border: 2px solid #9b59b6;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+    text-align: center;
+    font-size: 18px;
+    transition: transform 0.3s, box-shadow 0.3s;
 }
 
 .tile:hover {
-    transform: translateY(-5px); /* Lift effect on hover */
-    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.3); /* Enhanced shadow on hover */
-    background-color: #f7f3ff; /* Light purple background on hover */
+    transform: translateY(-5px);
+    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.3);
+    background-color: #f7f3ff;
+}
+
+.about {
+    text-align: center;
+    font-size: 18px;
+    margin-top: 20px;
 }
