@@ -16,14 +16,27 @@ h1 {
 }
 
 .navbar {
-    margin-bottom: 20px;
+    display: flex;
+    position: absolute; /* Position it in the corner */
+    top: 20px; /* Adjust as needed */
+    right: 20px; /* Adjust as needed */
 }
 
 .navbar button {
-    margin: 0 10px;
-    padding: 10px 20px;
-    font-size: 16px;
-    cursor: pointer;
+    background-color: #9b59b6; /* Purple background */
+    color: white; /* White text */
+    border: none; /* Remove default border */
+    border-radius: 5px; /* Rounded corners */
+    margin: 0 5px; /* Spacing between buttons */
+    padding: 10px 15px; /* Padding for buttons */
+    font-size: 16px; /* Font size */
+    cursor: pointer; /* Pointer cursor on hover */
+    transition: background-color 0.3s, transform 0.2s; /* Smooth transitions */
+}
+
+.navbar button:hover {
+    background-color: #8e44ad; /* Darker purple on hover */
+    transform: scale(1.05); /* Slightly enlarge on hover */
 }
 
 .tiles-container {
