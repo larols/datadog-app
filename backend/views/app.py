@@ -35,7 +35,7 @@ def get_views_data():
     visit_count += 1  # Increment the visit counter
 
     # Send a custom metric to Datadog
-    statsd.increment('datadog-app.visits.count', 1)  # Increment the visit count metric
+    statsd.increment('custom.visits.count', 1)  # Increment the visit count metric
 
     log.info(f"Visitor count: {visit_count}")
 
