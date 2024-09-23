@@ -28,6 +28,8 @@ spec:
             }
           }
     spec:
+      nodeSelector:
+        postgres-node: "true"
       containers:
       - name: datadog-app-postgres
         image: postgres:latest

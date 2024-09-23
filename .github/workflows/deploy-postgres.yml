@@ -57,7 +57,6 @@ jobs:
         kubectl apply -f k8s/postgres-storage.yaml --insecure-skip-tls-verify
         kubectl apply -f k8s/postgres-deployment-template.yaml --insecure-skip-tls-verify
 
-
     - name: Mark deployment in Datadog
       run: |
         npx @datadog/datadog-ci deployment mark --env production --service datadog-app-postgres --revision "${{ github.sha }}"
