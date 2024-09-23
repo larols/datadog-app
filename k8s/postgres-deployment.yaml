@@ -27,7 +27,7 @@ spec:
           - name: POSTGRES_DB
             value: "datadog-app-db"
           - name: DD_VERSION
-            value: "default-value"
+            value: "default-value"  # Adjust this if needed
           - name: DD_ENV
             value: production
           - name: DD_SERVICE
@@ -36,8 +36,14 @@ spec:
             value: "true"
         volumeMounts:
         - name: postgres-storage
-          mountPath: /var/lib/postgresql/data 
+          mountPath: /var/lib/postgresql/data
+        - name: postgres-config-volume
+          mountPath: /etc/postgresql/postgresql.conf
+          subPath: postgresql.conf
       volumes:
       - name: postgres-storage
         persistentVolumeClaim:
           claimName: postgres-data
+      - name: postgres-config-volume
+        configMap:
+          name: postgres-config
