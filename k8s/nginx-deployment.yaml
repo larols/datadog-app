@@ -24,7 +24,7 @@ spec:
           mountPath: /etc/nginx/conf.d
         env:
           - name: DD_VERSION
-            value: "1.0"
+            value: "1.0.0"
           - name: DD_ENV
             value: production
           - name: DD_SERVICE
