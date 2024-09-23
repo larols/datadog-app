@@ -54,6 +54,7 @@ jobs:
       run: |
         kubectl apply -f k8s/postgres-service.yaml --insecure-skip-tls-verify
         kubectl apply -f k8s/postgres-config.yaml --insecure-skip-tls-verify
+        kubectl apply -f k8s/postgres-storage.yaml --insecure-skip-tls-verify
         kubectl apply -f k8s/postgres-deployment-template.yaml --insecure-skip-tls-verify
 
 
