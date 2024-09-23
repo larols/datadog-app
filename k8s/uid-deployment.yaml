@@ -35,7 +35,7 @@ spec:
           - name: POSTGRES_HOST
             value: "datadog-app-postgres"
           - name: DD_VERSION
-            value: "default-value"
+            value: "${VERSION}"
           - name: DD_ENV
             value: production
           - name: DD_SERVICE

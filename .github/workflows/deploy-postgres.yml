@@ -44,12 +44,17 @@ jobs:
         mkdir -p $HOME/.kube
         echo "${{ secrets.KUBECONFIG }}" > $HOME/.kube/config
 
+    - name: Generate PostgreSQL deployment with VERSION
+      run: |
+        # Use envsubst to substitute VERSION in the deployment template
+        export VERSION=$(echo ${{ github.sha }} | cut -c1-7)
+        envsubst < k8s/postgres-deployment.yaml > k8s/postgres-deployment-template.yaml
+
     - name: Deploy PostgreSQL to Kubernetes
       run: |
         kubectl apply -f k8s/postgres-service.yaml --insecure-skip-tls-verify
         kubectl apply -f k8s/postgres-config.yaml --insecure-skip-tls-verify
         kubectl apply -f k8s/postgres-deployment.yaml --insecure-skip-tls-verify
-        kubectl set env deployment/datadog-app-postgres DD_VERSION=${{ env.VERSION }} --insecure-skip-tls-verify
 
 
     - name: Mark deployment in Datadog

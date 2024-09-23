@@ -83,11 +83,17 @@ jobs:
         mkdir -p $HOME/.kube
         echo "${{ secrets.KUBECONFIG }}" > $HOME/.kube/config
 
+    - name: Generate uid deployment with VERSION
+      run: |
+        # Use envsubst to substitute VERSION in the deployment template
+        export VERSION=$(echo ${{ github.sha }} | cut -c1-7)
+        envsubst < k8s/uid-deployment.yaml > k8s/uid-deployment-template.yaml
+
     - name: Deploy UID Service to Kubernetes
       run: |
-        kubectl apply -f k8s/uid-deployment.yaml --insecure-skip-tls-verify
+        kubectl apply -f k8s/uid-deployment-template.yaml --insecure-skip-tls-verify
         kubectl apply -f k8s/uid-service.yaml --insecure-skip-tls-verify
-        kubectl set env deployment/datadog-app-uid DD_VERSION=${{ env.VERSION }} --insecure-skip-tls-verify
+
 
     - name: Mark deployment in Datadog
       run: |

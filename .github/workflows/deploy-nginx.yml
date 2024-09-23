@@ -45,12 +45,18 @@ jobs:
         mkdir -p $HOME/.kube
         echo "${{ secrets.KUBECONFIG }}" > $HOME/.kube/config
 
+    - name: Generate PostgreSQL deployment with VERSION
+      run: |
+        # Use envsubst to substitute VERSION in the deployment template
+        export VERSION=$(echo ${{ github.sha }} | cut -c1-7)
+        envsubst < k8s/nginx-deployment.yaml > k8s/nginx-deployment-template.yaml
+
     - name: Deploy Nginx to Kubernetes
       run: |
         kubectl apply -f k8s/nginx-config.yaml --insecure-skip-tls-verify
-        kubectl apply -f k8s/nginx-deployment.yaml --insecure-skip-tls-verify
+        kubectl apply -f k8s/nginx-deployment.yaml-template --insecure-skip-tls-verify
         kubectl apply -f k8s/nginx-service.yaml --insecure-skip-tls-verify
-        kubectl set env deployment/datadog-app-nginx DD_VERSION=${{ env.VERSION }} --insecure-skip-tls-verify
+
 
     - name: Mark deployment in Datadog
       run: |

@@ -83,11 +83,16 @@ jobs:
         mkdir -p $HOME/.kube
         echo "${{ secrets.KUBECONFIG }}" > $HOME/.kube/config
 
+    - name: Generate views deployment with VERSION
+      run: |
+        # Use envsubst to substitute VERSION in the deployment template
+        export VERSION=$(echo ${{ github.sha }} | cut -c1-7)
+        envsubst < k8s/views-deployment.yaml > k8s/views-deployment-template.yaml
+
     - name: Deploy Backend to Kubernetes
       run: |
-        kubectl apply -f k8s/views-deployment.yaml --insecure-skip-tls-verify
+        kubectl apply -f k8s/views-deployment-template.yaml --insecure-skip-tls-verify
         kubectl apply -f k8s/views-service.yaml --insecure-skip-tls-verify
-        kubectl set env deployment/datadog-app-views DD_VERSION=${{ env.VERSION }} --insecure-skip-tls-verify
 
     - name: Mark deployment in Datadog
       run: |

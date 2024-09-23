@@ -41,7 +41,7 @@ spec:
           - name: POSTGRES_DB
             value: "datadog-app-db"
           - name: DD_VERSION
-            value: "1.0.0"  # Adjust this if needed
+            value: "${VERSION}"
           - name: DD_ENV
             value: production
           - name: DD_SERVICE

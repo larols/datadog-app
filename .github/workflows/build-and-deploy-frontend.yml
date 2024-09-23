@@ -88,11 +88,16 @@ jobs:
         mkdir -p $HOME/.kube
         echo "${{ secrets.KUBECONFIG }}" > $HOME/.kube/config
 
+    - name: Generate frontend deployment with VERSION
+      run: |
+        # Use envsubst to substitute VERSION in the deployment template
+        export VERSION=$(echo ${{ github.sha }} | cut -c1-7)
+        envsubst < k8s/frontend-deployment.yaml > k8s/frontend-deployment-template.yaml
+
     - name: Deploy Frontend to Kubernetes
       run: |
-        kubectl apply -f k8s/frontend-deployment.yaml --insecure-skip-tls-verify
+        kubectl apply -f k8s/frontend-deployment-template.yaml --insecure-skip-tls-verify
         kubectl apply -f k8s/frontend-service.yaml --insecure-skip-tls-verify
-        kubectl set env deployment/datadog-app-frontend DD_VERSION=${{ env.VERSION }} --insecure-skip-tls-verify
 
     - name: Mark deployment in Datadog
       run: |

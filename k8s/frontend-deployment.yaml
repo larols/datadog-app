@@ -43,4 +43,4 @@ spec:
             - name: DD_SERVICE
               value: datadog-app-frontend
             - name: DD_VERSION
-              value: "default-value"  # Placeholder to be patched later
+              value: "${VERSION}"
