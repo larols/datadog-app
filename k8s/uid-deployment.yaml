@@ -42,3 +42,11 @@ spec:
             value: datadog-app-uid
           - name: DD_RUNTIME_METRICS_ENABLED
             value: "true"
+          - name: DD_TRACE_ENABLED
+            value: "true"
+          - name: DD_IAST_ENABLED
+             value: "true"
+          - name: DD_DYNAMIC_INSTRUMENTATION_ENABLED
+            value: "true"
+          - name: DD_PROFILING_ENABLED
+            value: "true"
