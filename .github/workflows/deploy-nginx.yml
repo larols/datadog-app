@@ -50,6 +50,7 @@ jobs:
         kubectl apply -f k8s/nginx-config.yaml --insecure-skip-tls-verify
         kubectl apply -f k8s/nginx-deployment.yaml --insecure-skip-tls-verify
         kubectl apply -f k8s/nginx-service.yaml --insecure-skip-tls-verify
+        kubectl set env deployment/datadog-app-nginx DD_VERSION=${{ env.VERSION }} --insecure-skip-tls-verify
 
     - name: Mark deployment in Datadog
       run: |

@@ -65,6 +65,12 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v3
 
+    - name: Set commit sha for version
+      id: set_commit_sha
+      run: |
+        VERSION=$(echo ${{ github.sha }} | cut -c1-7)
+        echo "VERSION=${VERSION}" >> $GITHUB_ENV
+
     - name: Tag pipeline in Datadog
       run: npx @datadog/datadog-ci tag --level pipeline --tags team:datadog-app
 
