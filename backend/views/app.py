@@ -1,6 +1,14 @@
 from flask import Flask, jsonify
 from ddtrace import patch_all, patch
+from datadog import initialize, statsd  # Import Datadog statsd for custom metrics
 import logging
+
+# Initialize Datadog
+options = {
+    'api_key': 'YOUR_DATADOG_API_KEY',  # Replace with your API key
+    'app_key': 'YOUR_DATADOG_APP_KEY'    # Optional: Replace with your app key
+}
+initialize(**options)
 
 # Patch all supported libraries for Datadog tracing
 patch_all()
@@ -26,11 +34,14 @@ def get_views_data():
     global visit_count
     visit_count += 1  # Increment the visit counter
 
+    # Send a custom metric to Datadog
+    statsd.increment('datadog-app.visits.count', 1)  # Increment the visit count metric
+
     log.info(f"Visitor count: {visit_count}")
 
     data = {
         "id": 1,
-        "text": f" You are visitor number {visit_count}!"
+        "text": f"You are visitor number {visit_count}!"
     }
     return jsonify(data)
 

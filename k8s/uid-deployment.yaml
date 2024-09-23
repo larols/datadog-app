@@ -45,7 +45,7 @@ spec:
           - name: DD_TRACE_ENABLED
             value: "true"
           - name: DD_IAST_ENABLED
-             value: "true"
+            value: "true"
           - name: DD_DYNAMIC_INSTRUMENTATION_ENABLED
             value: "true"
           - name: DD_PROFILING_ENABLED
