@@ -54,7 +54,7 @@ jobs:
     - name: Deploy Nginx to Kubernetes
       run: |
         kubectl apply -f k8s/nginx-config.yaml --insecure-skip-tls-verify
-        kubectl apply -f k8s/nginx-deployment.yaml-template --insecure-skip-tls-verify
+        kubectl apply -f k8s/nginx-deployment-template.yaml --insecure-skip-tls-verify
         kubectl apply -f k8s/nginx-service.yaml --insecure-skip-tls-verify
 
 
