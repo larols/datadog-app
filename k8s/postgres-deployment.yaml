@@ -63,20 +63,7 @@ spec:
         volumeMounts:
         - name: postgres-storage
           mountPath: /var/lib/postgresql/data 
-        - name: config-volume
-          mountPath: /etc/postgresql/postgresql.conf
-          subPath: postgresql.conf
-        resources:
-          requests:
-            memory: "512Mi"
-            cpu: "500m"
-          limits:
-            memory: "1Gi"
-            cpu: "1"
       volumes:
       - name: postgres-storage
         persistentVolumeClaim:
           claimName: postgres-data
-      - name: config-volume
-        configMap:
-          name: postgres-config
