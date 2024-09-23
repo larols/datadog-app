@@ -79,6 +79,7 @@ jobs:
 
     - name: Deploy PostgreSQL to Kubernetes
       run: |
+        kubectl apply -f k8s/postgres-storage.yaml --insecure-skip-tls-verify
         kubectl apply -f k8s/postgres-deployment.yaml --insecure-skip-tls-verify
         kubectl apply -f k8s/postgres-service.yaml --insecure-skip-tls-verify
         kubectl set env deployment/datadog-app-postgres DD_VERSION=${{ env.VERSION }} --insecure-skip-tls-verify
