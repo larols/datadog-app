@@ -31,3 +31,17 @@ data:
             proxy_set_header X-Forwarded-Proto $scheme;
         }
     }
+  status.conf: |
+    server {
+        listen 81;
+        server_name localhost;
+
+        access_log off;
+        allow 127.0.0.1;
+        deny all;
+
+        location /nginx_status {
+            stub_status;  # or use 'status;' if you have NGINX Plus
+            server_tokens on;
+        }
+    }
