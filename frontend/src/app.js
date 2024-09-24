@@ -50,9 +50,14 @@ function App() {
             .catch(error => console.error('Error recording visit:', error));
     }, []);
 
-    // Function to reload UID data only
+    // Function to reload UID data and generate a new UID
     const reloadUidData = () => {
-        fetchUidData();
+        fetch('/api/uid', { method: 'POST' }) // Generate a new UID
+            .then(response => response.json())
+            .then(() => {
+                fetchUidData(); // Fetch the latest UID after generating
+            })
+            .catch(error => console.error('Error generating new UID:', error));
     };
 
     // Function to update current time every second
@@ -95,7 +100,7 @@ function App() {
             <nav className="navbar">
                 <button onClick={() => setActiveTab('home')}>Home</button>
                 <button onClick={() => setActiveTab('about')}>About</button>
-                <button onClick={reloadUidData}>Reload UID Data</button> {/* Reloads only UID data */}
+                <button onClick={reloadUidData}>Reload UID Data</button> {/* Reloads UID data */}
             </nav>
             {renderContent()}
             {modalContent && (
