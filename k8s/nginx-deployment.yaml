@@ -13,7 +13,7 @@ spec:
         app: datadog-app-nginx
       annotations:
         ad.datadoghq.com/datadog-app-nginx.logs: '[{"source":"nginx","service":"datadog-app-nginx"}]'
-        ad.datadoghq.com/nginx.checks: |
+        ad.datadoghq.com/datadog-app-nginx.checks: |
           {
             "nginx": {
               "init_config": {},
