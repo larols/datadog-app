@@ -38,6 +38,7 @@ data:
 
         access_log off;
         allow 127.0.0.1;
+        allow 10.244.0.0/16;
         deny all;
 
         location /nginx_status {
