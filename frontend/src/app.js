@@ -4,6 +4,7 @@ import './app.css';
 function App() {
     const [viewsData, setViewsData] = useState(null);
     const [uidData, setUidData] = useState(null);
+    const [externalData, setExternalData] = useState(null); // State for external API data
     const [activeTab, setActiveTab] = useState('home'); // Track the active tab
     const [currentTime, setCurrentTime] = useState(new Date().toLocaleTimeString()); // State for current time
     const [modalContent, setModalContent] = useState(null); // State for modal content
@@ -34,10 +35,22 @@ function App() {
             .catch(error => console.error('Error fetching latest UID data:', error));
     };
 
+    // Function to fetch external API data
+    const fetchExternalData = () => {
+        fetch('/api/external') // Fetch data from the new external API endpoint
+            .then(response => response.json())
+            .then(data => {
+                setExternalData(data.data); // Extract 'data' from the API response
+                window.DD_LOGS?.logger.info('Fetched data from external API', data);
+            })
+            .catch(error => console.error('Error fetching external API data:', error));
+    };
+
     // Fetch data on component mount
     useEffect(() => {
         fetchViewsData();
         fetchUidData();
+        fetchExternalData(); // Fetch external API data on mount
     }, []);
 
     // Record a visit and generate a new UID
@@ -68,10 +81,12 @@ function App() {
         return () => clearInterval(timer); // Cleanup on component unmount
     }, []);
 
+    // Updated tiles data including the external API response
     const tilesData = [
         { id: 1, text: viewsData ? viewsData.text : 'Loading...', tooltip: "This tile shows the number of visitors." },
         { id: 2, text: uidData ? `Latest UID: ${uidData.uid}, Timestamp: ${uidData.visit_time}` : 'Fetching UID...', tooltip: "This tile shows the latest UID generated." },
         { id: 3, text: `Current Time: ${currentTime}` }, // Tile for current time
+        { id: 4, text: externalData ? `External Data: ${externalData.title}` : 'Fetching External Data...', tooltip: "This tile shows data fetched from an external API." }
     ];
 
     const renderContent = () => {
@@ -90,7 +105,7 @@ function App() {
                 </div>
             );
         } else if (activeTab === 'about') {
-            return <div className="about">This application tracks user visits and displays the latest UID.</div>;
+            return <div className="about">This application tracks user visits and displays the latest UID, current time, and data from an external API.</div>;
         }
     };
 

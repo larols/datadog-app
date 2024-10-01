@@ -2,11 +2,12 @@ from flask import Flask, jsonify
 from ddtrace import patch_all, patch
 from datadog import initialize, statsd  # Import Datadog statsd for custom metrics
 import logging
+import requests
 
 # Initialize Datadog
 options = {
     'api_key': 'YOUR_DATADOG_API_KEY',  # Replace with your API key
-    'app_key': 'YOUR_DATADOG_APP_KEY'    # Optional: Replace with your app key
+    'app_key': 'YOUR_DATADOG_APP_KEY'   # Optional: Replace with your app key
 }
 initialize(**options)
 
@@ -29,6 +30,9 @@ log.setLevel(logging.INFO)
 # Initialize a visit counter
 visit_count = 0
 
+# Define an external API to simulate data fetching
+EXTERNAL_API_URL = 'https://jsonplaceholder.typicode.com/posts/1'
+
 @app.route('/api/views', methods=['GET'])
 def get_views_data():
     global visit_count
@@ -49,6 +53,20 @@ def get_views_data():
 def get_visit_count():
     log.info("Fetching visit count")
     return jsonify({"visit_count": visit_count})
+
+@app.route('/api/external', methods=['GET'])
+def fetch_external_data():
+    try:
+        # Make an external API call to get sample data
+        response = requests.get(EXTERNAL_API_URL, timeout=5)
+        response.raise_for_status()  # Raise an exception for HTTP errors
+        data = response.json()  # Parse the JSON response
+
+        log.info("Successfully fetched external data.")
+        return jsonify({"message": "External data fetched successfully", "data": data}), 200
+    except requests.RequestException as e:
+        log.error(f"Failed to fetch external data: {e}")
+        return jsonify({"error": "Failed to fetch external data"}), 500
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000)  # Expose the app on port 5000

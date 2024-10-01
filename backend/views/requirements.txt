@@ -1,3 +1,4 @@
 Flask
 ddtrace
 datadog
+requests
