@@ -1,15 +1,8 @@
 from flask import Flask, jsonify
 from ddtrace import patch_all, patch
-from datadog import initialize, statsd  # Import Datadog statsd for custom metrics
+from datadog import statsd  # Import Datadog statsd for custom metrics
 import logging
 import requests
-
-# Initialize Datadog
-options = {
-    'api_key': 'YOUR_DATADOG_API_KEY',  # Replace with your API key
-    'app_key': 'YOUR_DATADOG_APP_KEY'   # Optional: Replace with your app key
-}
-initialize(**options)
 
 # Patch all supported libraries for Datadog tracing
 patch_all()
@@ -31,8 +24,8 @@ log.setLevel(logging.INFO)
 visit_count = 0
 
 # Define external API URLs
-EXTERNAL_API_URL_1 = 'https://jsonplaceholder.typicode.com/posts/1'
-EXTERNAL_API_URL_2 = 'https://jsonplaceholder.typicode.com/posts/2'  # Second external API
+EXTERNAL_API_URL_1 = 'https://jsonplaceholder.typicode.com/posts/1'  # First external API
+EXTERNAL_API_URL_2 = 'https://api.coindesk.com/v1/bpi/currentprice.json'  # Second external API (Bitcoin price)
 
 @app.route('/api/views', methods=['GET'])
 def get_views_data():
@@ -58,7 +51,7 @@ def get_visit_count():
 @app.route('/api/external', methods=['GET'])
 def fetch_external_data():
     try:
-        # Make an external API call to get sample data
+        # Make an external API call to get sample data from the first URL
         response = requests.get(EXTERNAL_API_URL_1, timeout=5)
         response.raise_for_status()  # Raise an exception for HTTP errors
         data = response.json()  # Parse the JSON response
@@ -72,7 +65,7 @@ def fetch_external_data():
 @app.route('/api/external2', methods=['GET'])
 def fetch_external_data2():
     try:
-        # Make a second external API call to get different sample data
+        # Make a second external API call to get different sample data from the new domain
         response = requests.get(EXTERNAL_API_URL_2, timeout=5)
         response.raise_for_status()  # Raise an exception for HTTP errors
         data = response.json()  # Parse the JSON response
