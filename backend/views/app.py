@@ -30,8 +30,9 @@ log.setLevel(logging.INFO)
 # Initialize a visit counter
 visit_count = 0
 
-# Define an external API to simulate data fetching
-EXTERNAL_API_URL = 'https://jsonplaceholder.typicode.com/posts/1'
+# Define external API URLs
+EXTERNAL_API_URL_1 = 'https://jsonplaceholder.typicode.com/posts/1'
+EXTERNAL_API_URL_2 = 'https://jsonplaceholder.typicode.com/posts/2'  # Second external API
 
 @app.route('/api/views', methods=['GET'])
 def get_views_data():
@@ -58,14 +59,28 @@ def get_visit_count():
 def fetch_external_data():
     try:
         # Make an external API call to get sample data
-        response = requests.get(EXTERNAL_API_URL, timeout=5)
+        response = requests.get(EXTERNAL_API_URL_1, timeout=5)
         response.raise_for_status()  # Raise an exception for HTTP errors
         data = response.json()  # Parse the JSON response
 
-        log.info("Successfully fetched external data.")
-        return jsonify({"message": "External data fetched successfully", "data": data}), 200
+        log.info("Successfully fetched external data from URL 1.")
+        return jsonify({"message": "External data fetched successfully from URL 1", "data": data}), 200
     except requests.RequestException as e:
-        log.error(f"Failed to fetch external data: {e}")
+        log.error(f"Failed to fetch external data from URL 1: {e}")
+        return jsonify({"error": "Failed to fetch external data"}), 500
+
+@app.route('/api/external2', methods=['GET'])
+def fetch_external_data2():
+    try:
+        # Make a second external API call to get different sample data
+        response = requests.get(EXTERNAL_API_URL_2, timeout=5)
+        response.raise_for_status()  # Raise an exception for HTTP errors
+        data = response.json()  # Parse the JSON response
+
+        log.info("Successfully fetched external data from URL 2.")
+        return jsonify({"message": "External data fetched successfully from URL 2", "data": data}), 200
+    except requests.RequestException as e:
+        log.error(f"Failed to fetch external data from URL 2: {e}")
         return jsonify({"error": "Failed to fetch external data"}), 500
 
 if __name__ == '__main__':

@@ -4,7 +4,8 @@ import './app.css';
 function App() {
     const [viewsData, setViewsData] = useState(null);
     const [uidData, setUidData] = useState(null);
-    const [externalData, setExternalData] = useState(null); // State for external API data
+    const [externalData1, setExternalData1] = useState(null);  // State for the first external API data
+    const [externalData2, setExternalData2] = useState(null);  // State for the second external API data
     const [activeTab, setActiveTab] = useState('home'); // Track the active tab
     const [currentTime, setCurrentTime] = useState(new Date().toLocaleTimeString()); // State for current time
     const [modalContent, setModalContent] = useState(null); // State for modal content
@@ -35,22 +36,34 @@ function App() {
             .catch(error => console.error('Error fetching latest UID data:', error));
     };
 
-    // Function to fetch external API data
-    const fetchExternalData = () => {
-        fetch('/api/external') // Fetch data from the new external API endpoint
+    // Function to fetch data from the first external API
+    const fetchExternalData1 = () => {
+        fetch('/api/external')
             .then(response => response.json())
             .then(data => {
-                setExternalData(data.data); // Extract 'data' from the API response
-                window.DD_LOGS?.logger.info('Fetched data from external API', data);
+                setExternalData1(data.data); // Set data for the first external API
+                window.DD_LOGS?.logger.info('Fetched data from external API 1', data);
             })
-            .catch(error => console.error('Error fetching external API data:', error));
+            .catch(error => console.error('Error fetching external API data 1:', error));
+    };
+
+    // Function to fetch data from the second external API
+    const fetchExternalData2 = () => {
+        fetch('/api/external2')
+            .then(response => response.json())
+            .then(data => {
+                setExternalData2(data.data); // Set data for the second external API
+                window.DD_LOGS?.logger.info('Fetched data from external API 2', data);
+            })
+            .catch(error => console.error('Error fetching external API data 2:', error));
     };
 
     // Fetch data on component mount
     useEffect(() => {
         fetchViewsData();
         fetchUidData();
-        fetchExternalData(); // Fetch external API data on mount
+        fetchExternalData1(); // Fetch data from the first external API
+        fetchExternalData2(); // Fetch data from the second external API
     }, []);
 
     // Record a visit and generate a new UID
@@ -81,12 +94,13 @@ function App() {
         return () => clearInterval(timer); // Cleanup on component unmount
     }, []);
 
-    // Updated tiles data including the external API response
+    // Updated tiles data including external API responses
     const tilesData = [
         { id: 1, text: viewsData ? viewsData.text : 'Loading...', tooltip: "This tile shows the number of visitors." },
         { id: 2, text: uidData ? `Latest UID: ${uidData.uid}, Timestamp: ${uidData.visit_time}` : 'Fetching UID...', tooltip: "This tile shows the latest UID generated." },
         { id: 3, text: `Current Time: ${currentTime}` }, // Tile for current time
-        { id: 4, text: externalData ? `External Data: ${externalData.title}` : 'Fetching External Data...', tooltip: "This tile shows data fetched from an external API." }
+        { id: 4, text: externalData1 ? `External API 1 Data: ${externalData1.title}` : 'Fetching External Data 1...', tooltip: "This tile shows data fetched from the first external API." },
+        { id: 5, text: externalData2 ? `External API 2 Data: ${externalData2.title}` : 'Fetching External Data 2...', tooltip: "This tile shows data fetched from the second external API." }
     ];
 
     const renderContent = () => {
@@ -105,7 +119,7 @@ function App() {
                 </div>
             );
         } else if (activeTab === 'about') {
-            return <div className="about">This application tracks user visits and displays the latest UID, current time, and data from an external API.</div>;
+            return <div className="about">This application tracks user visits and displays the latest UID, current time, and data from two different external APIs.</div>;
         }
     };
 
