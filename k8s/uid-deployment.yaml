@@ -50,3 +50,5 @@ spec:
             value: "true"
           - name: DD_PROFILING_ENABLED
             value: "true"
+          - name: DD_PROFILING_TIMELINE_ENABLED
+            value: "true"

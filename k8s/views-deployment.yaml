@@ -44,3 +44,5 @@ spec:
               value: datadog-app-views
             - name: DD_VERSION
               value: "${VERSION}"
+            - name: DD_PROFILING_TIMELINE_ENABLED
+              value: "true"
