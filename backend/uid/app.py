@@ -1,5 +1,5 @@
 from flask import Flask, jsonify, request
-from ddtrace import patch_all, patch
+from ddtrace import patch_all, patch, tracer
 import logging
 import psycopg2
 import os
@@ -63,34 +63,40 @@ initialize_database()
 MAX_ENTRIES = 100
 
 @app.route('/api/uid', methods=['POST'])
+@tracer.wrap(service="datadog-app", resource="/api/uid", span_type="web")
 def record_visit():
     uid = str(uuid.uuid4())  # Generate a unique identifier (UID)
     visit_time = datetime.now()  # Get the current timestamp as a datetime object
 
     try:
         # Store the UID in the database
-        conn = get_db_connection()
-        cursor = conn.cursor()
-        cursor.execute("INSERT INTO visitors (uid, visit_time) VALUES (%s, %s);",
-                       (uid, visit_time))  # Use the datetime object
-        conn.commit()
+        with tracer.trace("db.connection", service="datadog-app", resource="db_connection", span_type="sql"):
+            conn = get_db_connection()
+            cursor = conn.cursor()
 
-        # Check the number of entries and delete the oldest if necessary
-        cursor.execute("SELECT COUNT(*) FROM visitors;")
-        count = cursor.fetchone()[0]
-        if count > MAX_ENTRIES:
-            cursor.execute("""
-                DELETE FROM visitors
-                WHERE ctid IN (
-                    SELECT ctid
-                    FROM visitors
-                    ORDER BY visit_time ASC
-                    LIMIT 1
-                );
-            """)  # Remove the oldest entry
+            with tracer.trace("db.query.insert", service="datadog-app", resource="INSERT INTO visitors", span_type="sql"):
+                cursor.execute("INSERT INTO visitors (uid, visit_time) VALUES (%s, %s);", (uid, visit_time))
+                conn.commit()
 
-        cursor.close()
-        conn.close()
+            # Check the number of entries and delete the oldest if necessary
+            with tracer.trace("db.query.count", service="datadog-app", resource="SELECT COUNT(*) FROM visitors", span_type="sql"):
+                cursor.execute("SELECT COUNT(*) FROM visitors;")
+                count = cursor.fetchone()[0]
+
+            if count > MAX_ENTRIES:
+                with tracer.trace("db.query.delete_oldest", service="datadog-app", resource="DELETE oldest entry", span_type="sql"):
+                    cursor.execute("""
+                        DELETE FROM visitors
+                        WHERE ctid IN (
+                            SELECT ctid
+                            FROM visitors
+                            ORDER BY visit_time ASC
+                            LIMIT 1
+                        );
+                    """)  # Remove the oldest entry
+
+            cursor.close()
+            conn.close()
 
         log.info(f"Visit recorded: {uid}")  # Log the recorded visit
         return jsonify({"message": "Visit recorded successfully!", "uid": uid}), 201
@@ -99,14 +105,19 @@ def record_visit():
         return jsonify({"error": "Database error"}), 500
 
 @app.route('/api/uid/latest', methods=['GET'])
+@tracer.wrap(service="datadog-app", resource="/api/uid/latest", span_type="web")
 def fetch_latest_uid():
     try:
-        conn = get_db_connection()
-        cursor = conn.cursor()
-        cursor.execute("SELECT uid, visit_time FROM visitors ORDER BY visit_time DESC LIMIT 1;")
-        row = cursor.fetchone()
-        cursor.close()
-        conn.close()
+        with tracer.trace("db.connection", service="datadog-app", resource="db_connection", span_type="sql"):
+            conn = get_db_connection()
+            cursor = conn.cursor()
+
+            with tracer.trace("db.query.select_latest", service="datadog-app", resource="SELECT latest UID", span_type="sql"):
+                cursor.execute("SELECT uid, visit_time FROM visitors ORDER BY visit_time DESC LIMIT 1;")
+                row = cursor.fetchone()
+
+            cursor.close()
+            conn.close()
 
         if row:
             latest_uid, visit_time = row
