@@ -36,6 +36,10 @@ spec:
             value: datadog-app-postgres
           - name: DD_RUNTIME_METRICS_ENABLED
             value: "true"
+          - name: DD_AGENT_HOST
+            valueFrom:
+              fieldRef:
+                fieldPath: status.hostIP   # This sets the host IP where the Datadog agent is likely running
         volumeMounts:
         - name: postgres-storage
           mountPath: /var/lib/postgresql/data
