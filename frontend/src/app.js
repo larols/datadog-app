@@ -5,7 +5,7 @@ function App() {
     const [viewsData, setViewsData] = useState(null);
     const [uidData, setUidData] = useState(null);
     const [externalData1, setExternalData1] = useState(null);  // State for the first external API data
-    const [externalData2, setExternalData2] = useState(null);  // State for the second external API data
+    const [bitcoinPriceEUR, setBitcoinPriceEUR] = useState(null);  // State for the Bitcoin price in EUR
     const [activeTab, setActiveTab] = useState('home'); // Track the active tab
     const [currentTime, setCurrentTime] = useState(new Date().toLocaleTimeString()); // State for current time
     const [modalContent, setModalContent] = useState(null); // State for modal content
@@ -47,15 +47,16 @@ function App() {
             .catch(error => console.error('Error fetching external API data 1:', error));
     };
 
-    // Function to fetch data from the second external API
-    const fetchExternalData2 = () => {
+    // Function to fetch data from the second external API (Bitcoin price in EUR)
+    const fetchBitcoinPriceEUR = () => {
         fetch('/api/external2')
             .then(response => response.json())
             .then(data => {
-                setExternalData2(data.data); // Set data for the second external API
-                window.DD_LOGS?.logger.info('Fetched data from external API 2', data);
+                const eurRate = data.data.bpi.EUR.rate; // Extract the EUR rate
+                setBitcoinPriceEUR(eurRate); // Set the Bitcoin price in EUR
+                window.DD_LOGS?.logger.info('Fetched Bitcoin price in EUR', { rate: eurRate });
             })
-            .catch(error => console.error('Error fetching external API data 2:', error));
+            .catch(error => console.error('Error fetching Bitcoin price in EUR:', error));
     };
 
     // Fetch data on component mount
@@ -63,7 +64,7 @@ function App() {
         fetchViewsData();
         fetchUidData();
         fetchExternalData1(); // Fetch data from the first external API
-        fetchExternalData2(); // Fetch data from the second external API
+        fetchBitcoinPriceEUR(); // Fetch Bitcoin price in EUR from the second external API
     }, []);
 
     // Record a visit and generate a new UID
@@ -100,7 +101,7 @@ function App() {
         { id: 2, text: uidData ? `Latest UID: ${uidData.uid}, Timestamp: ${uidData.visit_time}` : 'Fetching UID...', tooltip: "This tile shows the latest UID generated." },
         { id: 3, text: `Current Time: ${currentTime}` }, // Tile for current time
         { id: 4, text: externalData1 ? `External API 1 Data: ${externalData1.title}` : 'Fetching External Data 1...', tooltip: "This tile shows data fetched from the first external API." },
-        { id: 5, text: externalData2 ? `External API 2 Data: ${externalData2.title}` : 'Fetching External Data 2...', tooltip: "This tile shows data fetched from the second external API." }
+        { id: 5, text: bitcoinPriceEUR ? `Bitcoin Price (EUR): ${bitcoinPriceEUR} €` : 'Fetching Bitcoin Price...', tooltip: "This tile shows the Bitcoin price in Euros." }
     ];
 
     const renderContent = () => {
