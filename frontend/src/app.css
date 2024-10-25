@@ -1,3 +1,4 @@
+/* Overall app styling */
 .App {
     display: flex;
     flex-direction: column;
@@ -8,6 +9,7 @@
     font-family: 'Arial', sans-serif;
 }
 
+/* Main title styling */
 h1 {
     margin-bottom: 20px;
     color: #333;
@@ -15,41 +17,47 @@ h1 {
     text-align: center;
 }
 
+/* Navbar styling */
 .navbar {
     display: flex;
-    position: absolute; /* Position it in the corner */
-    top: 20px; /* Adjust as needed */
-    left: 20px; /* Move to the left corner */
+    position: absolute;
+    top: 20px;
+    left: 20px;
 }
 
 .navbar button {
-    background-color: #9b59b6; /* Purple background */
-    color: white; /* White text */
-    border: none; /* Remove default border */
-    border-radius: 5px; /* Rounded corners */
-    margin: 0 5px; /* Spacing between buttons */
-    padding: 10px 15px; /* Padding for buttons */
-    font-size: 16px; /* Font size */
-    cursor: pointer; /* Pointer cursor on hover */
-    transition: background-color 0.3s, transform 0.2s; /* Smooth transitions */
+    background-color: #9b59b6;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    margin: 0 5px;
+    padding: 10px 15px;
+    font-size: 16px;
+    cursor: pointer;
+    transition: background-color 0.3s, transform 0.2s;
 }
 
 .navbar button:hover {
-    background-color: #8e44ad; /* Darker purple on hover */
-    transform: scale(1.05); /* Slightly enlarge on hover */
+    background-color: #8e44ad;
+    transform: scale(1.05);
 }
 
+/* Tiles container styling */
 .tiles-container {
     display: flex;
+    flex-wrap: wrap; /* Enables wrapping of tiles */
     justify-content: center;
-    overflow-x: auto;
     gap: 20px;
-    max-width: 800px;
     width: 100%;
+    max-width: 1000px; /* Allows it to scale on larger screens */
     padding: 20px;
+    box-sizing: border-box;
 }
 
+/* Tile styling */
 .tile {
+    flex: 1 1 200px; /* Flexible layout with minimum size */
+    max-width: 250px; /* Restrict max width */
     background-color: #ffffff;
     padding: 20px;
     border-radius: 8px;
@@ -66,12 +74,14 @@ h1 {
     background-color: #f7f3ff;
 }
 
+/* About section styling */
 .about {
     text-align: center;
     font-size: 18px;
     margin-top: 20px;
 }
 
+/* Modal styling */
 .modal {
     display: flex;
     position: fixed;
@@ -80,7 +90,7 @@ h1 {
     top: 0;
     width: 100%;
     height: 100%;
-    background-color: rgba(0, 0, 0, 0.5); /* Semi-transparent background */
+    background-color: rgba(0, 0, 0, 0.5);
     justify-content: center;
     align-items: center;
 }
@@ -99,4 +109,23 @@ h1 {
     top: 10px;
     cursor: pointer;
     font-size: 1.5em;
+}
+
+/* Input field styling */
+input[type="text"] {
+    padding: 10px 15px;
+    font-size: 16px;
+    border: 2px solid #9b59b6;
+    border-radius: 5px;
+    outline: none;
+    transition: border-color 0.3s, box-shadow 0.3s;
+    margin-bottom: 20px;
+    width: 80%;
+    max-width: 400px;
+    box-sizing: border-box;
+}
+
+input[type="text"]:focus {
+    border-color: #8e44ad;
+    box-shadow: 0 0 8px rgba(155, 89, 182, 0.5);
 }
