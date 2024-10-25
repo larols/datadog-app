@@ -4,11 +4,12 @@ import './app.css';
 function App() {
     const [viewsData, setViewsData] = useState(null);
     const [uidData, setUidData] = useState(null);
-    const [externalData1, setExternalData1] = useState(null);  // State for the first external API data
-    const [bitcoinPriceEUR, setBitcoinPriceEUR] = useState(null);  // State for the Bitcoin price in EUR
-    const [activeTab, setActiveTab] = useState('home'); // Track the active tab
-    const [currentTime, setCurrentTime] = useState(new Date().toLocaleTimeString()); // State for current time
-    const [modalContent, setModalContent] = useState(null); // State for modal content
+    const [externalData1, setExternalData1] = useState(null);
+    const [bitcoinPriceEUR, setBitcoinPriceEUR] = useState(null);
+    const [activeTab, setActiveTab] = useState('home');
+    const [currentTime, setCurrentTime] = useState(new Date().toLocaleTimeString());
+    const [modalContent, setModalContent] = useState(null);
+    const [userInput, setUserInput] = useState(''); // State for user input
 
     // Function to fetch views data
     const fetchViewsData = () => {
@@ -41,35 +42,34 @@ function App() {
         fetch('/api/external')
             .then(response => response.json())
             .then(data => {
-                setExternalData1(data.data); // Set data for the first external API
+                setExternalData1(data.data);
                 window.DD_LOGS?.logger.info('Fetched data from external API 1', data);
             })
             .catch(error => console.error('Error fetching external API data 1:', error));
     };
 
-    // Function to fetch data from the second external API (Bitcoin price in EUR)
+    // Function to fetch Bitcoin price in EUR
     const fetchBitcoinPriceEUR = () => {
         fetch('/api/external2')
             .then(response => response.json())
             .then(data => {
-                const eurRate = data.data.bpi.EUR.rate; // Extract the EUR rate
-                setBitcoinPriceEUR(eurRate); // Set the Bitcoin price in EUR
+                const eurRate = data.data.bpi.EUR.rate;
+                setBitcoinPriceEUR(eurRate);
                 window.DD_LOGS?.logger.info('Fetched Bitcoin price in EUR', { rate: eurRate });
             })
             .catch(error => console.error('Error fetching Bitcoin price in EUR:', error));
     };
 
-    // Fetch data on component mount
     useEffect(() => {
         fetchViewsData();
         fetchUidData();
-        fetchExternalData1(); // Fetch data from the first external API
-        fetchBitcoinPriceEUR(); // Fetch Bitcoin price in EUR from the second external API
+        fetchExternalData1();
+        fetchBitcoinPriceEUR();
     }, []);
 
     // Record a visit and generate a new UID
     useEffect(() => {
-        fetch('/api/uid', { method: 'POST' }) // Correct endpoint to record a visit
+        fetch('/api/uid', { method: 'POST' })
             .then(response => response.json())
             .then(data => {
                 console.log('Visit recorded:', data.uid);
@@ -79,10 +79,10 @@ function App() {
 
     // Function to reload UID data and generate a new UID
     const reloadUidData = () => {
-        fetch('/api/uid', { method: 'POST' }) // Generate a new UID
+        fetch('/api/uid', { method: 'POST' })
             .then(response => response.json())
             .then(() => {
-                fetchUidData(); // Fetch the latest UID after generating
+                fetchUidData();
             })
             .catch(error => console.error('Error generating new UID:', error));
     };
@@ -92,16 +92,17 @@ function App() {
         const timer = setInterval(() => {
             setCurrentTime(new Date().toLocaleTimeString());
         }, 1000);
-        return () => clearInterval(timer); // Cleanup on component unmount
+        return () => clearInterval(timer);
     }, []);
 
     // Updated tiles data including external API responses
     const tilesData = [
         { id: 1, text: viewsData ? viewsData.text : 'Loading...', tooltip: "This tile shows the number of visitors." },
         { id: 2, text: uidData ? `Latest UID: ${uidData.uid}, Timestamp: ${uidData.visit_time}` : 'Fetching UID...', tooltip: "This tile shows the latest UID generated." },
-        { id: 3, text: `Current Time: ${currentTime}` }, // Tile for current time
+        { id: 3, text: `Current Time: ${currentTime}`, tooltip: "This tile shows the current time." },
         { id: 4, text: externalData1 ? `External API 1 Data: ${externalData1.title}` : 'Fetching External Data 1...', tooltip: "This tile shows data fetched from the first external API." },
-        { id: 5, text: bitcoinPriceEUR ? `Bitcoin Price (EUR): ${bitcoinPriceEUR} €` : 'Fetching Bitcoin Price...', tooltip: "This tile shows the Bitcoin price in Euros." }
+        { id: 5, text: bitcoinPriceEUR ? `Bitcoin Price (EUR): ${bitcoinPriceEUR} €` : 'Fetching Bitcoin Price...', tooltip: "This tile shows the Bitcoin price in Euros." },
+        { id: 6, text: `User Input: ${userInput}`, tooltip: "This tile displays user input and is vulnerable to XSS.", inputField: true }
     ];
 
     const renderContent = () => {
@@ -112,15 +113,19 @@ function App() {
                         <div 
                             key={tile.id} 
                             className="tile" 
-                            onClick={() => setModalContent(tile.tooltip)} // Show tooltip on click
+                            onClick={() => setModalContent(tile.tooltip)}
                         >
-                            {tile.text}
+                            {tile.inputField ? (
+                                <div dangerouslySetInnerHTML={{ __html: userInput }} /> // XSS vulnerability
+                            ) : (
+                                tile.text
+                            )}
                         </div>
                     ))}
                 </div>
             );
         } else if (activeTab === 'about') {
-            return <div className="about">This application tracks user visits and displays the latest UID, current time, and data from two different external APIs.</div>;
+            return <div className="about">This application tracks user visits and displays various data.</div>;
         }
     };
 
@@ -130,8 +135,14 @@ function App() {
             <nav className="navbar">
                 <button onClick={() => setActiveTab('home')}>Home</button>
                 <button onClick={() => setActiveTab('about')}>About</button>
-                <button onClick={reloadUidData}>Reload UID Data</button> {/* Reloads UID data */}
+                <button onClick={reloadUidData}>Reload UID Data</button>
             </nav>
+            <input
+                type="text"
+                placeholder="Enter text for XSS test"
+                value={userInput}
+                onChange={e => setUserInput(e.target.value)}
+            />
             {renderContent()}
             {modalContent && (
                 <div className="modal">
