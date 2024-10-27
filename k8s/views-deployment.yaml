@@ -30,8 +30,6 @@ spec:
                   fieldPath: status.hostIP
             - name: DD_TRACE_ENABLED
               value: "true"
-            - name: DD_IAST_ENABLED
-              value: "true"
             - name: DD_DYNAMIC_INSTRUMENTATION_ENABLED
               value: "true"
             - name: DD_RUNTIME_METRICS_ENABLED
@@ -45,6 +43,4 @@ spec:
             - name: DD_VERSION
               value: "${VERSION}"
             - name: DD_PROFILING_TIMELINE_ENABLED
-              value: "true"
-            - name: DD_APPSEC_SCA_ENABLED
               value: "true"
