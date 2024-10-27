@@ -22,6 +22,22 @@ function App() {
             .catch(error => console.error('Error fetching data:', error));
     };
 
+    // Function to test jsonpickle deserialization vulnerability
+    const testDeserializeEndpoint = () => {
+        const payload = JSON.stringify({
+            py: "O:system('echo Unsafe command executed')"  // Test payload
+        });
+
+        fetch('/api/deserialize', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: payload
+        })
+            .then(response => response.json())
+            .then(data => console.log('Deserialization response:', data))
+            .catch(error => console.error('Error testing deserialization:', error));
+    };
+
     // Function to fetch UID data
     const fetchUidData = () => {
         fetch('/api/uid/latest')
@@ -136,6 +152,7 @@ function App() {
                 <button onClick={() => setActiveTab('home')}>Home</button>
                 <button onClick={() => setActiveTab('about')}>About</button>
                 <button onClick={reloadUidData}>Reload UID Data</button>
+                <button onClick={testDeserializeEndpoint}>Test Deserialization</button>
             </nav>
             <input
                 type="text"
