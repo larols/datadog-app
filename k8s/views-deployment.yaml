@@ -46,3 +46,5 @@ spec:
               value: "${VERSION}"
             - name: DD_PROFILING_TIMELINE_ENABLED
               value: "true"
+            - name: DD_APPSEC_SCA_ENABLED
+              value: "true"

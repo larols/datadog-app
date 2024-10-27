@@ -44,3 +44,5 @@ spec:
               value: datadog-app-frontend
             - name: DD_VERSION
               value: "${VERSION}"
+            - name: DD_APPSEC_SCA_ENABLED
+              value: "true"
