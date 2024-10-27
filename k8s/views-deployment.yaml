@@ -2,6 +2,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: datadog-app-views
+  namespace: datadog-app
   labels:
     app: datadog-app-views
 spec:
