@@ -25,7 +25,7 @@ function App() {
 
     // New function to fetch data from the new API endpoint
     const fetchNewApiData = () => {
-        fetch('/api/new-endpoint')  // Replace with your actual API endpoint
+        fetch('/api/new-endpoint')  // Ensure this endpoint exists in your Flask backend
             .then(response => response.json())
             .then(data => {
                 setNewApiData(data);  // Update state with new data
@@ -88,6 +88,7 @@ function App() {
             .catch(error => console.error('Error fetching Bitcoin price in EUR:', error));
     };
 
+    // Use effect to fetch data on component mount
     useEffect(() => {
         fetchViewsData();
         fetchUidData();

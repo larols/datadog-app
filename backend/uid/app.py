@@ -138,7 +138,7 @@ def delete_uid():
         log.error(f"Database error: {e}")
         return jsonify({"error": "Database error"}), 500
 
-@app.route('/api/ssrf', methods=['POST'])
+@app.route('/api/uid/ssrf', methods=['POST'])
 def ssrf():
     target_url = request.json.get('url', '')  # User-provided URL
     try:
