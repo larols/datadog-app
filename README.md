@@ -1,44 +1,6 @@
 # Project Name: Datadog App
 This project consists of a frontend and backend application monitored by Datadog. The structure is organized into multiple directories for clarity. Please note that this setup was built for testing purposes in my private lab.
 
-## Directory Structure
-```
-├── README.md
-├── backend
-│   ├── uid
-│   │   ├── Dockerfile
-│   │   ├── app.py
-│   │   └── requirements.txt
-│   └── views
-│       ├── Dockerfile
-│       ├── app.py
-│       └── requirements.txt
-├── frontend
-│   ├── Dockerfile
-│   ├── package.json
-│   ├── public
-│   │   ├── favicon.ico
-│   │   └── index.html
-│   └── src
-│       ├── app.css
-│       ├── app.js
-│       ├── index.css
-│       └── index.js
-├── k8s
-│   ├── frontend-deployment.yaml
-│   ├── frontend-service.yaml
-│   ├── nginx-config.yaml
-│   ├── nginx-deployment.yaml
-│   ├── nginx-service.yaml
-│   ├── postgres-deployment.yaml
-│   ├── postgres-service.yaml
-│   ├── uid-deployment.yaml
-│   ├── uid-service.yaml
-│   ├── views-deployment.yaml
-│   └── views-service.yaml
-└── static-analysis.datadog.yml
-```
-
 ## Description of Files
 
 ### README.md
