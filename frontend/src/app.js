@@ -155,10 +155,34 @@ function App() {
                             )}
                         </div>
                     ))}
+                    <div>
+                        <input
+                            type="text"
+                            placeholder="Enter URL for SSRF test or XSS"
+                            value={urlInput} // Bind URL input
+                            onChange={e => setUrlInput(e.target.value)} // Update URL input
+                        />
+                        <button onClick={testSsrEndpoint}>Submit</button> {/* Button to trigger SSRF test */}
+                        {ssrfResponse && (
+                            <div>
+                                <h3>SSRF Response:</h3>
+                                <pre>{ssrfResponse}</pre> {/* Displaying SSRF response */}
+                            </div>
+                        )}
+                    </div>
                 </div>
             );
         } else if (activeTab === 'about') {
-            return <div className="about">This application tracks user visits and displays various data.</div>;
+            return (
+                <div className="about">
+                    <p>This application tracks user visits and displays various data.</p>
+                    <p>For testing purposes:</p>
+                    <ul>
+                        <li>Use <code>https://jsonplaceholder.typicode.com/posts</code> for SSRF testing.</li>
+                        <li>Use <code>&lt;script&gt;alert("XSS Test")&lt;/script&gt;</code> for XSS testing.</li>
+                    </ul>
+                </div>
+            );
         }
     };
 
@@ -171,19 +195,6 @@ function App() {
                 <button onClick={reloadUidData}>Reload UID Data</button>
                 <button onClick={testDeserializeEndpoint}>Test Deserialization</button>
             </nav>
-            <input
-                type="text"
-                placeholder="Enter URL for SSRF test"
-                value={urlInput} // Bind URL input
-                onChange={e => setUrlInput(e.target.value)} // Update URL input
-            />
-            <button onClick={testSsrEndpoint}>Test SSRF</button> {/* Button to trigger SSRF test */}
-            {ssrfResponse && (
-                <div>
-                    <h3>SSRF Response:</h3>
-                    <pre>{ssrfResponse}</pre> {/* Displaying SSRF response */}
-                </div>
-            )}
             {renderContent()}
             {modalContent && (
                 <div className="modal">
