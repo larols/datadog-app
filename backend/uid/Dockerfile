@@ -19,5 +19,5 @@ ENV DD_GIT_COMMIT_SHA=${DD_GIT_COMMIT_SHA}
 # Expose the port
 EXPOSE 5000
 
-# Run the application with Datadog tracing
-CMD ["ddtrace-run", "python", "uid/app.py"]
+# Run the application with Datadog tracing and IAST enabled
+CMD ["sh", "-c", "DD_IAST_ENABLED=true ddtrace-run python uid/app.py"]
