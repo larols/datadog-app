@@ -177,10 +177,8 @@ function App() {
                 <div className="about">
                     <p>This application tracks user visits and displays various data.</p>
                     <p>For testing purposes:</p>
-                    <ul>
-                        <li>Use <code>https://jsonplaceholder.typicode.com/posts</code> for SSRF testing.</li>
-                        <li>Use <code>&lt;script&gt;alert("XSS Test")&lt;/script&gt;</code> for XSS testing.</li>
-                    </ul>
+                    <p>Use <code>https://jsonplaceholder.typicode.com/posts</code> for SSRF testing.</p>
+                    <p>Use <code>&lt;script&gt;alert("XSS Test")&lt;/script&gt;</code> for XSS testing.</p>
                 </div>
             );
         }
