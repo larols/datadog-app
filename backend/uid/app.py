@@ -118,5 +118,24 @@ def fetch_latest_uid():
         log.error(f"Database error: {e}")
         return jsonify({"error": "Database error"}), 500
 
+# Vulnerable delete endpoint to test Datadog Code Vulnerability Detection
+@app.route('/api/uid/delete', methods=['POST'])
+def delete_uid():
+    ctid = request.args.get('ctid', '0')  # Insecure way to get 'ctid' for deletion
+
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        cursor.execute(f"DELETE FROM visitors WHERE ctid = '{ctid}';")  # Directly inserting user input
+        conn.commit()
+        cursor.close()
+        conn.close()
+
+        log.info("Deleted UID with user-provided ctid")  # Log deletion
+        return jsonify({"message": "UID deleted successfully!"}), 200
+    except Exception as e:
+        log.error(f"Database error: {e}")
+        return jsonify({"error": "Database error"}), 500
+
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000)
