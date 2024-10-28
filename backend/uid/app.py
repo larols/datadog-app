@@ -5,6 +5,7 @@ import psycopg2
 import os
 import uuid
 from datetime import datetime
+import requests
 
 # Patch all supported libraries for Datadog tracing
 patch_all()
@@ -136,6 +137,16 @@ def delete_uid():
     except Exception as e:
         log.error(f"Database error: {e}")
         return jsonify({"error": "Database error"}), 500
+
+@app.route('/api/ssrf', methods=['POST'])
+def ssrf():
+    target_url = request.json.get('url', '')  # User-provided URL
+    try:
+        response = requests.get(target_url)  # This can lead to SSRF
+        return jsonify({"data": response.text}), 200
+    except Exception as e:
+        log.error(f"Error fetching URL: {e}")
+        return jsonify({"error": "Failed to fetch URL"}), 500
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000)

@@ -5,11 +5,12 @@ function App() {
     const [viewsData, setViewsData] = useState(null);
     const [uidData, setUidData] = useState(null);
     const [externalData1, setExternalData1] = useState(null);
+    const [newApiData, setNewApiData] = useState(null); // State for new API data
     const [bitcoinPriceEUR, setBitcoinPriceEUR] = useState(null);
     const [activeTab, setActiveTab] = useState('home');
     const [currentTime, setCurrentTime] = useState(new Date().toLocaleTimeString());
     const [modalContent, setModalContent] = useState(null);
-    const [userInput, setUserInput] = useState(''); // State for user input
+    const [userInput, setUserInput] = useState('');
 
     // Function to fetch views data
     const fetchViewsData = () => {
@@ -20,6 +21,17 @@ function App() {
                 window.DD_LOGS?.logger.info('Fetched data for views', { id: data.id, text: data.text });
             })
             .catch(error => console.error('Error fetching data:', error));
+    };
+
+    // New function to fetch data from the new API endpoint
+    const fetchNewApiData = () => {
+        fetch('/api/new-endpoint')  // Replace with your actual API endpoint
+            .then(response => response.json())
+            .then(data => {
+                setNewApiData(data);  // Update state with new data
+                window.DD_LOGS?.logger.info('Fetched data from new API', data);
+            })
+            .catch(error => console.error('Error fetching new API data:', error));
     };
 
     // Function to test jsonpickle deserialization vulnerability
@@ -81,6 +93,7 @@ function App() {
         fetchUidData();
         fetchExternalData1();
         fetchBitcoinPriceEUR();
+        fetchNewApiData(); // Fetch new API data on mount
     }, []);
 
     // Record a visit and generate a new UID
@@ -118,7 +131,8 @@ function App() {
         { id: 3, text: `Current Time: ${currentTime}`, tooltip: "This tile shows the current time." },
         { id: 4, text: externalData1 ? `External API 1 Data: ${externalData1.title}` : 'Fetching External Data 1...', tooltip: "This tile shows data fetched from the first external API." },
         { id: 5, text: bitcoinPriceEUR ? `Bitcoin Price (EUR): ${bitcoinPriceEUR} €` : 'Fetching Bitcoin Price...', tooltip: "This tile shows the Bitcoin price in Euros." },
-        { id: 6, text: `User Input: ${userInput}`, tooltip: "This tile displays user input and is vulnerable to XSS.", inputField: true }
+        { id: 6, text: newApiData ? `New API Data: ${JSON.stringify(newApiData)}` : 'Fetching New API Data...', tooltip: "This tile shows data fetched from the new API." },
+        { id: 7, text: `User Input: ${userInput}`, tooltip: "This tile displays user input and is vulnerable to XSS.", inputField: true }
     ];
 
     const renderContent = () => {

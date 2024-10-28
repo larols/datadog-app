@@ -74,6 +74,12 @@ h1 {
     background-color: #f7f3ff;
 }
 
+/* New API tile styling */
+.tile.new-api {
+    border-color: #3498db; /* Different border color for new API tile */
+    background-color: #eaf9ff; /* Light background color for new API tile */
+}
+
 /* About section styling */
 .about {
     text-align: center;
