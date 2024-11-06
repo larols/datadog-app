@@ -5,11 +5,6 @@ import logging
 import requests
 import jsonpickle  # Import jsonpickle for testing deserialization vulnerability
 
-# ANSI color codes
-RED = "\u001b[31m"
-GREEN = "\u001b[32m"
-RESET = "\u001b[0m"
-
 # Patch all supported libraries for Datadog tracing
 patch_all()
 patch(logging=True)  # Enable tracing for logging
@@ -56,12 +51,10 @@ def fetch_external_data():
         response = requests.get(EXTERNAL_API_URL_1, timeout=5)
         response.raise_for_status()
         data = response.json()
-        # Success log in green
-        log.info(f"{GREEN}Successfully fetched external data from URL 1.{RESET}")
+        log.info("Successfully fetched external data from URL 1.")
         return jsonify({"message": "External data fetched successfully from URL 1", "data": data}), 200
     except requests.RequestException as e:
-        # Error log in red
-        log.error(f"{RED}Failed to fetch external data from URL 1: {e}{RESET}")
+        log.error(f"Failed to fetch external data from URL 1: {e}")
         return jsonify({"error": "Failed to fetch external data"}), 500
 
 @app.route('/api/external2', methods=['GET'])
@@ -70,13 +63,10 @@ def fetch_external_data2():
         response = requests.get(EXTERNAL_API_URL_2, timeout=5)
         response.raise_for_status()
         data = response.json()
-        # Success log in green
-        log.info(f"{GREEN}Successfully fetched external data from URL 2.{RESET}")
+        log.info("Successfully fetched external data from URL 2.")
         return jsonify({"message": "External data fetched successfully from URL 2", "data": data}), 200
-    except requests.RequestException as e:    
-        # Error log in red
-        log.error(f"{RED}Failed to fetch external data from URL 2: {e}{RESET}")
-        
+    except requests.RequestException as e:
+        log.error(f"Failed to fetch external data from URL 2: {e}")
         return jsonify({"error": "Failed to fetch external data"}), 500
     
 
