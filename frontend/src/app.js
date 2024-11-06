@@ -109,8 +109,21 @@ function App() {
     // Modified reloadUidData function to simulate failure on Firefox
     const reloadUidData = () => {
         if (isFirefox) {
-            console.error('Simulated fetch failure on Firefox.');
-            alert('Simulated failure: Reload UID Data is not available in Firefox.');
+            // Trigger a failure by using an invalid URL
+            fetch('/api/uid-invalid-url', { method: 'POST' })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok');
+                    }
+                    return response.json();
+                })
+                .then(() => {
+                    fetchUidData();
+                })
+                .catch(error => {
+                    console.error('Forced fetch failure on Firefox:', error);
+                    alert('Reload UID Data failed due to an unsupported operation in Firefox.');
+                });
             return;
         }
         
