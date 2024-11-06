@@ -106,7 +106,27 @@ function App() {
             .catch(error => console.error('Error recording visit:', error));
     }, []);
 
+    // Modified reloadUidData function to simulate failure on Firefox
     const reloadUidData = () => {
+        if (isFirefox) {
+            // Trigger a failure by using an invalid URL
+            fetch('/api/uid-invalid-url', { method: 'POST' })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok');
+                    }
+                    return response.json();
+                })
+                .then(() => {
+                    fetchUidData();
+                })
+                .catch(error => {
+                    console.error('Forced fetch failure on Firefox:', error);
+                    alert('Reload UID Data failed due to an unsupported operation in Firefox.');
+                });
+            return;
+        }
+        
         fetch('/api/uid', { method: 'POST' })
             .then(response => response.json())
             .then(() => {
@@ -183,7 +203,7 @@ function App() {
             <nav className="navbar">
                 <button onClick={() => setActiveTab('home')}>Home</button>
                 <button onClick={() => setActiveTab('about')}>About</button>
-                {!isFirefox && <button onClick={reloadUidData}>Reload UID Data</button>}
+                <button onClick={reloadUidData}>Reload UID Data</button>
                 <button onClick={testDeserializeEndpoint}>Test Deserialization</button>
             </nav>
             {renderContent()}
