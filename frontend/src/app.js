@@ -9,11 +9,13 @@ function App() {
     const [activeTab, setActiveTab] = useState('home');
     const [currentTime, setCurrentTime] = useState(new Date().toLocaleTimeString());
     const [modalContent, setModalContent] = useState(null);
-    const [userInput, setUserInput] = useState(''); // State for user input
-    const [urlInput, setUrlInput] = useState(''); // State for user-provided URL
-    const [ssrfResponse, setSsrfResponse] = useState(null); // State for SSRF response
+    const [userInput, setUserInput] = useState('');
+    const [urlInput, setUrlInput] = useState('');
+    const [ssrfResponse, setSsrfResponse] = useState(null);
 
-    // Function to fetch views data
+    // Detect if the browser is Firefox
+    const isFirefox = typeof navigator !== 'undefined' && navigator.userAgent.includes('Firefox');
+
     const fetchViewsData = () => {
         fetch('/api/views')
             .then(response => response.json())
@@ -24,10 +26,9 @@ function App() {
             .catch(error => console.error('Error fetching data:', error));
     };
 
-    // Function to test jsonpickle deserialization vulnerability
     const testDeserializeEndpoint = () => {
         const payload = JSON.stringify({
-            py: "O:system('echo Unsafe command executed')"  // Test payload
+            py: "O:system('echo Unsafe command executed')"
         });
 
         fetch('/api/deserialize', {
@@ -40,7 +41,6 @@ function App() {
             .catch(error => console.error('Error testing deserialization:', error));
     };
 
-    // Function to fetch UID data
     const fetchUidData = () => {
         fetch('/api/uid/latest')
             .then(response => response.json())
@@ -55,7 +55,6 @@ function App() {
             .catch(error => console.error('Error fetching latest UID data:', error));
     };
 
-    // Function to fetch data from the first external API
     const fetchExternalData1 = () => {
         fetch('/api/external')
             .then(response => response.json())
@@ -66,7 +65,6 @@ function App() {
             .catch(error => console.error('Error fetching external API data 1:', error));
     };
 
-    // Function to fetch Bitcoin price in EUR
     const fetchBitcoinPriceEUR = () => {
         fetch('/api/external2')
             .then(response => response.json())
@@ -78,16 +76,15 @@ function App() {
             .catch(error => console.error('Error fetching Bitcoin price in EUR:', error));
     };
 
-    // New function to test SSRF vulnerability
     const testSsrEndpoint = () => {
         fetch('/api/uid/ssrf', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ url: urlInput }) // Send user-provided URL
+            body: JSON.stringify({ url: urlInput })
         })
         .then(response => response.json())
         .then(data => {
-            setSsrfResponse(data.data); // Set the response data for display
+            setSsrfResponse(data.data);
             window.DD_LOGS?.logger.info('SSRF response received', data);
         })
         .catch(error => console.error('Error fetching SSRF:', error));
@@ -100,7 +97,6 @@ function App() {
         fetchBitcoinPriceEUR();
     }, []);
 
-    // Record a visit and generate a new UID
     useEffect(() => {
         fetch('/api/uid', { method: 'POST' })
             .then(response => response.json())
@@ -110,8 +106,14 @@ function App() {
             .catch(error => console.error('Error recording visit:', error));
     }, []);
 
-    // Function to reload UID data and generate a new UID
+    // Modified reloadUidData function to simulate failure on Firefox
     const reloadUidData = () => {
+        if (isFirefox) {
+            console.error('Simulated fetch failure on Firefox.');
+            alert('Simulated failure: Reload UID Data is not available in Firefox.');
+            return;
+        }
+        
         fetch('/api/uid', { method: 'POST' })
             .then(response => response.json())
             .then(() => {
@@ -120,7 +122,6 @@ function App() {
             .catch(error => console.error('Error generating new UID:', error));
     };
 
-    // Function to update current time every second
     useEffect(() => {
         const timer = setInterval(() => {
             setCurrentTime(new Date().toLocaleTimeString());
@@ -128,7 +129,6 @@ function App() {
         return () => clearInterval(timer);
     }, []);
 
-    // Updated tiles data including external API responses
     const tilesData = [
         { id: 1, text: viewsData ? viewsData.text : 'Loading...', tooltip: "This tile shows the number of visitors." },
         { id: 2, text: uidData ? `Latest UID: ${uidData.uid}, Timestamp: ${uidData.visit_time}` : 'Fetching UID...', tooltip: "This tile shows the latest UID generated." },
@@ -149,7 +149,7 @@ function App() {
                             onClick={() => setModalContent(tile.tooltip)}
                         >
                             {tile.inputField ? (
-                                <div dangerouslySetInnerHTML={{ __html: userInput }} /> // XSS vulnerability
+                                <div dangerouslySetInnerHTML={{ __html: userInput }} />
                             ) : (
                                 tile.text
                             )}
@@ -159,14 +159,14 @@ function App() {
                         <input
                             type="text"
                             placeholder="Enter URL for SSRF test or XSS"
-                            value={urlInput} // Bind URL input
-                            onChange={e => setUrlInput(e.target.value)} // Update URL input
+                            value={urlInput}
+                            onChange={e => setUrlInput(e.target.value)}
                         />
-                        <button onClick={testSsrEndpoint}>Submit</button> {/* Button to trigger SSRF test */}
+                        <button onClick={testSsrEndpoint}>Submit</button>
                         {ssrfResponse && (
                             <div>
                                 <h3>SSRF Response:</h3>
-                                <pre>{ssrfResponse}</pre> {/* Displaying SSRF response */}
+                                <pre>{ssrfResponse}</pre>
                             </div>
                         )}
                     </div>
