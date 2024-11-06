@@ -86,7 +86,7 @@ jobs:
     - name: Configure kubectl
       run: |
         mkdir -p $HOME/.kube
-        echo "${{ secrets.KUBECONFIG }}" > $HOME/.kube/config
+        echo "${{ secrets.KUBECONFIG_BASE64 }}" | base64 --decode > ~/.kube/config
 
     - name: Generate frontend deployment with VERSION
       run: |
