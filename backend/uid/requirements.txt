@@ -1,4 +1,4 @@
 Flask
 psycopg2-binary
-ddtrace
+ddtrace==2.16.0
 requests

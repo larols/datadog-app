@@ -1,5 +1,5 @@
 Flask
-ddtrace
+ddtrace==2.16.0
 datadog
 requests
 jsonpickle==1.4.1 # https://nvd.nist.gov/vuln/detail/CVE-2020-22083
