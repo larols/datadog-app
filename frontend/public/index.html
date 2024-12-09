@@ -28,6 +28,9 @@
             trackLongTasks: true,
             defaultPrivacyLevel: 'allow',
         });
+
+        // Add feature flag tracking for "new_version" with a value of true
+        window.DD_RUM && window.DD_RUM.addFeatureFlagEvaluation('new_version', true);
     </script>
 
     <!-- Datadog Logs Script -->
