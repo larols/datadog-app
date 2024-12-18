@@ -6,9 +6,8 @@ from opentelemetry.sdk.resources import Resource
 from opentelemetry.sdk.trace import TracerProvider
 from opentelemetry.sdk.trace.export import BatchSpanProcessor
 from opentelemetry.exporter.otlp.proto.grpc.trace_exporter import OTLPSpanExporter
-from opentelemetry.instrumentation.flask import FlaskInstrumentor
+from opentelemetry.instrumentation.flask import FlaskInstrumentor  # Werkzeug is already included here
 from opentelemetry.instrumentation.logging import LoggingInstrumentor  
-from opentelemetry.instrumentation.werkzeug import WerkzeugInstrumentor  # Add this import
 
 # OpenTelemetry Resource Configuration
 resource = Resource(attributes={
@@ -24,10 +23,9 @@ processor = BatchSpanProcessor(OTLPSpanExporter(endpoint=otlp_endpoint))
 provider.add_span_processor(processor)
 trace.set_tracer_provider(provider)
 
-# Enable Flask, Werkzeug, and Logging Instrumentation for OTel
+# Enable Flask and Logging Instrumentation for OTel
 FlaskInstrumentor().instrument_app(app)
 LoggingInstrumentor().instrument(set_logging_format=True)
-WerkzeugInstrumentor().instrument()  # Ensure Werkzeug logs have context
 
 # Initialize Flask app
 app = Flask(__name__)
