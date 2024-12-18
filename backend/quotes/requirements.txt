@@ -7,4 +7,4 @@ opentelemetry-exporter-otlp
 opentelemetry-instrumentation-flask
 opentelemetry-instrumentation-psycopg2
 opentelemetry-instrumentation-logging
-opentelemetry-instrumentation-werkzeug
+
