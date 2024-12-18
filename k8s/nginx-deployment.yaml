@@ -1,0 +1,49 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: datadog-app-nginx
+  namespace: datadog-app
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: datadog-app-nginx
+  template:
+    metadata:
+      labels:
+        app: datadog-app-nginx
+      annotations:
+        ad.datadoghq.com/datadog-app-nginx.logs: '[{"source":"nginx","service":"datadog-app-nginx"}]'
+        ad.datadoghq.com/datadog-app-nginx.checks: |
+          {
+            "nginx": {
+              "init_config": {},
+              "instances": [
+                {
+                  "nginx_status_url":"http://%%host%%:81/nginx_status/"
+                }
+              ]
+            }
+          }
+    spec:
+      containers:
+      - name: datadog-app-nginx
+        image: nginx:alpine
+        ports:
+        - containerPort: 80
+        volumeMounts:
+        - name: nginx-config
+          mountPath: /etc/nginx/conf.d
+        env:
+          - name: DD_VERSION
+            value: "${VERSION}"
+          - name: DD_ENV
+            value: production
+          - name: DD_SERVICE
+            value: datadog-app-nginx
+          - name: DD_RUNTIME_METRICS_ENABLED
+            value: "true"
+      volumes:
+      - name: nginx-config
+        configMap:
+          name: nginx-config

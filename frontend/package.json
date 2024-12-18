@@ -1,0 +1,14 @@
+{
+    "name": "datadog-app-frontend",
+    "version": "1.0.0",
+    "private": true,
+    "dependencies": {
+    "react": "*",
+    "react-dom": "*",
+    "react-scripts": "*"
+    },
+    "scripts": {
+      "start": "react-scripts start",
+      "build": "react-scripts build"
+    }
+  }

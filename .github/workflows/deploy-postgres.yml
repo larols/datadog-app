@@ -1,0 +1,70 @@
+name: Deploy PostgreSQL
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'k8s/postgres-deployment.yaml'
+      - 'k8s/postgres-service.yaml'
+      - '.github/workflows/deploy-postgres.yaml'
+
+jobs:
+  deploy:
+    name: Deploy to k8s
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    env:
+      DD_BETA_COMMANDS_ENABLED: 1
+      DD_GITHUB_JOB_NAME: Deploy to k8s
+      DD_SITE: datadoghq.eu
+      DD_API_KEY: ${{ secrets.DD_API_KEY }}
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    - name: Set commit sha for version
+      id: set_commit_sha
+      run: |
+        # Extract the commit SHA
+        VERSION=$(echo ${{ github.sha }} | cut -c1-7)
+        echo "VERSION=${VERSION}" >> $GITHUB_ENV
+
+    - name: Tag pipeline in Datadog
+      run: npx @datadog/datadog-ci tag --level pipeline --tags team:datadog-app
+
+    - name: Set deployment start time
+      id: set_deploy_start
+      run: echo "deploy_start=$(date +%s)" >> $GITHUB_ENV
+
+    - name: Configure kubectl
+      run: |
+        mkdir -p $HOME/.kube
+        echo "${{ secrets.KUBECONFIG_BASE64 }}" | base64 --decode > ~/.kube/config
+
+    - name: Generate PostgreSQL deployment with VERSION
+      run: |
+        # Use envsubst to substitute VERSION in the deployment template
+        export VERSION=$(echo ${{ github.sha }} | cut -c1-7)
+        envsubst < k8s/postgres-deployment.yaml > k8s/postgres-deployment-template.yaml
+
+    - name: Deploy PostgreSQL to Kubernetes
+      run: |
+        kubectl apply -f k8s/postgres-service.yaml --insecure-skip-tls-verify
+        kubectl apply -f k8s/postgres-config.yaml --insecure-skip-tls-verify
+        kubectl apply -f k8s/postgres-storage.yaml --insecure-skip-tls-verify
+        kubectl apply -f k8s/postgres-deployment-template.yaml --insecure-skip-tls-verify
+
+    - name: Mark deployment in Datadog
+      run: |
+        npx @datadog/datadog-ci deployment mark --env production --service datadog-app-postgres --revision "${{ github.sha }}"
+          
+    - name: Track deployment in Datadog
+      env:
+        DD_BETA_COMMANDS_ENABLED: 1
+        DD_SITE: 'datadoghq.eu'
+        DD_API_KEY: ${{ secrets.DD_API_KEY }}
+      run: |
+        npx @datadog/datadog-ci dora deployment --service datadog-app-postgres --env production --started-at ${{ env.deploy_start }} --finished-at $(date +%s) --git-repository-url "${{ github.event.repository.html_url }}" --git-commit-sha ${{ github.sha }}

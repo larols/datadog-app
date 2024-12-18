@@ -1,0 +1,131 @@
+name: Build and Deploy Frontend
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'frontend/**'
+      - 'k8s/frontend-deployment.yaml'
+      - 'k8s/frontend-service.yaml'
+      - '.github/workflows/build-and-deploy-frontend.yml'
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    env:
+      DD_BETA_COMMANDS_ENABLED: 1
+      DD_SITE: datadoghq.eu
+      DD_API_KEY: ${{ secrets.DD_API_KEY }}
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    - name: Set commit sha for RUM version
+      id: set_commit_sha
+      run: |
+        # Extract the commit SHA
+        VERSION=$(echo ${{ github.sha }} | cut -c1-7)
+        echo "VERSION=${VERSION}" >> $GITHUB_ENV
+
+    - name: Update version in index.html
+      run: |
+        # Replace the placeholder VERSION in index.html with the commit SHA
+        sed -i "s/version: 'VERSION'/version: '${{ env.VERSION }}'/g" frontend/public/index.html
+
+    - name: Log in to Docker Hub
+      uses: docker/login-action@v2
+      with:
+        username: ${{ secrets.DOCKER_USERNAME }}
+        password: ${{ secrets.DOCKER_PASSWORD }}
+
+    - name: Build Docker image with Datadog build args
+      run: |
+        # Get Git repository URL and commit SHA
+        REPO_URL=$(git config --get remote.origin.url)
+        COMMIT_SHA=$(git rev-parse HEAD)
+
+        # Build Docker image with build arguments
+        docker build -f frontend/Dockerfile frontend/ \
+          -t ${{ secrets.DOCKER_USERNAME }}/datadog-app-frontend:latest \
+          --build-arg DD_GIT_REPOSITORY_URL="$REPO_URL" \
+          --build-arg DD_GIT_COMMIT_SHA="$COMMIT_SHA" \
+          --build-arg DD_VERSION=${{ env.VERSION }}
+  
+    - name: Send measure to Datadog (Build Size)
+      run: |
+        npx @datadog/datadog-ci measure \
+          --level pipeline \
+          --measures "build_time:$(date +%s)" \
+          --measures "docker_image_size:$(docker images --format '{{.Size}}' | head -1 | tr -d '[:alpha:][:space:]')"
+
+    - name: Push Docker image
+      run: |
+        docker push ${{ secrets.DOCKER_USERNAME }}/datadog-app-frontend:latest
+
+  deploy:
+    name: Deploy to k8s
+    runs-on: ubuntu-latest
+    needs: build-and-push
+    timeout-minutes: 5
+
+    env:
+      DD_BETA_COMMANDS_ENABLED: 1
+      DD_GITHUB_JOB_NAME: Deploy to k8s
+      DD_SITE: datadoghq.eu
+      DD_API_KEY: ${{ secrets.DD_API_KEY }}
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    - name: Set commit sha for version
+      id: set_commit_sha
+      run: |
+        VERSION=$(echo ${{ github.sha }} | cut -c1-7)
+        echo "VERSION=${VERSION}" >> $GITHUB_ENV
+
+    - name: Tag pipeline in Datadog
+      run: npx @datadog/datadog-ci tag --level pipeline --tags team:datadog-app
+
+    - name: Set deployment start time
+      id: set_deploy_start
+      run: echo "deploy_start=$(date +%s)" >> $GITHUB_ENV
+
+    - name: Configure kubectl
+      run: |
+        mkdir -p $HOME/.kube
+        echo "${{ secrets.KUBECONFIG_BASE64 }}" | base64 --decode > ~/.kube/config
+
+    - name: Generate frontend deployment with VERSION
+      run: |
+        # Use envsubst to substitute VERSION in the deployment template
+        export VERSION=$(echo ${{ github.sha }} | cut -c1-7)
+        envsubst < k8s/frontend-deployment.yaml > k8s/frontend-deployment-template.yaml
+
+    - name: Deploy Frontend to Kubernetes
+      run: |
+        kubectl apply -f k8s/frontend-deployment-template.yaml --insecure-skip-tls-verify
+        kubectl apply -f k8s/frontend-service.yaml --insecure-skip-tls-verify
+
+    - name: Mark deployment in Datadog
+      run: |
+        npx @datadog/datadog-ci deployment mark --env production --service datadog-app-frontend --revision "${{ github.sha }}"
+      
+    - name: Track deployment in Datadog
+      env:
+        DD_BETA_COMMANDS_ENABLED: 1
+        DD_SITE: 'datadoghq.eu'
+        DD_API_KEY: ${{ secrets.DD_API_KEY }}
+      run: |
+        npx @datadog/datadog-ci dora deployment --service datadog-app-frontend --env production --started-at ${{ env.deploy_start }} --finished-at $(date +%s) --git-repository-url "${{ github.event.repository.html_url }}" --git-commit-sha ${{ github.sha }}
+ 
+    - name: Send measure to Datadog (Error Rate)
+      run: |
+        npx @datadog/datadog-ci measure \
+          --level pipeline \
+          --measures "custom_error_rate:0.56" \
+          --measures "custom_deploy_time:$(($(date +%s) - ${{ env.deploy_start }}))"

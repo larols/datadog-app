@@ -1,0 +1,53 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: datadog-app-uid
+  namespace: datadog-app
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: datadog-app-uid
+  template:
+    metadata:
+      labels:
+        app: datadog-app-uid
+      annotations:
+        ad.datadoghq.com/datadog-app-uid.logs: '[{"source":"python","service":"datadog-app-uid"}]'
+    spec:
+      containers:
+      - name: datadog-app-uid
+        image: laols/datadog-app-uid:latest
+        ports:
+        - containerPort: 5000
+        env:
+          - name: DD_TRACE_AGENT_URL
+            value: 'http://datadog-agent.default:8126'         
+          - name: DD_AGENT_HOST   
+            valueFrom:
+              fieldRef:
+                fieldPath: status.hostIP 
+          - name: POSTGRES_USER
+            value: "datadog"
+          - name: POSTGRES_PASSWORD
+            value: "Datadog1!"
+          - name: POSTGRES_DB
+            value: "datadog-app-db"
+          - name: POSTGRES_HOST
+            value: "datadog-app-postgres"
+          - name: DD_VERSION
+            value: "${VERSION}"
+          - name: DD_ENV
+            value: production
+          - name: DD_SERVICE
+            value: datadog-app-uid
+          - name: DD_RUNTIME_METRICS_ENABLED
+            value: "true"
+          - name: DD_TRACE_ENABLED
+            value: "true"
+          - name: DD_DYNAMIC_INSTRUMENTATION_ENABLED
+            value: "true"
+          - name: DD_PROFILING_ENABLED
+            value: "true"
+          - name: DD_PROFILING_TIMELINE_ENABLED
+            value: "true"

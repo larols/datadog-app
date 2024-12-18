@@ -1,0 +1,56 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: datadog-app-postgres
+  namespace: datadog-app
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: datadog-app-postgres
+  template:
+    metadata:
+      labels:
+        app: datadog-app-postgres
+      annotations:
+        ad.datadoghq.com/datadog-app-postgres.logs: '[{"source":"postgres","service":"datadog-app-postgres"}]'
+    spec:
+      nodeSelector:
+        postgres-node: "true"
+      containers:
+      - name: datadog-app-postgres
+        image: postgres:latest
+        ports:
+        - containerPort: 5432
+        env:
+          - name: POSTGRES_USER
+            value: "datadog"
+          - name: POSTGRES_PASSWORD
+            value: "Datadog1!"
+          - name: POSTGRES_DB
+            value: "datadog-app-db"
+          - name: DD_VERSION
+            value: "${VERSION}"
+          - name: DD_ENV
+            value: production
+          - name: DD_SERVICE
+            value: datadog-app-postgres
+          - name: DD_RUNTIME_METRICS_ENABLED
+            value: "true"
+          - name: DD_AGENT_HOST
+            valueFrom:
+              fieldRef:
+                fieldPath: status.hostIP   # This sets the host IP where the Datadog agent is likely running
+        volumeMounts:
+        - name: postgres-storage
+          mountPath: /var/lib/postgresql/data
+        - name: postgres-config-volume
+          mountPath: /etc/postgresql/postgresql.conf
+          subPath: postgresql.conf
+      volumes:
+      - name: postgres-storage
+        persistentVolumeClaim:
+          claimName: postgres-data
+      - name: postgres-config-volume
+        configMap:
+          name: postgres-config

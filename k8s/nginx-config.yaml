@@ -1,0 +1,88 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: nginx-config
+  namespace: datadog-app
+data:
+  default.conf: |
+    server {
+        listen 80;
+
+        # Route requests to the frontend service
+        location / {
+            proxy_pass http://datadog-app-frontend;  # Use the frontend service name
+            proxy_set_header Host $host;
+            proxy_set_header X-Real-IP $remote_addr;
+            proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+            proxy_set_header X-Forwarded-Proto $scheme;
+        }
+
+        # Route to the views backend service (including /api/external and /api/external2)
+        location /api/views {
+            proxy_pass http://datadog-app-views;
+            proxy_set_header Host $host;
+            proxy_set_header X-Real-IP $remote_addr;
+            proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+            proxy_set_header X-Forwarded-Proto $scheme;
+        }
+
+        # Route the external API endpoint to the same views service
+        location /api/external {
+            proxy_pass http://datadog-app-views;  # Route to the same service as views
+            proxy_set_header Host $host;
+            proxy_set_header X-Real-IP $remote_addr;
+            proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+            proxy_set_header X-Forwarded-Proto $scheme;
+        }
+
+        # Route the second external API endpoint to the same views service
+        location /api/external2 {
+            proxy_pass http://datadog-app-views;  # Route to the same service as views
+            proxy_set_header Host $host;
+            proxy_set_header X-Real-IP $remote_addr;
+            proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+            proxy_set_header X-Forwarded-Proto $scheme;
+        }
+
+        # Route to the UID backend service
+        location /api/uid {
+            proxy_pass http://datadog-app-uid;
+            proxy_set_header Host $host;
+            proxy_set_header X-Real-IP $remote_addr;
+            proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+            proxy_set_header X-Forwarded-Proto $scheme;
+        }
+
+        # Route to the deserialize endpoint
+        location /api/deserialize {
+            proxy_pass http://datadog-app-views;  # Route to the same service as views
+            proxy_set_header Host $host;
+            proxy_set_header X-Real-IP $remote_addr;
+            proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+            proxy_set_header X-Forwarded-Proto $scheme;
+        }
+
+        # Route to the Quotes service
+        location /api/quotes {
+            proxy_pass http://datadog-app-quotes;
+            proxy_set_header Host $host;
+            proxy_set_header X-Real-IP $remote_addr;
+            proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+            proxy_set_header X-Forwarded-Proto $scheme;
+        }
+    }
+  status.conf: |
+    server {
+        listen 81;
+        server_name localhost;
+
+        access_log off;
+        allow 127.0.0.1;
+        allow 10.244.0.0/16;
+        deny all;
+
+        location /nginx_status {
+            stub_status;  # or use 'status;' if you have NGINX Plus
+            server_tokens on;
+        }
+    }

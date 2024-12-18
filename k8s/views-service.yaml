@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: datadog-app-views
+  namespace: datadog-app
+  labels:
+    app: datadog-app-views
+spec:
+  type: ClusterIP
+  ports:
+    - port: 80 
+      targetPort: 5000
+  selector:
+    app: datadog-app-views

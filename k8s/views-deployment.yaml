@@ -1,0 +1,47 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: datadog-app-views
+  namespace: datadog-app
+  labels:
+    app: datadog-app-views
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: datadog-app-views
+  template:
+    metadata:
+      labels:
+        app: datadog-app-views
+      annotations:
+        ad.datadoghq.com/datadog-app-views.logs: '[{"source":"python","service":"datadog-app-views"}]'
+    spec:
+      containers:
+        - name: datadog-app-views
+          image: laols/datadog-app-views:latest  # Ensure the Docker image name is correct
+          ports:
+            - containerPort: 5000  # Match the port the Flask app is running on
+          env:  # Adding environment variables for Datadog
+            - name: DD_TRACE_AGENT_URL
+              value: 'http://datadog-agent.default:8126'
+            - name: DD_AGENT_HOST
+              valueFrom:
+                fieldRef:
+                  fieldPath: status.hostIP
+            - name: DD_TRACE_ENABLED
+              value: "true"
+            - name: DD_DYNAMIC_INSTRUMENTATION_ENABLED
+              value: "true"
+            - name: DD_RUNTIME_METRICS_ENABLED
+              value: "true"
+            - name: DD_PROFILING_ENABLED
+              value: "true"
+            - name: DD_ENV
+              value: production
+            - name: DD_SERVICE
+              value: datadog-app-views
+            - name: DD_VERSION
+              value: "${VERSION}"
+            - name: DD_PROFILING_TIMELINE_ENABLED
+              value: "true"

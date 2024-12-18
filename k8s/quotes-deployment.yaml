@@ -1,0 +1,40 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: datadog-app-quotes
+  namespace: datadog-app
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: datadog-app-quotes
+  template:
+    metadata:
+      labels:
+        app: datadog-app-quotes
+        version: "${VERSION}"
+    spec:
+      containers:
+      - name: datadog-app-quotes
+        image: laols/datadog-app-quotes:latest
+        ports:
+        - containerPort: 5000
+        env:
+          # OpenTelemetry Variables
+          - name: OTEL_EXPORTER_OTLP_ENDPOINT
+            value: 'http://otel-collector.datadog-app:4317'
+          - name: OTEL_SERVICE_NAME
+            value: "datadog-app-quotes"
+          - name: OTEL_RESOURCE_ATTRIBUTES
+            value: "service.name=datadog-app-quotes,service.version=${VERSION},service.environment=production"
+
+          # Database Variables
+          - name: POSTGRES_USER
+            value: "datadog"
+          - name: POSTGRES_PASSWORD
+            value: "Datadog1!"
+          - name: POSTGRES_DB
+            value: "datadog-app-db"
+          - name: POSTGRES_HOST
+            value: "datadog-app-postgres"
+            

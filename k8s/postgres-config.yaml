@@ -1,0 +1,8 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: postgres-config
+  namespace: datadog-app
+data:
+  postgresql.conf: |
+    shared_preload_libraries = 'pg_stat_statements'
