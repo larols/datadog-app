@@ -8,6 +8,7 @@ from opentelemetry.sdk.trace.export import BatchSpanProcessor
 from opentelemetry.exporter.otlp.proto.grpc.trace_exporter import OTLPSpanExporter
 from opentelemetry.instrumentation.flask import FlaskInstrumentor
 from opentelemetry.instrumentation.logging import LoggingInstrumentor  
+from opentelemetry.instrumentation.werkzeug import WerkzeugInstrumentor  # Add this import
 
 # OpenTelemetry Resource Configuration
 resource = Resource(attributes={
@@ -23,20 +24,19 @@ processor = BatchSpanProcessor(OTLPSpanExporter(endpoint=otlp_endpoint))
 provider.add_span_processor(processor)
 trace.set_tracer_provider(provider)
 
-# Enable Logging Instrumentation for OTel
-LoggingInstrumentor().instrument(set_logging_format=True)
-
-# Initialize Flask and Instrument with OTel
-app = Flask(__name__)
+# Enable Flask, Werkzeug, and Logging Instrumentation for OTel
 FlaskInstrumentor().instrument_app(app)
+LoggingInstrumentor().instrument(set_logging_format=True)
+WerkzeugInstrumentor().instrument()  # Ensure Werkzeug logs have context
+
+# Initialize Flask app
+app = Flask(__name__)
 
 # Set Up Logging Format 
 FORMAT = ('%(asctime)s %(levelname)s [%(name)s] [%(filename)s:%(lineno)d] '
-          '[otel.trace_id=%(otelTraceId)s otel.span_id=%(otelSpanId)s] '
-          '- %(message)s')
-logging.basicConfig(format=FORMAT)
+          '[otel.trace_id=%(otelTraceId)s otel.span_id=%(otelSpanId)s] - %(message)s')
+logging.basicConfig(format=FORMAT, level=logging.INFO)
 log = logging.getLogger(__name__)
-log.setLevel(logging.INFO)
 
 # Predefined list of quotes
 QUOTES = [
@@ -65,4 +65,4 @@ def fetch_random_quote():
         return jsonify({"error": "Internal server error"}), 500
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=5000)  # Listen on all interfaces, port 5000
+    app.run(host='0.0.0.0', port=5000)
