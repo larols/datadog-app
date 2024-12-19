@@ -152,6 +152,11 @@ function App() {
             alert('Authentication failed');
         }
     };
+
+    const logoutUser = () => {
+        setAuthenticated(false);
+        alert('You have been logged out.');
+    };
     
 
     const renderContent = () => {
@@ -197,9 +202,9 @@ function App() {
                         <li>Access system settings</li>
                         <li>Manage application state</li>
                     </ul>
+                    <button onClick={logoutUser}>Logout</button> {/* Add this logout button here */}
                 </div>
             );
-        }
         
         
 
