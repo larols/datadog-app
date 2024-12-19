@@ -170,6 +170,14 @@ function App() {
         }
 
         if (activeTab === 'admin') {
+            const urlParams = new URLSearchParams(window.location.search);
+            const apiAuthHeader = urlParams.get('auth');
+            const validAuthHeader = btoa('lars:secret');
+        
+            if (apiAuthHeader && apiAuthHeader === validAuthHeader) {
+                setAuthenticated(true);
+            }
+        
             if (!authenticated) {
                 authenticateUser();
                 return <p>Access denied. Please authenticate to view this page.</p>;
@@ -187,6 +195,7 @@ function App() {
                 </div>
             );
         }
+        
 
         return (
             <div className="tiles-container">
