@@ -150,7 +150,6 @@ function App() {
         
         if (username === USERNAME && password === PASSWORD) {
             setAuthenticated(true);
-            alert('Authentication successful');
         } else {
             alert('Authentication failed');
         }
