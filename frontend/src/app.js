@@ -13,6 +13,8 @@ function App() {
     const [userInput, setUserInput] = useState('');
     const [urlInput, setUrlInput] = useState('');
     const [ssrfResponse, setSsrfResponse] = useState(null);
+    const [authenticated, setAuthenticated] = useState(false);
+
 
     // Detect if the browser is Firefox
     const isFirefox = typeof navigator !== 'undefined' && navigator.userAgent.includes('Firefox');
@@ -139,6 +141,19 @@ function App() {
         return () => clearInterval(intervalId);
     }, []);
 
+    const authenticateUser = () => {
+        const username = prompt('Enter username:');
+        const password = prompt('Enter password:');
+        
+        if (username === 'lars' && password === 'secret') {
+            setAuthenticated(true);
+            alert('Authentication successful');
+        } else {
+            alert('Authentication failed');
+        }
+    };
+    
+
     const renderContent = () => {
         if (activeTab === 'about') {
             return (
@@ -150,6 +165,25 @@ function App() {
                     <p>To test SSRF, enter a URL (like <code>https://jsonplaceholder.typicode.com/posts</code>) in the input field on the home page and submit it.</p>
                     <h3>XSS Testing</h3>
                     <p>To test XSS, you can input code like <code>&lt;script&gt;alert("XSS Test")&lt;/script&gt;</code> in the user input field to observe how it is handled.</p>
+                </div>
+            );
+        }
+
+        if (activeTab === 'admin') {
+            if (!authenticated) {
+                authenticateUser();
+                return <p>Access denied. Please authenticate to view this page.</p>;
+            }
+        
+            return (
+                <div className="admin">
+                    <h2>Admin Panel</h2>
+                    <p>Welcome to the admin section. Here you can see and manage protected information.</p>
+                    <ul>
+                        <li>View sensitive logs</li>
+                        <li>Access system settings</li>
+                        <li>Manage application state</li>
+                    </ul>
                 </div>
             );
         }
@@ -199,6 +233,8 @@ function App() {
                 <button onClick={() => setActiveTab('about')}>About</button>
                 <button onClick={reloadUidData}>Reload UID Data</button>
                 <button onClick={testDeserializeEndpoint}>Test Deserialization</button>
+                <button onClick={() => setActiveTab('admin')}>Admin</button>
+
             </nav>
             {renderContent()}
         </div>
