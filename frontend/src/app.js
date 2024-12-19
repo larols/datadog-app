@@ -170,16 +170,21 @@ function App() {
         }
 
         if (activeTab === 'admin') {
-            const urlParams = new URLSearchParams(window.location.search);
-            const apiAuthHeader = urlParams.get('auth');
-            const validAuthHeader = btoa('lars:secret');
-        
-            if (apiAuthHeader && apiAuthHeader === validAuthHeader) {
-                setAuthenticated(true);
+            // Check if the Authorization header is present in the request
+            const authHeader = window.btoa('lars:secret');
+            const storedAuthHeader = localStorage.getItem('authHeader');
+            
+            if (!storedAuthHeader) {
+                const encodedAuthHeader = btoa('lars:secret');
+                localStorage.setItem('authHeader', encodedAuthHeader);
             }
         
-            if (!authenticated) {
-                authenticateUser();
+            // Check if Authorization header matches `lars:secret`
+            const apiAuthHeader = storedAuthHeader || localStorage.getItem('authHeader');
+            const validAuthHeader = btoa('lars:secret');
+        
+            if (apiAuthHeader !== validAuthHeader) {
+                alert('Access Denied: Invalid Credentials');
                 return <p>Access denied. Please authenticate to view this page.</p>;
             }
         
@@ -195,6 +200,7 @@ function App() {
                 </div>
             );
         }
+        
         
 
         return (
