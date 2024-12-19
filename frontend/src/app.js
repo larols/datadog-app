@@ -158,8 +158,8 @@ function App() {
 
     const logoutUser = () => {
         setAuthenticated(false);
-        alert('You have been logged out.');
-    };   
+        setActiveTab('home'); // Redirect to home tab
+    };  
 
     const renderContent = () => {
         if (activeTab === 'about') {
@@ -192,7 +192,6 @@ function App() {
                         <li>Access system settings</li>
                         <li>Manage application state</li>
                     </ul>
-                    <button onClick={logoutUser}>Logout</button>
                 </div>
             );
         }
