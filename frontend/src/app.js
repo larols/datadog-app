@@ -13,11 +13,7 @@ function App() {
     const [userInput, setUserInput] = useState('');
     const [urlInput, setUrlInput] = useState('');
     const [ssrfResponse, setSsrfResponse] = useState(null);
-    const [authenticated, setAuthenticated] = useState(false);
 
-    const USERNAME = 'lars';
-    const PASSWORD = 'secret';
-    const validAuthHeader = btoa(`${USERNAME}:${PASSWORD}`);
 
     // Detect if the browser is Firefox
     const isFirefox = typeof navigator !== 'undefined' && navigator.userAgent.includes('Firefox');
@@ -144,17 +140,6 @@ function App() {
         return () => clearInterval(intervalId);
     }, []);
 
-    const authenticateUser = () => {
-        const username = prompt('Enter username:');
-        const password = prompt('Enter password:');
-        
-        if (username === USERNAME && password === PASSWORD) {
-            setAuthenticated(true);
-        } else {
-            alert('Authentication failed');
-        }
-    };
-
     const logoutUser = () => {
         setAuthenticated(false);
         setActiveTab('home'); // Redirect to home tab
@@ -174,29 +159,7 @@ function App() {
                 </div>
             );
         }
-
-
-        if (activeTab === 'admin') {
-            if (!authenticated) {
-                alert('Access Denied: You must log in to access this page.');
-                return <p>Access denied. Please authenticate to view this page.</p>;
-            }
-        
-            return (
-                <div className="admin">
-                    <h2>Admin Panel</h2>
-                    <p>Welcome to the admin section. Here you can see and manage protected information.</p>
-                    <ul>
-                        <li>View sensitive logs</li>
-                        <li>Access system settings</li>
-                        <li>Manage application state</li>
-                    </ul>
-                </div>
-            );
-        }
-        
-        
-
+    
         return (
             <div className="tiles-container">
                 {tilesData.map(tile => (
@@ -242,14 +205,6 @@ function App() {
                 <button onClick={() => setActiveTab('about')}>About</button>
                 <button onClick={reloadUidData}>Reload UID Data</button>
                 <button onClick={testDeserializeEndpoint}>Test Deserialization</button>
-                {authenticated ? (
-                    <>
-                        <button onClick={() => setActiveTab('admin')}>Admin</button>
-                        <button onClick={logoutUser}>Logout</button>
-                    </>
-                ) : (
-                    <button onClick={authenticateUser}>Login</button>
-                )}
             </nav>
             {renderContent()}
         </div>
