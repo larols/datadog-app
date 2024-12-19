@@ -159,7 +159,7 @@ function App() {
     const logoutUser = () => {
         setAuthenticated(false);
         alert('You have been logged out.');
-    };    
+    };   
 
     const renderContent = () => {
         if (activeTab === 'about') {
@@ -178,20 +178,10 @@ function App() {
 
 
         if (activeTab === 'admin') {
-            // Extract auth from URL parameters (for testing)
-            const urlParams = new URLSearchParams(window.location.search);
-            const authFromUrl = urlParams.get('auth');
-        
-            // Check if the auth token from the URL matches the validAuthHeader
-            if (!authFromUrl || authFromUrl !== validAuthHeader) {
-                alert('Access Denied: Invalid Credentials');
+            if (!authenticated) {
+                alert('Access Denied: You must log in to access this page.');
                 return <p>Access denied. Please authenticate to view this page.</p>;
             }
-        
-            const logoutUser = () => {
-                alert('You have been logged out.');
-                window.location.href = '/'; // Redirect to the homepage
-            };
         
             return (
                 <div className="admin">
@@ -254,8 +244,14 @@ function App() {
                 <button onClick={() => setActiveTab('about')}>About</button>
                 <button onClick={reloadUidData}>Reload UID Data</button>
                 <button onClick={testDeserializeEndpoint}>Test Deserialization</button>
-                <button onClick={() => setActiveTab('admin')}>Admin</button>
-
+                {authenticated ? (
+                    <>
+                        <button onClick={() => setActiveTab('admin')}>Admin</button>
+                        <button onClick={logoutUser}>Logout</button>
+                    </>
+                ) : (
+                    <button onClick={authenticateUser}>Login</button>
+                )}
             </nav>
             {renderContent()}
         </div>
