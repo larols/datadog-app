@@ -15,6 +15,9 @@ function App() {
     const [ssrfResponse, setSsrfResponse] = useState(null);
     const [authenticated, setAuthenticated] = useState(false);
 
+    const USERNAME = 'lars';
+    const PASSWORD = 'secret';
+    const validAuthHeader = btoa(`${USERNAME}:${PASSWORD}`);
 
     // Detect if the browser is Firefox
     const isFirefox = typeof navigator !== 'undefined' && navigator.userAgent.includes('Firefox');
@@ -145,7 +148,7 @@ function App() {
         const username = prompt('Enter username:');
         const password = prompt('Enter password:');
         
-        if (username === 'lars' && password === 'secret') {
+        if (username === USERNAME && password === PASSWORD) {
             setAuthenticated(true);
             alert('Authentication successful');
         } else {
@@ -156,8 +159,7 @@ function App() {
     const logoutUser = () => {
         setAuthenticated(false);
         alert('You have been logged out.');
-    };
-    
+    };    
 
     const renderContent = () => {
         if (activeTab === 'about') {
@@ -174,24 +176,22 @@ function App() {
             );
         }
 
+
         if (activeTab === 'admin') {
-            // Check if the Authorization header is present in the request
-            const authHeader = window.btoa('lars:secret');
-            const storedAuthHeader = localStorage.getItem('authHeader');
-            
-            if (!storedAuthHeader) {
-                const encodedAuthHeader = btoa('lars:secret');
-                localStorage.setItem('authHeader', encodedAuthHeader);
-            }
+            // Extract auth from URL parameters (for testing)
+            const urlParams = new URLSearchParams(window.location.search);
+            const authFromUrl = urlParams.get('auth');
         
-            // Check if Authorization header matches `lars:secret`
-            const apiAuthHeader = storedAuthHeader || localStorage.getItem('authHeader');
-            const validAuthHeader = btoa('lars:secret');
-        
-            if (apiAuthHeader !== validAuthHeader) {
+            // Check if the auth token from the URL matches the validAuthHeader
+            if (!authFromUrl || authFromUrl !== validAuthHeader) {
                 alert('Access Denied: Invalid Credentials');
                 return <p>Access denied. Please authenticate to view this page.</p>;
             }
+        
+            const logoutUser = () => {
+                alert('You have been logged out.');
+                window.location.href = '/'; // Redirect to the homepage
+            };
         
             return (
                 <div className="admin">
@@ -202,9 +202,10 @@ function App() {
                         <li>Access system settings</li>
                         <li>Manage application state</li>
                     </ul>
-                    <button onClick={logoutUser}>Logout</button> {/* Add this logout button here */}
+                    <button onClick={logoutUser}>Logout</button>
                 </div>
             );
+        }
         
         
 
