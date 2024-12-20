@@ -18,7 +18,7 @@ resource = Resource(attributes={
 
 # Initialize OTel Tracer and Span Processor
 provider = TracerProvider(resource=resource)
-otlp_endpoint = 'http://otel-agent.otel.svc.cluster.local:4317'
+otlp_endpoint = 'http://otel-agent.otel.svc.cluster.local:4318'
 processor = BatchSpanProcessor(OTLPSpanExporter(endpoint=otlp_endpoint))
 provider.add_span_processor(processor)
 trace.set_tracer_provider(provider)
