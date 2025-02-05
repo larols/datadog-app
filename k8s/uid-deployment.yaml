@@ -51,3 +51,9 @@ spec:
             value: "true"
           - name: DD_PROFILING_TIMELINE_ENABLED
             value: "true"
+          - name: DD_APPSEC_ENABLED
+            value: "true"
+          - name: DD_IAST_ENABLED
+            value: "true"
+          - name: DD_APPSEC_SCA_ENABLED
+            value: "true"
