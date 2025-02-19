@@ -3,7 +3,7 @@ WORKDIR /app
 COPY package*.json ./ 
 RUN npm install
 COPY . /app
-RUN npm run build -- --prod  
+RUN npx ng build --prod
 
 FROM nginx:alpine
 COPY --from=build /app/dist/angular-frontend /usr/share/nginx/html
