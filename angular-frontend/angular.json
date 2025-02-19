@@ -13,7 +13,7 @@
         "build": {
           "builder": "@angular-devkit/build-angular:application",
           "options": {
-            "outputPath": "dist/angular-frontend/angular",
+            "outputPath": "dist/angular-frontend/",
             "index": "src/index.html",
             "browser": "src/main.ts",
             "polyfills": [
