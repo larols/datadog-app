@@ -6,7 +6,7 @@ COPY . /app
 RUN npx ng build
 
 FROM nginx:alpine
-COPY --from=build /app/dist/angular-frontend /usr/share/nginx/html
+COPY --from=build /app/dist/angular-frontend/browser /usr/share/nginx/html
 
 ARG DD_GIT_REPOSITORY_URL
 ARG DD_GIT_COMMIT_SHA

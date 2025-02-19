@@ -1,1 +1,14 @@
 .DS_Store
+# Ignore Angular build output
+dist/
+angular-frontend/dist/
+angular-frontend/browser/
+
+# Node modules 
+node_modules/
+npm-debug.log
+package-lock.json
+
+# Environment files
+*.env
+*.local
