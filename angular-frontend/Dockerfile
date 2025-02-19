@@ -3,7 +3,7 @@ WORKDIR /app
 COPY package*.json ./ 
 RUN npm install
 COPY . /app
-RUN npx ng build --prod
+RUN npx ng build
 
 FROM nginx:alpine
 COPY --from=build /app/dist/angular-frontend /usr/share/nginx/html
@@ -14,5 +14,4 @@ ENV DD_GIT_REPOSITORY_URL=${DD_GIT_REPOSITORY_URL}
 ENV DD_GIT_COMMIT_SHA=${DD_GIT_COMMIT_SHA}
 
 EXPOSE 80
-
 CMD ["nginx", "-g", "daemon off;"]
