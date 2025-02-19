@@ -1,0 +1,17 @@
+<h2>Security Testing</h2>
+
+<h3>SSRF Test</h3>
+<input type="text" [(ngModel)]="ssrfUrl" placeholder="Enter URL">
+<button (click)="testSsrf()">Test SSRF</button>
+<div *ngIf="ssrfResponse">
+  <h4>SSRF Response:</h4>
+  <pre>{{ ssrfResponse | json }}</pre>
+</div>
+
+<h3>Deserialization Test</h3>
+<input type="text" [(ngModel)]="deserializePayload" placeholder="Enter Payload">
+<button (click)="testDeserialize()">Test Deserialize</button>
+<div *ngIf="deserializeResponse">
+  <h4>Deserialization Response:</h4>
+  <pre>{{ deserializeResponse | json }}</pre>
+</div>
