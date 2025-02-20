@@ -6,10 +6,9 @@ COPY . /app
 RUN npx ng build --configuration=production --source-map
 
 FROM nginx:alpine
-# Copy only the source maps to a separate directory
-COPY --from=build /app/dist/angular-frontend/browser*.map /usr/share/nginx/html/angular/dist/
 
-# Copy the rest of the files (excluding source maps)
+RUN mkdir -p /usr/share/nginx/html/angular/dist
+COPY --from=build /app/dist/angular-frontend/browser*.map /usr/share/nginx/html/angular/dist/
 COPY --from=build /app/dist/angular-frontend/browser /usr/share/nginx/html/angular
 
 ARG DD_GIT_REPOSITORY_URL
