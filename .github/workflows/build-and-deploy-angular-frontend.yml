@@ -50,6 +50,8 @@ jobs:
       run: npm install -g @datadog/datadog-ci
     
     - name: Upload Source Maps to Datadog
+      env:
+        DATADOG_API_KEY: ${{ secrets.DD_API_KEY }}
       run: |
         npx @datadog/datadog-ci sourcemaps upload angular-frontend/dist/angular-frontend/browser \
           --service=datadog-app-angular \
