@@ -3,7 +3,7 @@ WORKDIR /app
 COPY package*.json ./ 
 RUN npm install
 COPY . /app
-RUN npx ng build --configuration=production --source-map
+RUN npx ng build --configuration=production
 
 FROM nginx:alpine
 
