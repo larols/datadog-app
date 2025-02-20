@@ -8,7 +8,7 @@ RUN npx ng build --configuration=production --source-map
 FROM nginx:alpine
 
 RUN mkdir -p /usr/share/nginx/html/angular/dist
-COPY --from=build /app/dist/angular-frontend/browser*.map /usr/share/nginx/html/angular/dist/
+COPY --from=build /app/dist/angular-frontend/browser/*.map /usr/share/nginx/html/angular/dist/
 COPY --from=build /app/dist/angular-frontend/browser /usr/share/nginx/html/angular
 
 ARG DD_GIT_REPOSITORY_URL
