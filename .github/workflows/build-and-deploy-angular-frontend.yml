@@ -48,6 +48,9 @@ jobs:
 
     - name: Install Datadog CLI
       run: npm install -g @datadog/datadog-ci
+
+    - name: List Source Maps  # New step
+      run: ls -la angular-frontend/dist/angular-frontend/browser
     
     - name: Upload Source Maps to Datadog
       env:
