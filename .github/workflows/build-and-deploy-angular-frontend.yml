@@ -51,6 +51,7 @@ jobs:
 
     - name: List Source Maps  # New step
       run: ls -la angular-frontend/dist/angular-frontend/browser
+      run: ls -la angular-frontend/
     
     - name: Upload Source Maps to Datadog
       env:
