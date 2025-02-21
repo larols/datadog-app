@@ -33,18 +33,19 @@ jobs:
 
     - name: Build Angular App with Source Maps (for Datadog)
       working-directory: ./angular-frontend
-      run: npm run build -- --configuration=production --source-map --output-path=../dist-github-actions/browser
+      run: npm run build -- --configuration=production --source-map --output-path=../build-temp
 
     - name: List Built Files
       run: |
         pwd
-        ls -R dist-github-actions/browser
+        ls -R build-temp/
+        ls -R build-temp/browser
     
     - name: Upload Source Maps to Datadog
       env:
         DATADOG_API_KEY: ${{ secrets.DD_API_KEY }}
       run: |
-        npx @datadog/datadog-ci sourcemaps upload dist-github-actions/ \
+        npx @datadog/datadog-ci sourcemaps upload build-temp/ \
           --service=datadog-app-angular \
           --release-version=${{ env.VERSION }} \
           --minified-path-prefix=http://192.168.50.240/angular/
