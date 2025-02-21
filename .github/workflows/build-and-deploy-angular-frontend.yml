@@ -49,6 +49,9 @@ jobs:
     - name: Install Datadog CLI
       run: npm install -g @datadog/datadog-ci
 
+    - name: Install Angular CLI
+      run: npm install -g @angular/cli
+
     - name: Build Angular App with Source Maps (for Datadog)
       run: ng build --configuration=production --source-map --output-path=dist-github-actions
     
