@@ -7,7 +7,7 @@ RUN npx ng build --configuration=production
 
 FROM nginx:alpine
 
-COPY build-temp/ /usr/share/nginx/html/angular
+COPY build-temp/browser /usr/share/nginx/html/angular
 
 ARG DD_GIT_REPOSITORY_URL
 ARG DD_GIT_COMMIT_SHA

@@ -44,7 +44,7 @@ jobs:
     
     - name: Upload Source Maps to Datadog
       run: |
-        npx @datadog/datadog-ci sourcemaps upload build-temp/ \
+        npx @datadog/datadog-ci sourcemaps upload build-temp/browser \
           --service=datadog-app-angular \
           --release-version=${{ env.VERSION }} \
           --minified-path-prefix=http://192.168.50.240/angular/
