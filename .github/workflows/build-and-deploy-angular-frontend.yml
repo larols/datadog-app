@@ -19,6 +19,7 @@ jobs:
       DD_BETA_COMMANDS_ENABLED: 1
       DD_SITE: datadoghq.eu
       DD_API_KEY: ${{ secrets.DD_API_KEY }}
+      DATADOG_API_KEY: ${{ secrets.DD_API_KEY }}
 
     steps:
     - name: Checkout repository
@@ -42,9 +43,6 @@ jobs:
         ls -R build-temp/browser
     
     - name: Upload Source Maps to Datadog
-      env:
-        DD_SITE: 'datadoghq.eu'
-        DATADOG_API_KEY: ${{ secrets.DD_API_KEY }}
       run: |
         npx @datadog/datadog-ci sourcemaps upload build-temp/ \
           --service=datadog-app-angular \
@@ -112,10 +110,6 @@ jobs:
           --revision "${{ github.sha }}"
 
     - name: Track deployment in Datadog
-      env:
-        DD_BETA_COMMANDS_ENABLED: 1
-        DD_SITE: 'datadoghq.eu'
-        DD_API_KEY: ${{ secrets.DD_API_KEY }}
       run: |
         npx @datadog/datadog-ci dora deployment \
           --service datadog-app-angular \
@@ -126,10 +120,6 @@ jobs:
           --git-commit-sha ${{ github.sha }}
 
     - name: Send deployment metrics to Datadog
-      env:
-        DD_BETA_COMMANDS_ENABLED: 1
-        DD_SITE: 'datadoghq.eu'
-        DD_API_KEY: ${{ secrets.DD_API_KEY }}
       run: |
         npx @datadog/datadog-ci measure \
           --level pipeline \
