@@ -17,7 +17,8 @@ export class AppComponent {
 
   triggerError() {
     setTimeout(() => {
-      throw new Error('🔥 Intentional test error for Datadog RUM!');
-    }, 5000); // Delays 5s to ensure RUM has time to initialize
+      // ✅ Throwing error in global scope (Datadog can now capture it)
+      window.onerror?.('🔥 Intentional load error for Datadog RUM!', '', 0, 0, new Error('🔥 Intentional test error for Datadog RUM!'));
+    }, 5000); // Delays to ensure RUM is initialized
   }
 }
