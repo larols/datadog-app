@@ -21,14 +21,31 @@ jobs:
       DD_API_KEY: ${{ secrets.DD_API_KEY }}
 
     steps:
-    - name: Checkout code
+    - name: Checkout repository
       uses: actions/checkout@v3
 
-    - name: Set commit sha for RUM version
-      id: set_commit_sha
+    - name: Set version from commit SHA
+      run: echo "VERSION=$(echo ${{ github.sha }} | cut -c1-7)" >> $GITHUB_ENV
+
+    - name: Install dependencies
+      working-directory: ./angular-frontend
+      run: npm ci
+
+    - name: Build Angular App with Source Maps (for Datadog)
+      working-directory: ./angular-frontend
+      run: npm run build -- --configuration=production --source-map --output-path=../dist-github-actions
+
+    - name: List Source Maps
+      run: ls -la dist-github-actions/angular-frontend/browser
+
+    - name: Upload Source Maps to Datadog
+      env:
+        DATADOG_API_KEY: ${{ secrets.DD_API_KEY }}
       run: |
-        VERSION=$(echo ${{ github.sha }} | cut -c1-7)
-        echo "VERSION=${VERSION}" >> $GITHUB_ENV
+        npx @datadog/datadog-ci sourcemaps upload dist-github-actions/angular-frontend/browser \
+          --service=datadog-app-angular \
+          --release-version=${{ env.VERSION }} \
+          --minified-path-prefix=http://192.168.50.240/angular/
 
     - name: Log in to Docker Hub
       uses: docker/login-action@v2
@@ -45,46 +62,12 @@ jobs:
           --build-arg DD_GIT_REPOSITORY_URL="$REPO_URL" \
           --build-arg DD_GIT_COMMIT_SHA="$COMMIT_SHA" \
           --build-arg DD_VERSION=${{ env.VERSION }}
-    
-    - name: Print Working Directory
-      run: pwd
-
-    - name: Install Datadog CLI
-      run: npm install -g @datadog/datadog-ci
-
-    - name: Install Angular CLI
-      run: npm install -g @angular/cli
-
-    - name: Build Angular App with Source Maps (for Datadog)
-      working-directory: ./angular-frontend
-      run: |
-        ng build --configuration=production --source-map --output-path=../dist-github-actions
-    
-    - name: List Source Maps
-      run: ls -la dist-github-actions/angular-frontend/browser
-    
-    - name: Upload Source Maps to Datadog
-      env:
-        DATADOG_API_KEY: ${{ secrets.DD_API_KEY }}
-      run: |
-        npx @datadog/datadog-ci sourcemaps upload dist-github-actions/angular-frontend/browser \
-          --service=datadog-app-angular \
-          --release-version=${{ env.VERSION }} \
-          --minified-path-prefix=http://192.168.50.240/angular/
-  
-    - name: Send measure to Datadog (Build Size)
-      run: |
-        npx @datadog/datadog-ci measure \
-          --level pipeline \
-          --measures "build_time:$(date +%s)" \
-          --measures "docker_image_size:$(docker images --format '{{.Size}}' | head -1 | tr -d '[:alpha:][:space:]')"
 
     - name: Push Docker image
-      run: |
-        docker push ${{ secrets.DOCKER_USERNAME }}/angular-frontend:latest
+      run: docker push ${{ secrets.DOCKER_USERNAME }}/angular-frontend:latest
 
   deploy:
-    name: Deploy to k8s
+    name: Deploy to Kubernetes
     runs-on: ubuntu-latest
     needs: build-and-push
     timeout-minutes: 5
@@ -96,20 +79,16 @@ jobs:
       DD_API_KEY: ${{ secrets.DD_API_KEY }}
 
     steps:
-    - name: Checkout code
+    - name: Checkout repository
       uses: actions/checkout@v3
 
-    - name: Set commit sha for version
-      id: set_commit_sha
-      run: |
-        VERSION=$(echo ${{ github.sha }} | cut -c1-7)
-        echo "VERSION=${VERSION}" >> $GITHUB_ENV
+    - name: Set deployment version
+      run: echo "VERSION=$(echo ${{ github.sha }} | cut -c1-7)" >> $GITHUB_ENV
 
     - name: Tag pipeline in Datadog
       run: npx @datadog/datadog-ci tag --level pipeline --tags team:datadog-app
 
     - name: Set deployment start time
-      id: set_deploy_start
       run: echo "deploy_start=$(date +%s)" >> $GITHUB_ENV
 
     - name: Configure kubectl
@@ -124,17 +103,21 @@ jobs:
 
     - name: Mark deployment in Datadog
       run: |
-        npx @datadog/datadog-ci deployment mark --env production --service datadog-app-angular --revision "${{ github.sha }}"
-      
+        npx @datadog/datadog-ci deployment mark \
+          --env production --service datadog-app-angular \
+          --revision "${{ github.sha }}"
+
     - name: Track deployment in Datadog
-      env:
-        DD_BETA_COMMANDS_ENABLED: 1
-        DD_SITE: 'datadoghq.eu'
-        DD_API_KEY: ${{ secrets.DD_API_KEY }}
       run: |
-        npx @datadog/datadog-ci dora deployment --service datadog-app-angular --env production --started-at ${{ env.deploy_start }} --finished-at $(date +%s) --git-repository-url "${{ github.event.repository.html_url }}" --git-commit-sha ${{ github.sha }}
- 
-    - name: Send measure to Datadog (Error Rate)
+        npx @datadog/datadog-ci dora deployment \
+          --service datadog-app-angular \
+          --env production \
+          --started-at ${{ env.deploy_start }} \
+          --finished-at $(date +%s) \
+          --git-repository-url "${{ github.event.repository.html_url }}" \
+          --git-commit-sha ${{ github.sha }}
+
+    - name: Send deployment metrics to Datadog
       run: |
         npx @datadog/datadog-ci measure \
           --level pipeline \
