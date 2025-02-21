@@ -53,7 +53,9 @@ jobs:
       run: npm install -g @angular/cli
 
     - name: Build Angular App with Source Maps (for Datadog)
-      run: ng build --configuration=production --source-map --output-path=dist-github-actions
+      working-directory:./angular-frontend  # Add this line
+      run: |
+        ng build --configuration=production --source-map --output-path=dist-github-actions
     
     - name: List Source Maps
       run: ls -la dist-github-actions/angular-frontend/browser
