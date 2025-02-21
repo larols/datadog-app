@@ -18,8 +18,35 @@ export class HomeComponent implements OnInit {
   constructor(private dataService: DataService) { }
 
   ngOnInit(): void {
-    this.dataService.getViews().subscribe(data => this.viewsData = data);
-    this.dataService.getUidLatest().subscribe(data => this.uidData = data);
-    this.dataService.getQuotesRandom().subscribe(data => this.quoteData = data);
+    
+    setTimeout(() => {
+      throw new Error('Intentional error in HomeComponent for Datadog RUM!');
+    }, 3000);
+
+    this.dataService.getViews().subscribe({
+      next: data => this.viewsData = data,
+      error: () => {
+        throw new Error('API call failed in HomeComponent!');
+      }
+    });
+
+    this.dataService.getUidLatest().subscribe({
+      next: data => this.uidData = data,
+      error: () => {
+        throw new Error('UID API call failed in HomeComponent!');
+      }
+    });
+
+    this.dataService.getQuotesRandom().subscribe({
+      next: data => this.quoteData = data,
+      error: () => {
+        throw new Error('uotes API call failed in HomeComponent!');
+      }
+    });
+  }
+
+
+  generateError() {
+    throw new Error('User clicked the error button in HomeComponent!');
   }
 }
