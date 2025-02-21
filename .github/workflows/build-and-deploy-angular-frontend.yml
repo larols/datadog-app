@@ -33,12 +33,12 @@ jobs:
 
     - name: Build Angular App with Source Maps (for Datadog)
       working-directory: ./angular-frontend
-      run: npm run build -- --configuration=production --source-map --output-path=../dist-github-actions
+      run: npm run build -- --configuration=production --source-map --output-path=../dist-github-actions/browser
 
     - name: List Built Files
       run: |
         pwd
-        ls -R dist-github-actions
+        ls -R dist-github-actions/browser
     
     - name: Upload Source Maps to Datadog
       env:
