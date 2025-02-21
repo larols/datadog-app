@@ -1,12 +1,20 @@
 import { Component } from '@angular/core';
-import { RouterOutlet } from '@angular/router';
 
 @Component({
   selector: 'app-root',
-  imports: [RouterOutlet],
   templateUrl: './app.component.html',
-  styleUrl: './app.component.css'
+  styleUrls: ['./app.component.css']
 })
 export class AppComponent {
-  title = 'angular-frontend';
+  title = 'Angular App';
+
+  constructor() {
+    this.triggerError(); // Call error function on load
+  }
+
+  triggerError() {
+    setTimeout(() => {
+      throw new Error('🔥 Intentional test error for Datadog!');
+    }, 3000); // Delay to ensure Datadog RUM captures it
+  }
 }
