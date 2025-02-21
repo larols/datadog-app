@@ -43,9 +43,8 @@ jobs:
     
     - name: Upload Source Maps to Datadog
       env:
-        DD_BETA_COMMANDS_ENABLED: 1
         DD_SITE: 'datadoghq.eu'
-        DD_API_KEY: ${{ secrets.DD_API_KEY }}
+        DATADOG_API_KEY: ${{ secrets.DD_API_KEY }}
       run: |
         npx @datadog/datadog-ci sourcemaps upload build-temp/ \
           --service=datadog-app-angular \
