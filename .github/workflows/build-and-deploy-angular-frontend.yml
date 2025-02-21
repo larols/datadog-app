@@ -36,10 +36,12 @@ jobs:
       working-directory: ./angular-frontend
       run: npm run build -- --configuration=production --source-map --output-path=../build-temp
 
-    - name: List Built Files
+    - name: Debug Build Output
       run: |
+        echo "Current Working Directory:"
         pwd
-        ls -R build-temp/
+        echo "Listing all files in build-temp:"
+        ls -R build-temp
         ls -R build-temp/browser
     
 #    - name: Upload Source Maps to Datadog
@@ -55,16 +57,16 @@ jobs:
         username: ${{ secrets.DOCKER_USERNAME }}
         password: ${{ secrets.DOCKER_PASSWORD }}
 
-    - name: Build Docker image with Datadog build args
+    - name: Build Docker Image with Prebuilt Angular App
       run: |
         REPO_URL=$(git config --get remote.origin.url)
         COMMIT_SHA=$(git rev-parse HEAD)
-        docker build -f angular-frontend/Dockerfile angular-frontend/ \
+        docker build -f angular-frontend/Dockerfile . \
           -t ${{ secrets.DOCKER_USERNAME }}/angular-frontend:latest \
           --build-arg DD_GIT_REPOSITORY_URL="$REPO_URL" \
           --build-arg DD_GIT_COMMIT_SHA="$COMMIT_SHA" \
           --build-arg DD_VERSION=${{ env.VERSION }}
-
+    
     - name: Push Docker image
       run: docker push ${{ secrets.DOCKER_USERNAME }}/angular-frontend:latest
 
