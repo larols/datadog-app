@@ -106,6 +106,10 @@ jobs:
         kubectl apply -f k8s/angular-deployment.yaml --insecure-skip-tls-verify
         kubectl apply -f k8s/angular-service.yaml --insecure-skip-tls-verify
 
+    - name: Restart Deployment to Apply Changes
+      run: |
+        kubectl rollout restart deployment angular-frontend --insecure-skip-tls-verify
+
     - name: Mark deployment in Datadog
       run: |
         npx @datadog/datadog-ci deployment mark \
