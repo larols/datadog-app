@@ -12,26 +12,8 @@ datadogRum.init({
     env: 'production', // Change dynamically if needed
     sessionSampleRate: 100,
     sessionReplaySampleRate: 100,
-    trackErrors: true,  // Enables error tracking
-    trackInteractions: true, // Tracks clicks, inputs, etc.
-    trackResources: true, // Tracks network requests
+    trackUserInteractions: true,
+    trackResources: true,
+    trackLongTasks: true,
     defaultPrivacyLevel: 'allow',
 });
-
-// Ensure RUM starts collecting session data
-datadogRum.startSessionReplayRecording();
-
-// Catch global Angular errors and send them to Datadog
-window.addEventListener('error', (event) => {
-  datadogRum.addError(event.error || event.message, { source: 'window' });
-});
-window.addEventListener('unhandledrejection', (event) => {
-  datadogRum.addError(event.reason, { source: 'promise' });
-});
-
-// Bootstrap Angular App
-bootstrapApplication(AppComponent, appConfig)
-  .catch((err) => {
-    datadogRum.addError(err, { source: 'bootstrap' });
-    console.error(err);
-  });
