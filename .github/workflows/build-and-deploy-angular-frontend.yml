@@ -35,6 +35,11 @@ jobs:
       working-directory: ./angular-frontend
       run: npm run build -- --configuration=production --source-map --output-path=../dist-github-actions
 
+    - name: List Built Files
+      run: |
+        pwd
+        ls -R dist-github-actions
+    
     - name: Upload Source Maps to Datadog
       env:
         DATADOG_API_KEY: ${{ secrets.DD_API_KEY }}
