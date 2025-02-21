@@ -108,7 +108,7 @@ jobs:
 
     - name: Restart Deployment to Apply Changes
       run: |
-        kubectl rollout restart deployment angular-frontend --insecure-skip-tls-verify
+        kubectl rollout restart deployment angular-frontend -n datadog-app --insecure-skip-tls-verify
 
     - name: Mark deployment in Datadog
       run: |
