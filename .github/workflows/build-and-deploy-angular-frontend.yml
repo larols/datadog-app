@@ -32,7 +32,7 @@ jobs:
       working-directory: ./angular-frontend
       run: npm ci
 
-    - name: Build Angular App with Source Maps (for Datadog)
+    - name: Build Angular App with Source Maps
       working-directory: ./angular-frontend
       run: npm run build -- --configuration=production --source-map --output-path=../build-temp
 
@@ -42,12 +42,12 @@ jobs:
         ls -R build-temp/
         ls -R build-temp/browser
     
-    - name: Upload Source Maps to Datadog
-      run: |
-        npx @datadog/datadog-ci sourcemaps upload build-temp/browser \
-          --service=datadog-app-angular \
-          --release-version=${{ env.VERSION }} \
-          --minified-path-prefix=http://192.168.50.240/angular/
+#    - name: Upload Source Maps to Datadog
+#      run: |
+#        npx @datadog/datadog-ci sourcemaps upload build-temp/browser \
+#          --service=datadog-app-angular \
+#          --release-version=${{ env.VERSION }} \
+#          --minified-path-prefix=http://192.168.50.240/angular/
 
     - name: Log in to Docker Hub
       uses: docker/login-action@v2
