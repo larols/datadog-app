@@ -19,6 +19,7 @@ jobs:
       DD_BETA_COMMANDS_ENABLED: 1
       DD_SITE: datadoghq.eu
       DD_API_KEY: ${{ secrets.DD_API_KEY }}
+      DATADOG_SITE: datadoghq.eu
       DATADOG_API_KEY: ${{ secrets.DD_API_KEY }}
 
     steps:
@@ -44,12 +45,12 @@ jobs:
         ls -R build-temp
         ls -R build-temp/browser
     
-#    - name: Upload Source Maps to Datadog
-#      run: |
-#        npx @datadog/datadog-ci sourcemaps upload build-temp/browser \
-#          --service=datadog-app-angular \
-#          --release-version=${{ env.VERSION }} \
-#          --minified-path-prefix=http://192.168.50.240/angular/
+    - name: Upload Source Maps to Datadog
+      run: |
+        npx @datadog/datadog-ci sourcemaps upload build-temp/browser \
+          --service=datadog-app-angular \
+          --release-version=${{ env.VERSION }} \
+          --minified-path-prefix=http://192.168.50.240/angular/
 
     - name: Log in to Docker Hub
       uses: docker/login-action@v2
