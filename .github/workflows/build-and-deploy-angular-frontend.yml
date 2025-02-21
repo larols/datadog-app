@@ -48,15 +48,18 @@ jobs:
 
     - name: Install Datadog CLI
       run: npm install -g @datadog/datadog-ci
+
+    - name: Build Angular App with Source Maps (for Datadog)
+      run: ng build --configuration=production --source-map --output-path=dist-github-actions
     
-    - name: List Source Maps  # New step
-      run: ls -la angular-frontend/
+    - name: List Source Maps
+      run: ls -la dist-github-actions/angular-frontend/browser
     
     - name: Upload Source Maps to Datadog
       env:
         DATADOG_API_KEY: ${{ secrets.DD_API_KEY }}
       run: |
-        npx @datadog/datadog-ci sourcemaps upload angular-frontend/dist/angular-frontend/browser \
+        npx @datadog/datadog-ci sourcemaps upload dist-github-actions/angular-frontend/browser \
           --service=datadog-app-angular \
           --release-version=${{ env.VERSION }} \
           --minified-path-prefix=http://192.168.50.240/angular/
