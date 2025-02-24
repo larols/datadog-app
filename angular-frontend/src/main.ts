@@ -27,7 +27,7 @@ window.addEventListener('error', (event) => {
 window.addEventListener('unhandledrejection', (event) => {
   datadogRum.addError(event.reason, { source: 'promise' });
 });
-r
+
 bootstrapApplication(AppComponent, appConfig)
   .catch((err) => {
     datadogRum.addError(err, { source: 'bootstrap' });
