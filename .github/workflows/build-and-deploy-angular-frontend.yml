@@ -1,4 +1,4 @@
-name: Build and Deploy Angular Frontend
+name: Build, Deploy, and Test Angular Frontend
 
 on:
   push:
@@ -23,53 +23,53 @@ jobs:
       DATADOG_API_KEY: ${{ secrets.DD_API_KEY }}
 
     steps:
-    - name: Checkout repository
-      uses: actions/checkout@v3
+      - name: Checkout repository
+        uses: actions/checkout@v3
 
-    - name: Set version from commit SHA
-      run: |
-        VERSION=$(echo ${{ github.sha }} | cut -c1-7)
-        echo "VERSION=$VERSION" >> $GITHUB_ENV
-        echo "Using VERSION: $VERSION"
+      - name: Set version from commit SHA
+        run: |
+          VERSION=$(echo ${{ github.sha }} | cut -c1-7)
+          echo "VERSION=$VERSION" >> $GITHUB_ENV
+          echo "Using VERSION: $VERSION"
 
-    - name: Install dependencies
-      working-directory: ./angular-frontend
-      run: npm ci
+      - name: Install dependencies
+        working-directory: ./angular-frontend
+        run: npm ci
 
-    - name: Inject Version into Angular Environment
-      run: |
-        sed -i "s/version: 'local-dev'/version: '$VERSION'/" angular-frontend/src/environments/environment.prod.ts
+      - name: Inject Version into Angular Environment
+        run: |
+          sed -i "s/version: 'local-dev'/version: '$VERSION'/" angular-frontend/src/environments/environment.prod.ts
 
-    - name: Build Angular App with Source Maps
-      working-directory: ./angular-frontend
-      run: npm run build -- --configuration=production --source-map --output-path=../build-temp
+      - name: Build Angular App with Source Maps
+        working-directory: ./angular-frontend
+        run: npm run build -- --configuration=production --source-map --output-path=../build-temp
 
-    - name: Upload Source Maps to Datadog
-      run: |
-        echo "Uploading sourcemaps for version: $VERSION"
-        npx @datadog/datadog-ci sourcemaps upload build-temp/browser \
-          --service=datadog-app-angular \
-          --release-version=$VERSION \
-          --minified-path-prefix=http://192.168.50.240/angular/
+      - name: Upload Source Maps to Datadog
+        run: |
+          echo "Uploading sourcemaps for version: $VERSION"
+          npx @datadog/datadog-ci sourcemaps upload build-temp/browser \
+            --service=datadog-app-angular \
+            --release-version=$VERSION \
+            --minified-path-prefix=http://192.168.50.240/angular/
 
-    - name: Log in to Docker Hub
-      uses: docker/login-action@v2
-      with:
-        username: ${{ secrets.DOCKER_USERNAME }}
-        password: ${{ secrets.DOCKER_PASSWORD }}
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
 
-    - name: Build Docker Image with Prebuilt Angular App
-      run: |
-        REPO_URL=$(git config --get remote.origin.url)
-        COMMIT_SHA=$(git rev-parse HEAD)
-        docker build -f angular-frontend/Dockerfile . \
-          -t ${{ secrets.DOCKER_USERNAME }}/angular-frontend:latest \
-          --build-arg DD_GIT_REPOSITORY_URL="$REPO_URL" \
-          --build-arg DD_GIT_COMMIT_SHA="$COMMIT_SHA" \
-          --build-arg DD_VERSION="$VERSION"
-    
-    - name: Push Docker image
-      run: docker push ${{ secrets.DOCKER_USERNAME }}/angular-frontend:latest
+      - name: Build Docker Image with Prebuilt Angular App
+        run: |
+          REPO_URL=$(git config --get remote.origin.url)
+          COMMIT_SHA=$(git rev-parse HEAD)
+          docker build -f angular-frontend/Dockerfile . \
+            -t ${{ secrets.DOCKER_USERNAME }}/angular-frontend:latest \
+            --build-arg DD_GIT_REPOSITORY_URL="$REPO_URL" \
+            --build-arg DD_GIT_COMMIT_SHA="$COMMIT_SHA" \
+            --build-arg DD_VERSION="$VERSION"
+
+      - name: Push Docker image
+        run: docker push ${{ secrets.DOCKER_USERNAME }}/angular-frontend:latest
 
   deploy:
     name: Deploy to Kubernetes
@@ -84,47 +84,68 @@ jobs:
       DD_API_KEY: ${{ secrets.DD_API_KEY }}
 
     steps:
-    - name: Checkout repository
-      uses: actions/checkout@v3
+      - name: Checkout repository
+        uses: actions/checkout@v3
 
-    - name: Set deployment version
-      run: echo "VERSION=$(echo ${{ github.sha }} | cut -c1-7)" >> $GITHUB_ENV
+      - name: Set deployment version
+        run: echo "VERSION=$(echo ${{ github.sha }} | cut -c1-7)" >> $GITHUB_ENV
 
-    - name: Tag pipeline in Datadog
-      run: npx @datadog/datadog-ci tag --level pipeline --tags team:datadog-app
+      - name: Tag pipeline in Datadog
+        run: npx @datadog/datadog-ci tag --level pipeline --tags team:datadog-app
 
-    - name: Set deployment start time
-      run: echo "deploy_start=$(date +%s)" >> $GITHUB_ENV
+      - name: Set deployment start time
+        run: echo "deploy_start=$(date +%s)" >> $GITHUB_ENV
 
-    - name: Configure kubectl
-      run: |
-        mkdir -p $HOME/.kube
-        echo "${{ secrets.KUBECONFIG_BASE64 }}" | base64 --decode > ~/.kube/config
+      - name: Configure kubectl
+        run: |
+          mkdir -p $HOME/.kube
+          echo "${{ secrets.KUBECONFIG_BASE64 }}" | base64 --decode > ~/.kube/config
 
-    - name: Deploy Angular Frontend to Kubernetes
-      run: |
-        kubectl apply -f k8s/angular-deployment.yaml --insecure-skip-tls-verify
-        kubectl apply -f k8s/angular-service.yaml --insecure-skip-tls-verify
+      - name: Deploy Angular Frontend to Kubernetes
+        run: |
+          kubectl apply -f k8s/angular-deployment.yaml --insecure-skip-tls-verify
+          kubectl apply -f k8s/angular-service.yaml --insecure-skip-tls-verify
 
-    - name: Mark deployment in Datadog
-      run: |
-        npx @datadog/datadog-ci deployment mark \
-          --env production --service datadog-app-angular \
-          --revision "$VERSION"
+      - name: Mark deployment in Datadog
+        run: |
+          npx @datadog/datadog-ci deployment mark \
+            --env production --service datadog-app-angular \
+            --revision "$VERSION"
 
-    - name: Track deployment in Datadog
-      run: |
-        npx @datadog/datadog-ci dora deployment \
-          --service datadog-app-angular \
-          --env production \
-          --started-at ${{ env.deploy_start }} \
-          --finished-at $(date +%s) \
-          --git-repository-url "${{ github.event.repository.html_url }}" \
-          --git-commit-sha ${{ github.sha }}
+      - name: Track deployment in Datadog
+        run: |
+          npx @datadog/datadog-ci dora deployment \
+            --service datadog-app-angular \
+            --env production \
+            --started-at ${{ env.deploy_start }} \
+            --finished-at $(date +%s) \
+            --git-repository-url "${{ github.event.repository.html_url }}" \
+            --git-commit-sha ${{ github.sha }}
 
-    - name: Send deployment metrics to Datadog
-      run: |
-        npx @datadog/datadog-ci measure \
-          --level pipeline \
-          --measures "custom_error_rate:0.56" \
-          --measures "custom_deploy_time:$(($(date +%s) - ${{ env.deploy_start }}))"
+      - name: Send deployment metrics to Datadog
+        run: |
+          npx @datadog/datadog-ci measure \
+            --level pipeline \
+            --measures "custom_error_rate:0.56" \
+            --measures "custom_deploy_time:$(($(date +%s) - ${{ env.deploy_start }}))"
+
+  test:
+    name: Run Datadog Synthetic Tests
+    runs-on: ubuntu-latest
+    needs: deploy
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Run Datadog Synthetic tests
+        uses: DataDog/synthetics-ci-github-action@v1.17.0
+        with:
+          api_key: ${{ secrets.DD_API_KEY }}
+          app_key: ${{ secrets.DD_APP_KEY }}
+          test_search_query: 'tag:e2e-tests'
+
+      - name: Report test results
+        if: failure()
+        run: echo "Datadog Synthetic Tests failed! Check Datadog for details."
