@@ -33,27 +33,23 @@ jobs:
       working-directory: ./angular-frontend
       run: npm ci
 
-    - name: Set Angular Version in Environment
+    - name: Inject Version into Angular Environment
       run: |
-        VERSION=$(echo ${{ github.sha }} | cut -c1-7)
         echo "Setting Angular version: $VERSION"
         sed -i "s/version: 'local-dev'/version: '$VERSION'/" angular-frontend/src/environments/environment.prod.ts
-    
+
     - name: Build Angular App with Source Maps
       working-directory: ./angular-frontend
-      run: |
-        npm run build -- --configuration=production --source-map --output-path=../build-temp
-    
+      run: npm run build -- --configuration=production --source-map --output-path=../build-temp
+
     - name: Upload Source Maps to Datadog
       run: |
-        VERSION=${{ github.sha }}
         echo "Uploading sourcemaps for version: $VERSION"
-          
         npx @datadog/datadog-ci sourcemaps upload build-temp/browser \
           --service=datadog-app-angular \
           --release-version=$VERSION \
           --minified-path-prefix=http://192.168.50.240/angular/
-      
+
     - name: Log in to Docker Hub
       uses: docker/login-action@v2
       with:
@@ -68,7 +64,7 @@ jobs:
           -t ${{ secrets.DOCKER_USERNAME }}/angular-frontend:latest \
           --build-arg DD_GIT_REPOSITORY_URL="$REPO_URL" \
           --build-arg DD_GIT_COMMIT_SHA="$COMMIT_SHA" \
-          --build-arg DD_VERSION=${{ env.VERSION }}
+          --build-arg DD_VERSION="$VERSION"
     
     - name: Push Docker image
       run: docker push ${{ secrets.DOCKER_USERNAME }}/angular-frontend:latest
@@ -112,7 +108,7 @@ jobs:
       run: |
         npx @datadog/datadog-ci deployment mark \
           --env production --service datadog-app-angular \
-          --revision "${{ github.sha }}"
+          --revision "$VERSION"
 
     - name: Track deployment in Datadog
       run: |
