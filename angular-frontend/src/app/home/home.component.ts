@@ -1,5 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { DataService } from '../data.service';
 
 @Component({
   selector: 'app-home',
@@ -9,21 +10,48 @@ import { CommonModule } from '@angular/common';
   styleUrls: ['./home.component.css']
 })
 export class HomeComponent implements OnInit {
-  staticText: string = "Welcome to the Home Page!";
+  viewsData: any = {}; 
+  uidData: any = {};
+  quoteData: any = {};
+  staticText: string = "Welcome to the Home Page! This is a simple Angular application that fetches dynamic data.";
 
-  constructor() {}
+  constructor(private dataService: DataService) { }
 
   ngOnInit(): void {
-    // Throws an error immediately when the page loads
+    this.dataService.getViews().subscribe({
+      next: data => this.viewsData = data,
+      error: () => {
+        console.error('API call failed for viewsData');
+        throw new Error('API call failed in HomeComponent!');
+      }
+    });
+
+    this.dataService.getUidLatest().subscribe({
+      next: data => this.uidData = data,
+      error: () => {
+        console.error('UID API call failed');
+        throw new Error('UID API call failed in HomeComponent!');
+      }
+    });
+
+    this.dataService.getQuotesRandom().subscribe({
+      next: data => this.quoteData = data,
+      error: () => {
+        console.error('Quotes API call failed');
+        throw new Error('Quotes API call failed in HomeComponent!');
+      }
+    });
+
+
     setTimeout(() => {
-      console.error('🔥 Intentional error in HomeComponent!'); // Logs in the browser console
-      throw new Error('🔥 Intentional test error for Datadog RUM!');
-    }, 3000); // Delayed to ensure RUM is initialized
+      console.error('Intentional error in HomeComponent!');
+      throw new Error('Intentional test error for Datadog RUM!');
+    }, 3000);
+  }
+
+
+  generateError(): void {
+    console.error('User clicked error button in HomeComponent!');
+    throw new Error('User-triggered test error for Datadog RUM!');
   }
 }
-
-generateError() {
-  console.error('🔥 User clicked error button in HomeComponent!'); // Console log for debugging
-  throw new Error('🔥 User-triggered test error for Datadog RUM!');
-}
-
