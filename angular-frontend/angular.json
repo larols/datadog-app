@@ -57,8 +57,7 @@
               "extractLicenses": true,
               "sourceMap": true,
               "namedChunks": false,
-              "aot": true,
-              "buildOptimizer": true
+              "aot": true
             },
             "development": {
               "optimization": false,
