@@ -33,15 +33,15 @@ jobs:
       working-directory: ./angular-frontend
       run: npm ci
 
-    - name: Set Version
-      run: echo "VERSION=${{ github.sha }}" >> $GITHUB_ENV
-
+    - name: Set Angular Version in Environment
+      run: |
+        VERSION=$(echo ${{ github.sha }} | cut -c1-7)
+        echo "Setting Angular version: $VERSION"
+        sed -i "s/version: 'local-dev'/version: '$VERSION'/" angular-frontend/src/environments/environment.prod.ts
+    
     - name: Build Angular App with Source Maps
       working-directory: ./angular-frontend
-      env:
-        VERSION: ${{ env.VERSION }}
       run: |
-        echo "Building Angular app with version: $VERSION"
         npm run build -- --configuration=production --source-map --output-path=../build-temp
     
     - name: Upload Source Maps to Datadog
