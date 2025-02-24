@@ -35,5 +35,3 @@ bootstrapApplication(AppComponent, appConfig)
         datadogRum.addError(err, { source: 'bootstrap' });
         console.error(err);
     });
-
-console.log(`Datadog RUM initialized with version: ${appVersion}`);
