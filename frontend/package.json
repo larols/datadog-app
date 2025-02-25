@@ -63,7 +63,7 @@
                 {
                     "outputDirectory": "./reports/junit",
                     "outputName": "jest-results.xml",
-                    "ancestorSeparator": " › "
+                    "usePathForSuiteName": true
                 }
             ]
         ]
