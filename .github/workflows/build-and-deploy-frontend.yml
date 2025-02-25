@@ -47,7 +47,7 @@ jobs:
       - name: Upload test results to Datadog
         run: |
           cd frontend
-          npx @datadog/datadog-ci junit upload .junit.xml --service datadog-app-frontend --env production
+          npx @datadog/datadog-ci junit upload ./junit.xml --service datadog-app-frontend --env production
         continue-on-error: true
 
 
