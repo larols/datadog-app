@@ -33,16 +33,22 @@ jobs:
       - name: Configure Datadog Test Optimization
         uses: datadog/test-visibility-github-action@v2
         with:
-          languages: js 
+          languages: js
           api_key: ${{ secrets.DD_API_KEY }}
           site: datadoghq.eu
 
-      - name: Run Jest tests with Datadog Test Visibility
+      - name: Run Jest tests and generate JUnit report
         run: |
           cd frontend
-          npx @datadog/datadog-ci junit upload --service datadog-app-frontend --env production
-          npm test -- --ci --coverage || echo "Tests failed, continuing..."
-        continue-on-error: true 
+          npm test -- --ci --coverage --reporters=jest-junit || echo "Tests failed, continuing..."
+        continue-on-error: true
+
+      - name: Upload test results to Datadog
+        run: |
+          cd frontend
+          npx @datadog/datadog-ci junit upload ./reports/junit/jest-results.xml --service datadog-app-frontend --env production
+        continue-on-error: true
+
 
   build-and-push:
     runs-on: ubuntu-latest
