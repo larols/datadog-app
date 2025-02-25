@@ -44,17 +44,25 @@ function App() {
     };
 
     const fetchUidData = () => {
+        // Start measuring UID fetch time
+        const uidLoadRef = window.DD_RUM?.startDurationVital("uidLoadTime");
+    
         fetch('/api/uid/latest')
             .then(response => response.json())
             .then(data => {
                 if (data.uid) {
                     setUidData(data);
                     window.DD_LOGS?.logger.info('Fetched latest UID', { uid: data.uid, visit_time: data.visit_time });
+    
+                    // Stop measurement when UID is successfully fetched
+                    window.DD_RUM?.stopDurationVital(uidLoadRef);
                 } else {
                     console.error('No UID found');
                 }
             })
-            .catch(error => console.error('Error fetching UID data:', error));
+            .catch(error => {
+                console.error('Error fetching UID data:', error);
+            });
     };
 
     const fetchExternalData1 = () => {
