@@ -40,7 +40,8 @@ jobs:
       - name: Run Jest tests and generate JUnit report
         run: |
           cd frontend
-          npm test -- --ci --coverage --reporters=jest-junit || echo "Tests failed, continuing..."
+          mkdir -p reports/junit # Ensure the directory exists
+          npm test -- --ci --coverage || echo "Tests failed, continuing..."
         continue-on-error: true
 
       - name: Upload test results to Datadog
