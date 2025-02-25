@@ -3,12 +3,31 @@
     "version": "1.0.0",
     "private": true,
     "dependencies": {
-    "react": "*",
-    "react-dom": "*",
-    "react-scripts": "*"
+        "react": "*",
+        "react-dom": "*",
+        "react-scripts": "*"
     },
     "scripts": {
-      "start": "react-scripts start",
-      "build": "react-scripts build"
+        "start": "react-scripts start",
+        "build": "react-scripts build",
+        "test": "jest --ci --coverage"
+    },
+    "devDependencies": {
+        "@testing-library/react": "^16.2.0",
+        "jest": "^27.5.1"
+    },
+    "jest": {
+        "testEnvironment": "jsdom",
+        "collectCoverageFrom": [
+            "src/**/*.{js,jsx}"
+        ],
+        "coverageThreshold": {
+            "global": {
+                "branches": 80,
+                "functions": 80,
+                "lines": 80,
+                "statements": 80
+            }
+        }
     }
-  }
+}

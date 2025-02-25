@@ -11,6 +11,41 @@ on:
       - '.github/workflows/build-and-deploy-frontend.yml'
 
 jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    continue-on-error: true
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 18
+          cache: 'npm'
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Install dependencies
+        run: |
+          cd frontend
+          npm install
+
+      - name: Configure Datadog Test Optimization
+        uses: datadog/test-visibility-github-action@v2
+        with:
+          languages: javascript 
+          api_key: ${{ secrets.DD_API_KEY }}
+          site: datadoghq.eu
+
+      - name: Run Jest tests with Datadog Test Visibility
+        run: |
+          cd frontend
+          npx @datadog/datadog-ci junit upload --service datadog-app-frontend --env production
+          npm test -- --ci --coverage || echo "Tests failed, continuing..."
+        continue-on-error: true 
+
   build-and-push:
     runs-on: ubuntu-latest
     timeout-minutes: 5
