@@ -15,8 +15,7 @@ function App() {
     const [ssrfResponse, setSsrfResponse] = useState(null);
 
 
-    // Detect if the browser is Firefox
-    const isFirefox = typeof navigator !== 'undefined' && navigator.userAgent.includes('Firefox');
+     const isFirefox = typeof navigator !== 'undefined' && navigator.userAgent.includes('Firefox');
 
     const fetchViewsData = () => {
         fetch('/api/views')
