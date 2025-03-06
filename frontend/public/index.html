@@ -29,6 +29,8 @@
             defaultPrivacyLevel: 'allow',
         });
 
+        window.DD_RUM && window.DD_RUM.setGlobalContextProperty('demo', 'yes');
+
         // Example logic to set the server variant (dynamically assign it)
         function getRandomVariant() {
             const variants = ['variant_a', 'variant_b', 'variant_c']; // Possible variants
