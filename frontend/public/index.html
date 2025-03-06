@@ -29,7 +29,7 @@
             defaultPrivacyLevel: 'allow',
         });
 
-        window.DD_RUM && window.DD_RUM.setGlobalContextProperty('demo', 'yes');
+        window.DD_RUM && window.DD_RUM.setGlobalContextProperty('demo', Math.random() < 0.5 ? 'green' : 'blue');
 
         // Example logic to set the server variant (dynamically assign it)
         function getRandomVariant() {
