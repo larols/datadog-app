@@ -56,3 +56,5 @@ spec:
               value: "${VERSION}"
             - name: DD_PROFILING_TIMELINE_ENABLED
               value: "true"
+            - name: DD_TAGS
+              value: "mccp:test"
