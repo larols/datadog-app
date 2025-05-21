@@ -5,6 +5,7 @@ metadata:
   namespace: datadog-app
   labels:
     app: datadog-app-views
+    mccp: "test"
 spec:
   replicas: 2
   selector:
