@@ -6,7 +6,7 @@ metadata:
   labels:
     app: datadog-app-views
 spec:
-  replicas: 1
+  replicas: 2
   selector:
     matchLabels:
       app: datadog-app-views
@@ -17,12 +17,22 @@ spec:
       annotations:
         ad.datadoghq.com/datadog-app-views.logs: '[{"source":"python","service":"datadog-app-views"}]'
     spec:
+      affinity:
+        podAntiAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+          - labelSelector:
+              matchExpressions:
+              - key: app
+                operator: In
+                values:
+                - datadog-app-views
+            topologyKey: "kubernetes.io/hostname"
       containers:
         - name: datadog-app-views
-          image: laols/datadog-app-views:latest  # Ensure the Docker image name is correct
+          image: laols/datadog-app-views:latest
           ports:
-            - containerPort: 5000  # Match the port the Flask app is running on
-          env:  # Adding environment variables for Datadog
+            - containerPort: 5000
+          env:
             - name: DD_TRACE_AGENT_URL
               value: 'http://datadog-agent.default:8126'
             - name: DD_AGENT_HOST
