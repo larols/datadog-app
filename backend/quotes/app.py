@@ -1,6 +1,7 @@
 from flask import Flask, jsonify
 import logging
 import random
+import sys
 from opentelemetry import trace
 from opentelemetry.sdk.resources import Resource
 from opentelemetry.sdk.trace import TracerProvider
@@ -31,10 +32,10 @@ app = Flask(__name__)
 FlaskInstrumentor().instrument_app(app)
 LoggingInstrumentor().instrument(set_logging_format=True)
 
-# Set Up Logging Format 
+# Set Up Logging Format and log to STDOUT (for Datadog to collect logs)
 FORMAT = ('%(asctime)s %(levelname)s [%(name)s] [%(filename)s:%(lineno)d] '
           '[otel.trace_id=%(otelTraceId)s otel.span_id=%(otelSpanId)s] - %(message)s')
-logging.basicConfig(format=FORMAT, level=logging.INFO)
+logging.basicConfig(stream=sys.stdout, format=FORMAT, level=logging.INFO)
 log = logging.getLogger(__name__)
 
 # Predefined list of quotes

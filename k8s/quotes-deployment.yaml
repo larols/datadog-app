@@ -13,28 +13,34 @@ spec:
       labels:
         app: datadog-app-quotes
         version: "${VERSION}"
+      annotations:
+        ad.datadoghq.com.datadog-app-quotes.logs: |
+          [
+            {
+              "source": "python",
+              "service": "datadog-app-quotes"
+            }
+          ]
     spec:
       containers:
-      - name: datadog-app-quotes
-        image: laols/datadog-app-quotes:latest
-        ports:
-        - containerPort: 5000
-        env:
-          # OpenTelemetry Variables
-          - name: OTEL_EXPORTER_OTLP_ENDPOINT
-            value: 'http://otel-collector.datadog-app:4317'
-          - name: OTEL_SERVICE_NAME
-            value: "datadog-app-quotes"
-          - name: OTEL_RESOURCE_ATTRIBUTES
-            value: "service.name=datadog-app-quotes,service.version=${VERSION},service.environment=production"
+        - name: datadog-app-quotes
+          image: laols/datadog-app-quotes:latest
+          ports:
+            - containerPort: 5000
+          env:
+            # OpenTelemetry Variables
+            - name: OTEL_EXPORTER_OTLP_ENDPOINT
+              value: 'http://otel-collector.datadog-app:4317'
+            - name: OTEL_SERVICE_NAME
+              value: "datadog-app-quotes"
+            - name: OTEL_RESOURCE_ATTRIBUTES
+              value: "service.name=datadog-app-quotes,service.version=${VERSION},service.environment=production"
 
-          # Database Variables
-          - name: POSTGRES_USER
-            value: "datadog"
-          - name: POSTGRES_PASSWORD
-            value: "Datadog1!"
-          - name: POSTGRES_DB
-            value: "datadog-app-db"
-          - name: POSTGRES_HOST
-            value: "datadog-app-postgres"
-            
+            # Datadog Logging/Tagging
+            - name: DD_ENV
+              value: "production"
+            - name: DD_SERVICE
+              value: "datadog-app-quotes"
+            - name: DD_VERSION
+              value: "${VERSION}"
+
