@@ -51,3 +51,5 @@ spec:
             value: "true"
           - name: DD_PROFILING_TIMELINE_ENABLED
             value: "true"
+          - name: DD_CODE_ORIGIN_FOR_SPANS_ENABLED
+            value: "true"
