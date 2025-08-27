@@ -7,6 +7,7 @@ on:
     paths:
       - 'k8s/postgres-deployment.yaml'
       - 'k8s/postgres-service.yaml'
+      - 'k8s/postgres-storage.yaml'
       - '.github/workflows/deploy-postgres.yaml'
 
 jobs:
