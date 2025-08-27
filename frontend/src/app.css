@@ -164,8 +164,6 @@ input[type="text"]:focus {
     background-color: #f7f3ff;
 }
 
-/* Rule to hide the 'About' button for testing purposes */
 .about-button {
-  position: absolute;
-  left: -9999px;
+  visibility: visible;
 }
