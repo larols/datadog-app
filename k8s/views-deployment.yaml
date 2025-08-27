@@ -18,6 +18,7 @@ spec:
       annotations:
         ad.datadoghq.com/datadog-app-views.logs: '[{"source":"python","service":"datadog-app-views"}]'
     spec:
+      serviceAccountName: datadog-app-sa
       affinity:
         podAntiAffinity:
           requiredDuringSchedulingIgnoredDuringExecution:

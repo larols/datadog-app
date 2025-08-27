@@ -22,6 +22,7 @@ spec:
             }
           ]
     spec:
+      serviceAccountName: datadog-app-sa
       containers:
         - name: datadog-app-quotes
           image: laols/datadog-app-quotes:latest

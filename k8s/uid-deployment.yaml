@@ -15,6 +15,7 @@ spec:
       annotations:
         ad.datadoghq.com/datadog-app-uid.logs: '[{"source":"python","service":"datadog-app-uid"}]'
     spec:
+      serviceAccountName: datadog-app-sa
       containers:
       - name: datadog-app-uid
         image: laols/datadog-app-uid:latest

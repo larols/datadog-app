@@ -17,6 +17,7 @@ spec:
     spec:
       nodeSelector:
         postgres-node: "true"
+      serviceAccountName: datadog-app-sa
       containers:
       - name: datadog-app-postgres
         image: postgres:latest

@@ -17,6 +17,7 @@ spec:
       annotations:
         ad.datadoghq.com/datadog-app-frontend.logs: '[{"source":"react-native","service":"datadog-app-frontend"}]'
     spec:
+      serviceAccountName: datadog-app-sa
       containers:
         - name: datadog-app-frontend
           image: laols/datadog-app-frontend:latest

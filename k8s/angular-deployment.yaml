@@ -17,6 +17,7 @@ spec:
       annotations:
         ad.datadoghq.com/datadog-app-angular.logs: '[{"source":"nginx","service":"datadog-app-angular"}]'  
     spec:
+      serviceAccountName: datadog-app-sa
       containers:
         - name: datadog-app-angular
           image: laols/angular-frontend:latest
