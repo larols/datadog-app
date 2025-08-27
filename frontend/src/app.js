@@ -209,7 +209,7 @@ function App() {
             <h1>datadog-app</h1>
             <nav className="navbar">
                 <button onClick={() => setActiveTab('home')}>Home</button>
-                <button onClick={() => setActiveTab('about')}>About</button>
+                <button className="about-button" onClick={() => setActiveTab('about')}>About</button>
                 <button onClick={reloadUidData}>Reload UID Data</button>
                 <button onClick={testDeserializeEndpoint}>Test Deserialization</button>
             </nav>
