@@ -164,17 +164,18 @@ input[type="text"]:focus {
     background-color: #f7f3ff;
 }
 
-/* 
+
 .about-button {
   visibility: visible;
 }
-
+/*
 .about-button {
   visibility: hidden;
 }
-  */
+
 
 .about-button {
   position: absolute;
   left: -9999px;
 }
+*/
