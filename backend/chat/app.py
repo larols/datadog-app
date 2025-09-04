@@ -16,7 +16,7 @@ LLMObs.enable(integrations_enabled=False)
 # Instrument ONLY what we need (avoid patch_all):
 # - flask/requests/logging for web traces + log correlation
 # - openai for LLM Observability (OpenAI SDK)
-patch(flask=True, requests=True, logging=True, openai=True)
+patch(flask=True, requests=True, logging=True, openai=True, openai_agents=True)
 
 # Service name for APM
 config.flask["service_name"] = os.getenv("DD_SERVICE", "datadog-app-chat")
