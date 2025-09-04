@@ -17,6 +17,34 @@ data:
             proxy_set_header X-Forwarded-Proto $scheme;
         }
 
+        # --- Chat service (non-streaming) ---
+        location /api/chat {
+            # This catches /api/chat (POST JSON)
+            proxy_pass http://datadog-app-chat;
+            proxy_set_header Host $host;
+            proxy_set_header X-Real-IP $remote_addr;
+            proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+            proxy_set_header X-Forwarded-Proto $scheme;
+        }
+
+        # --- Chat service (SSE streaming) ---
+        location /api/chat/stream {
+            # Long-lived Server-Sent Events — disable buffering and keep HTTP/1.1
+            proxy_http_version 1.1;
+            proxy_set_header Connection "";
+            proxy_set_header Cache-Control "no-cache";
+            proxy_set_header X-Accel-Buffering "no";
+            proxy_buffering off;
+            proxy_read_timeout 3600s;
+            proxy_send_timeout 3600s;
+
+            proxy_pass http://datadog-app-chat;
+            proxy_set_header Host $host;
+            proxy_set_header X-Real-IP $remote_addr;
+            proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+            proxy_set_header X-Forwarded-Proto $scheme;
+        }
+
         # Route requests to the Angular frontend service
         location /angular {
             proxy_pass http://datadog-app-angular:80;
