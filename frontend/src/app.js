@@ -214,7 +214,7 @@ function App() {
         const lines = chunk.split('\n');
         for (const line of lines) {
           if (!line.startsWith('data:')) continue;
-          const data = line.replace(/^data:\s?/, '').trim();
+          const data = line.replace(/^data:\s?/, '');
           if (data === '[DONE]') continue;
 
           assistantContent += data;
