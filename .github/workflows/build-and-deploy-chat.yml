@@ -31,20 +31,18 @@ jobs:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
 
-      - name: Build Docker image with Datadog build args
+      - name: Build Docker image with prebuilt chat app
         run: |
           REPO_URL=$(git config --get remote.origin.url)
           COMMIT_SHA=$(git rev-parse HEAD)
-
-          docker build -f backend/chat/Dockerfile backend/chat/ \
-            -t laols/datadog-app-chat:latest \
+          docker build -f backend/chat/Dockerfile . \
+            -t ${{ secrets.DOCKER_USERNAME }}/datadog-app-chat:latest \
             --build-arg DD_GIT_REPOSITORY_URL="$REPO_URL" \
             --build-arg DD_GIT_COMMIT_SHA="$COMMIT_SHA" \
-            --build-arg DD_VERSION=${{ env.VERSION }}
+            --build-arg DD_VERSION="$VERSION"
 
       - name: Push Docker image
-        run: |
-          docker push laols/datadog-app-chat:latest
+        run: docker push ${{ secrets.DOCKER_USERNAME }}/datadog-app-chat:latest
 
   deploy:
     name: Deploy to k8s

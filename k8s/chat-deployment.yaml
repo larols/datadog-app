@@ -18,7 +18,7 @@ spec:
       serviceAccountName: datadog-app-sa
       containers:
         - name: datadog-app-chat
-          image: laols/datadog-app-chat:${VERSION}
+          image: laols/datadog-app-chat:latest
           ports:
             - containerPort: 5050
           env:
