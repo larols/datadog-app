@@ -58,10 +58,6 @@ STRICT_MODEL_ENFORCEMENT = os.getenv("STRICT_MODEL_ENFORCEMENT", "true").lower()
 def list_models():
     return jsonify({"allowed": ALLOWED_MODELS, "default": DEFAULT_MODEL}), 200
 
-@app.route("/healthz", methods=["GET"])
-def healthz():
-    return jsonify({"ok": True}), 200
-
 def _trace_llm_call(name: str, model: str, prompt_chars: int):
     """
     Helper to start a manual span around the OpenAI SDK call.

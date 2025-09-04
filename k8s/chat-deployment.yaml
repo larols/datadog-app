@@ -66,19 +66,6 @@ spec:
                   name: openai-api
                   key: OPENAI_API_KEY
 
-          # Use your app’s health endpoint
-          readinessProbe:
-            httpGet:
-              path: /healthz
-              port: 5050
-            initialDelaySeconds: 5
-            periodSeconds: 10
-          livenessProbe:
-            httpGet:
-              path: /healthz
-              port: 5050
-            initialDelaySeconds: 15
-            periodSeconds: 20
 
           resources:
             requests:
