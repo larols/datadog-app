@@ -7,8 +7,6 @@ WORKDIR /app
 COPY requirements.txt ./
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Copy the application code (expects backend/chat/app.py in repo root)
-# Adjust the source path if your file is named differently.
 COPY app.py ./chat/
 
 # Datadog build args -> env (for commit/repo attribution)
