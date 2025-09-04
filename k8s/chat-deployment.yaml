@@ -44,7 +44,7 @@ spec:
               value: "true"
             - name: DD_LLMOBS_ML_APP
               value: "datadog-app-chat"
-            - name: DD_SITE:
+            - name: DD_SITE
               value: "datadoghq.eu"
 
             # --- Log correlation ---
