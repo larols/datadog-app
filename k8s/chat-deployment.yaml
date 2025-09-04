@@ -1,0 +1,76 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: datadog-app-chat
+  namespace: datadog-app
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: datadog-app-chat
+  template:
+    metadata:
+      labels:
+        app: datadog-app-chat
+      annotations:
+        ad.datadoghq.com/datadog-app-chat.logs: '[{"source":"python","service":"datadog-app-chat"}]'
+    spec:
+      serviceAccountName: datadog-app-sa
+      containers:
+        - name: datadog-app-chat
+          image: laols/datadog-app-chat:${VERSION}
+          ports:
+            - containerPort: 5050
+          env:
+            # Datadog APM / profiling / DI
+            - name: DD_TRACE_AGENT_URL
+              value: 'http://datadog-agent.default:8126'
+            - name: DD_AGENT_HOST
+              valueFrom:
+                fieldRef:
+                  fieldPath: status.hostIP
+            - name: DD_VERSION
+              value: "${VERSION}"
+            - name: DD_ENV
+              value: production
+            - name: DD_SERVICE
+              value: datadog-app-chat
+            - name: DD_RUNTIME_METRICS_ENABLED
+              value: "true"
+            - name: DD_TRACE_ENABLED
+              value: "true"
+            - name: DD_DYNAMIC_INSTRUMENTATION_ENABLED
+              value: "true"
+            - name: DD_PROFILING_ENABLED
+              value: "true"
+            - name: DD_PROFILING_TIMELINE_ENABLED
+              value: "true"
+            - name: DD_CODE_ORIGIN_FOR_SPANS_ENABLED
+              value: "true"
+
+            # Your OpenAI API key (store as a K8s Secret!)
+            - name: OPENAI_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: openai-api
+                  key: OPENAI_API_KEY
+
+          # Simple TCP probes (no specific /health endpoint required)
+          readinessProbe:
+            tcpSocket:
+              port: 5050
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          livenessProbe:
+            tcpSocket:
+              port: 5050
+            initialDelaySeconds: 15
+            periodSeconds: 20
+
+          resources:
+            requests:
+              cpu: 50m
+              memory: 128Mi
+            limits:
+              cpu: 500m
+              memory: 512Mi
