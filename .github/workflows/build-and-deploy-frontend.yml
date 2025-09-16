@@ -102,6 +102,34 @@ jobs:
           --measures "build_time:$(date +%s)" \
           --measures "docker_image_size:$(docker images --format '{{.Size}}' | head -1 | tr -d '[:alpha:][:space:]')"
 
+    - name: Create container to extract build artifacts
+      run: |
+        docker create --name tmpapp ${{ secrets.DOCKER_USERNAME }}/datadog-app-frontend:latest
+        # Adjust the path below to where your image serves files (nginx default shown)
+        docker cp tmpapp:/usr/share/nginx/html ./_extracted
+        docker rm tmpapp
+
+    - name: List extracted JS + maps
+      run: |
+        find ./_extracted -type f \( -name "*.js" -o -name "*.map" \) | head -n 200
+
+    - name: Upload sourcemaps to Datadog 
+      env:
+        DATADOG_SITE: datadoghq.eu
+        DATADOG_API_KEY: ${{ secrets.DD_API_KEY }}
+      run: |
+        # CRA/Webpack on nginx typically puts JS under ./_extracted/static/js
+        npx @datadog/datadog-ci sourcemaps upload ./_extracted \
+          --service datadog-app-frontend \
+          --release-version "${{ env.VERSION }}" \
+          --minified-path-prefix /static/js
+
+    - name: Upload Git metadata to Datadog
+      env:
+        DATADOG_SITE: datadoghq.eu
+        DATADOG_API_KEY: ${{ secrets.DD_API_KEY }}
+      run: npx @datadog/datadog-ci git-metadata upload
+
     - name: Push Docker image
       run: |
         docker push ${{ secrets.DOCKER_USERNAME }}/datadog-app-frontend:latest
