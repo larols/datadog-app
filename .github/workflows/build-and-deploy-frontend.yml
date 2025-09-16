@@ -115,7 +115,7 @@ jobs:
           npx @datadog/datadog-ci sourcemaps upload ./_extracted \
             --service datadog-app-frontend \
             --release-version "$VERSION" \
-            --minified-path-prefix /static/js
+            --minified-path-prefix "http://192.168.50.240/static/js"
 
       - name: Upload Git metadata to Datadog
         env:
