@@ -54,7 +54,6 @@ jobs:
   build-and-push:
     runs-on: ubuntu-latest
     timeout-minutes: 5
-
     env:
       DD_BETA_COMMANDS_ENABLED: 1
       DD_SITE: datadoghq.eu
@@ -64,17 +63,14 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v3
 
-    - name: Set commit sha for RUM version
-      id: set_commit_sha
-      run: |
-        # Extract the commit SHA
-        VERSION=$(echo ${{ github.sha }} | cut -c1-7)
-        echo "VERSION=${VERSION}" >> $GITHUB_ENV
+    - name: Set commit sha for RUM version (7 chars)
+      run: echo "VERSION=$(echo ${{ github.sha }} | cut -c1-7)" >> $GITHUB_ENV
 
     - name: Update version in index.html
       run: |
-        # Replace the placeholder VERSION in index.html with the commit SHA
-        sed -i "s/version: 'VERSION'/version: '${{ env.VERSION }}'/g" frontend/public/index.html
+        # Be tolerant to whitespace and quote style
+        sed -i -E "s/version:\s*['\"]VERSION['\"]/version: '${{ env.VERSION }}'/g" frontend/public/index.html
+        grep -n "version" frontend/public/index.html || true
 
     - name: Log in to Docker Hub
       uses: docker/login-action@v2
@@ -82,47 +78,48 @@ jobs:
         username: ${{ secrets.DOCKER_USERNAME }}
         password: ${{ secrets.DOCKER_PASSWORD }}
 
-    - name: Build Docker image with Datadog build args
+    - name: Build Docker image
       run: |
-        # Get Git repository URL and commit SHA
         REPO_URL=$(git config --get remote.origin.url)
         COMMIT_SHA=$(git rev-parse HEAD)
-
-        # Build Docker image with build arguments
         docker build -f frontend/Dockerfile frontend/ \
           -t ${{ secrets.DOCKER_USERNAME }}/datadog-app-frontend:latest \
           --build-arg DD_GIT_REPOSITORY_URL="$REPO_URL" \
           --build-arg DD_GIT_COMMIT_SHA="$COMMIT_SHA" \
           --build-arg DD_VERSION=${{ env.VERSION }}
-  
-    - name: Send measure to Datadog (Build Size)
-      run: |
-        npx @datadog/datadog-ci measure \
-          --level pipeline \
-          --measures "build_time:$(date +%s)" \
-          --measures "docker_image_size:$(docker images --format '{{.Size}}' | head -1 | tr -d '[:alpha:][:space:]')"
 
     - name: Create container to extract build artifacts
       run: |
         docker create --name tmpapp ${{ secrets.DOCKER_USERNAME }}/datadog-app-frontend:latest
-        # Adjust the path below to where your image serves files (nginx default shown)
         docker cp tmpapp:/usr/share/nginx/html ./_extracted
         docker rm tmpapp
+
+    - name: Show built index.html version
+      id: show_built_version
+      run: |
+        # Try to extract exactly what the browser will use
+        BUILT_VERSION=$(grep -oE "version:\s*'[^']+'" _extracted/index.html | head -1 | sed -E "s/.*'([^']+)'.*/\1/")
+        echo "BUILT_VERSION=$BUILT_VERSION" >> $GITHUB_ENV
+        echo "Built app version = $BUILT_VERSION"
 
     - name: List extracted JS + maps
       run: |
         find ./_extracted -type f \( -name "*.js" -o -name "*.map" \) | head -n 200
 
-    - name: Upload sourcemaps to Datadog 
+    - name: Upload sourcemaps to Datadog (using built version)
       env:
         DATADOG_SITE: datadoghq.eu
         DATADOG_API_KEY: ${{ secrets.DD_API_KEY }}
       run: |
-        # CRA/Webpack on nginx typically puts JS under ./_extracted/static/js
+        if [ -z "${{ env.BUILT_VERSION }}" ]; then
+          echo "ERROR: Could not detect built version from index.html"; exit 1
+        fi
+        echo "Uploading sourcemaps with release-version=${{ env.BUILT_VERSION }}"
         npx @datadog/datadog-ci sourcemaps upload ./_extracted \
           --service datadog-app-frontend \
-          --release-version "${{ env.VERSION }}" \
+          --release-version "${{ env.BUILT_VERSION }}" \
           --minified-path-prefix /static/js
+
 
     - name: Upload Git metadata to Datadog
       env:
