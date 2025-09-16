@@ -2,8 +2,7 @@ name: Build and Deploy Frontend
 
 on:
   push:
-    branches:
-      - main
+    branches: [ main ]
     paths:
       - 'frontend/**'
       - 'k8s/frontend-deployment.yaml'
@@ -11,11 +10,19 @@ on:
       - '.github/workflows/build-and-deploy-frontend.yml'
 
 jobs:
+  compute-version:
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.ver.outputs.version }}
+    steps:
+      - name: Set 7-char version
+        id: ver
+        run: echo "version=${GITHUB_SHA::7}" >> $GITHUB_OUTPUT
+
   test:
     runs-on: ubuntu-latest
     timeout-minutes: 5
     continue-on-error: true
-
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
@@ -40,7 +47,7 @@ jobs:
       - name: Run Jest tests and generate JUnit report
         run: |
           cd frontend
-          mkdir -p reports/junit # Ensure the directory exists
+          mkdir -p reports/junit
           npm test -- --ci --coverage || echo "Tests failed, continuing..."
         continue-on-error: true
 
@@ -50,147 +57,135 @@ jobs:
           npx @datadog/datadog-ci junit upload ./junit.xml --service datadog-app-frontend --env production
         continue-on-error: true
 
-
   build-and-push:
     runs-on: ubuntu-latest
+    needs: [ compute-version ]
     timeout-minutes: 5
     env:
+      VERSION: ${{ needs.compute-version.outputs.version }}
       DD_BETA_COMMANDS_ENABLED: 1
       DD_SITE: datadoghq.eu
       DD_API_KEY: ${{ secrets.DD_API_KEY }}
-
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v3
+      - name: Checkout code
+        uses: actions/checkout@v3
 
-    - name: Set commit sha for RUM version (7 chars)
-      run: echo "VERSION=$(echo ${{ github.sha }} | cut -c1-7)" >> $GITHUB_ENV
+      - name: Show VERSION
+        run: echo "Using VERSION=$VERSION"
 
-    - name: Update version in index.html
-      run: |
-        # Be tolerant to whitespace and quote style
-        sed -i -E "s/version:\s*['\"]VERSION['\"]/version: '${{ env.VERSION }}'/g" frontend/public/index.html
-        grep -n "version" frontend/public/index.html || true
+      - name: Update version in index.html
+        run: |
+          sed -i -E "s/version:\s*['\"]VERSION['\"]/version: '${VERSION}'/g" frontend/public/index.html
+          # Guard: fail if replacement didn't happen
+          grep -q "version: '${VERSION}'" frontend/public/index.html || { echo "version replacement failed"; exit 1; }
 
-    - name: Log in to Docker Hub
-      uses: docker/login-action@v2
-      with:
-        username: ${{ secrets.DOCKER_USERNAME }}
-        password: ${{ secrets.DOCKER_PASSWORD }}
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
 
-    - name: Build Docker image
-      run: |
-        REPO_URL=$(git config --get remote.origin.url)
-        COMMIT_SHA=$(git rev-parse HEAD)
-        docker build -f frontend/Dockerfile frontend/ \
-          -t ${{ secrets.DOCKER_USERNAME }}/datadog-app-frontend:latest \
-          --build-arg DD_GIT_REPOSITORY_URL="$REPO_URL" \
-          --build-arg DD_GIT_COMMIT_SHA="$COMMIT_SHA" \
-          --build-arg DD_VERSION=${{ env.VERSION }}
+      - name: Build Docker image
+        run: |
+          REPO_URL=$(git config --get remote.origin.url)
+          COMMIT_SHA=$(git rev-parse HEAD)
+          docker build -f frontend/Dockerfile frontend/ \
+            -t ${{ secrets.DOCKER_USERNAME }}/datadog-app-frontend:latest \
+            --build-arg DD_GIT_REPOSITORY_URL="$REPO_URL" \
+            --build-arg DD_GIT_COMMIT_SHA="$COMMIT_SHA" \
+            --build-arg DD_VERSION="$VERSION"
 
-    - name: Create container to extract build artifacts
-      run: |
-        docker create --name tmpapp ${{ secrets.DOCKER_USERNAME }}/datadog-app-frontend:latest
-        docker cp tmpapp:/usr/share/nginx/html ./_extracted
-        docker rm tmpapp
+      - name: Create container to extract build artifacts
+        run: |
+          docker create --name tmpapp ${{ secrets.DOCKER_USERNAME }}/datadog-app-frontend:latest
+          docker cp tmpapp:/usr/share/nginx/html ./_extracted
+          docker rm tmpapp
 
-    - name: Show built index.html version
-      id: show_built_version
-      run: |
-        # Try to extract exactly what the browser will use
-        BUILT_VERSION=$(grep -oE "version:\s*'[^']+'" _extracted/index.html | head -1 | sed -E "s/.*'([^']+)'.*/\1/")
-        echo "BUILT_VERSION=$BUILT_VERSION" >> $GITHUB_ENV
-        echo "Built app version = $BUILT_VERSION"
+      - name: List extracted JS + maps
+        run: |
+          find ./_extracted -type f \( -name "*.js" -o -name "*.map" \) | head -n 200
 
-    - name: List extracted JS + maps
-      run: |
-        find ./_extracted -type f \( -name "*.js" -o -name "*.map" \) | head -n 200
+      - name: Upload sourcemaps to Datadog
+        env:
+          DATADOG_SITE: datadoghq.eu
+          DATADOG_API_KEY: ${{ secrets.DD_API_KEY }}
+        run: |
+          [ -n "$VERSION" ] || { echo "ERROR: VERSION is empty"; exit 1; }
+          echo "Uploading sourcemaps with release-version=$VERSION"
+          npx @datadog/datadog-ci sourcemaps upload ./_extracted \
+            --service datadog-app-frontend \
+            --release-version "$VERSION" \
+            --minified-path-prefix /static/js
 
-    - name: Upload sourcemaps to Datadog (using built version)
-      env:
-        DATADOG_SITE: datadoghq.eu
-        DATADOG_API_KEY: ${{ secrets.DD_API_KEY }}
-      run: |
-        if [ -z "${{ env.BUILT_VERSION }}" ]; then
-          echo "ERROR: Could not detect built version from index.html"; exit 1
-        fi
-        echo "Uploading sourcemaps with release-version=${{ env.BUILT_VERSION }}"
-        npx @datadog/datadog-ci sourcemaps upload ./_extracted \
-          --service datadog-app-frontend \
-          --release-version "${{ env.BUILT_VERSION }}" \
-          --minified-path-prefix /static/js
+      - name: Upload Git metadata to Datadog
+        env:
+          DATADOG_SITE: datadoghq.eu
+          DATADOG_API_KEY: ${{ secrets.DD_API_KEY }}
+        run: npx @datadog/datadog-ci git-metadata upload
 
-
-    - name: Upload Git metadata to Datadog
-      env:
-        DATADOG_SITE: datadoghq.eu
-        DATADOG_API_KEY: ${{ secrets.DD_API_KEY }}
-      run: npx @datadog/datadog-ci git-metadata upload
-
-    - name: Push Docker image
-      run: |
-        docker push ${{ secrets.DOCKER_USERNAME }}/datadog-app-frontend:latest
+      - name: Push Docker image
+        run: docker push ${{ secrets.DOCKER_USERNAME }}/datadog-app-frontend:latest
 
   deploy:
     name: Deploy to k8s
     runs-on: ubuntu-latest
-    needs: build-and-push
+    needs: [ compute-version, build-and-push ]
     timeout-minutes: 5
-
     env:
+      VERSION: ${{ needs.compute-version.outputs.version }}
       DD_BETA_COMMANDS_ENABLED: 1
       DD_GITHUB_JOB_NAME: Deploy to k8s
       DD_SITE: datadoghq.eu
       DD_API_KEY: ${{ secrets.DD_API_KEY }}
-
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v3
+      - name: Show VERSION
+        run: echo "Deploying VERSION=$VERSION"
 
-    - name: Set commit sha for version
-      id: set_commit_sha
-      run: |
-        VERSION=$(echo ${{ github.sha }} | cut -c1-7)
-        echo "VERSION=${VERSION}" >> $GITHUB_ENV
+      - name: Checkout code
+        uses: actions/checkout@v3
 
-    - name: Tag pipeline in Datadog
-      run: npx @datadog/datadog-ci tag --level pipeline --tags team:datadog-app
+      - name: Tag pipeline in Datadog
+        run: npx @datadog/datadog-ci tag --level pipeline --tags team:datadog-app
 
-    - name: Set deployment start time
-      id: set_deploy_start
-      run: echo "deploy_start=$(date +%s)" >> $GITHUB_ENV
+      - name: Set deployment start time
+        id: set_deploy_start
+        run: echo "deploy_start=$(date +%s)" >> $GITHUB_ENV
 
-    - name: Configure kubectl
-      run: |
-        mkdir -p $HOME/.kube
-        echo "${{ secrets.KUBECONFIG_BASE64 }}" | base64 --decode > ~/.kube/config
+      - name: Configure kubectl
+        run: |
+          mkdir -p $HOME/.kube
+          echo "${{ secrets.KUBECONFIG_BASE64 }}" | base64 --decode > ~/.kube/config
 
-    - name: Generate frontend deployment with VERSION
-      run: |
-        # Use envsubst to substitute VERSION in the deployment template
-        export VERSION=$(echo ${{ github.sha }} | cut -c1-7)
-        envsubst < k8s/frontend-deployment.yaml > k8s/frontend-deployment-template.yaml
+      - name: Generate frontend deployment with VERSION
+        run: |
+          # Ensure your k8s template references ${VERSION}
+          envsubst < k8s/frontend-deployment.yaml > k8s/frontend-deployment-template.yaml
 
-    - name: Deploy Frontend to Kubernetes
-      run: |
-        kubectl apply -f k8s/frontend-deployment-template.yaml --insecure-skip-tls-verify
-        kubectl apply -f k8s/frontend-service.yaml --insecure-skip-tls-verify
+      - name: Deploy Frontend to Kubernetes
+        run: |
+          kubectl apply -f k8s/frontend-deployment-template.yaml --insecure-skip-tls-verify
+          kubectl apply -f k8s/frontend-service.yaml --insecure-skip-tls-verify
 
-    - name: Mark deployment in Datadog
-      run: |
-        npx @datadog/datadog-ci deployment mark --env production --service datadog-app-frontend --revision "${{ github.sha }}"
+      - name: Mark deployment in Datadog
+        run: npx @datadog/datadog-ci deployment mark --env production --service datadog-app-frontend --revision "${{ github.sha }}"
       
-    - name: Track deployment in Datadog
-      env:
-        DD_BETA_COMMANDS_ENABLED: 1
-        DD_SITE: 'datadoghq.eu'
-        DD_API_KEY: ${{ secrets.DD_API_KEY }}
-      run: |
-        npx @datadog/datadog-ci dora deployment --service datadog-app-frontend --env production --started-at ${{ env.deploy_start }} --finished-at $(date +%s) --git-repository-url "${{ github.event.repository.html_url }}" --git-commit-sha ${{ github.sha }}
+      - name: Track deployment in Datadog
+        env:
+          DD_BETA_COMMANDS_ENABLED: 1
+          DD_SITE: datadoghq.eu
+          DD_API_KEY: ${{ secrets.DD_API_KEY }}
+        run: |
+          npx @datadog/datadog-ci dora deployment \
+            --service datadog-app-frontend \
+            --env production \
+            --started-at ${{ env.deploy_start }} \
+            --finished-at $(date +%s) \
+            --git-repository-url "${{ github.event.repository.html_url }}" \
+            --git-commit-sha ${{ github.sha }}
  
-    - name: Send measure to Datadog (Error Rate)
-      run: |
-        npx @datadog/datadog-ci measure \
-          --level pipeline \
-          --measures "custom_error_rate:0.56" \
-          --measures "custom_deploy_time:$(($(date +%s) - ${{ env.deploy_start }}))"
+      - name: Send measure to Datadog (Error Rate)
+        run: |
+          npx @datadog/datadog-ci measure \
+            --level pipeline \
+            --measures "custom_error_rate:0.56" \
+            --measures "custom_deploy_time:$(($(date +%s) - ${{ env.deploy_start }}))"
