@@ -66,3 +66,5 @@ spec:
             value: mccp:test
           - name: DD_CODE_ORIGIN_FOR_SPANS_ENABLED
             value: "true"
+          - name: DD_IAST_ENABLED
+            value: "true"
