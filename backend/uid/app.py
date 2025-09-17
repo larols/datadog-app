@@ -142,7 +142,7 @@ def delete_uid():
 def ssrf():
     target_url = request.json.get('url', '')  # User-provided URL
     try:
-        response = requests.get(target_url)  # This can lead to SSRF
+        response = requests.get(target_url)  # This can lead to SSRF and it has no timeout parameter.
         return jsonify({"data": response.text}), 200
     except Exception as e:
         log.error(f"Error fetching URL: {e}")
